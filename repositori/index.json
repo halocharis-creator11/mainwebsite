@@ -1,1 +1,96 @@
-
+{
+  "generated": "2026-11-17",
+  "count": 2,
+  "items": [
+    {
+      "id": "CHARIS-2026-001",
+      "slug": "2026-11-contoh-kajian-biaya-satuan-puskesmas",
+      "url": "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/",
+      "type": "Laporan riset",
+      "series": "Laporan Riset CHARIS No. 1",
+      "title_id": "[Contoh] Biaya Satuan Layanan Rawat Jalan Puskesmas di Kabupaten X",
+      "title_en": "[Sample] Unit Cost of Outpatient Services in Primary Care Centres in District X",
+      "abstract_id": "[Contoh abstrak] Kajian ini menghitung biaya satuan layanan rawat jalan di puskesmas menggunakan metode activity-based costing. Bagian ini adalah teks contoh untuk menunjukkan tata letak dan akan diganti dengan abstrak asli.",
+      "abstract_en": "[Sample abstract] This study estimates the unit cost of outpatient services in primary care centres using activity-based costing. This is placeholder text.",
+      "authors": [
+        {
+          "name": "[Nama Penulis Pertama]",
+          "affiliation": "CHARIS, Yayasan Peduli Insan Rentan"
+        },
+        {
+          "name": "[Nama Penulis Kedua]",
+          "affiliation": "[Nama Institusi Mitra]"
+        }
+      ],
+      "date_published": "2026-11-10",
+      "uploaded": "2026-11-15",
+      "sort_date": "2026-11-10",
+      "language": "id",
+      "keywords": [
+        "biaya satuan",
+        "puskesmas",
+        "pembiayaan kesehatan"
+      ],
+      "service": "financing",
+      "project_id": "",
+      "doi": "",
+      "license": "CC BY 4.0",
+      "pages": 0,
+      "version": "1.0",
+      "cover": "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_cover.jpg",
+      "thumb": "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_thumb.jpg",
+      "preview": [
+        "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_p1.jpg",
+        "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_p2.jpg",
+        "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_p3.jpg",
+        "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_p4.jpg",
+        "repositori/2026-11-contoh-kajian-biaya-satuan-puskesmas/_p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "request",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-002",
+      "slug": "2026-10-contoh-policy-brief-layanan-primer",
+      "url": "repositori/2026-10-contoh-policy-brief-layanan-primer/",
+      "type": "Policy brief",
+      "series": "Policy Brief CHARIS No. 1",
+      "title_id": "[Contoh] Memperkuat Integrasi Layanan Primer di Tingkat Desa",
+      "title_en": "[Sample] Strengthening Integrated Primary Care at Village Level",
+      "abstract_id": "[Contoh abstrak] Policy brief ini merangkum pilihan kebijakan untuk memperkuat integrasi layanan primer. Teks ini adalah contoh.",
+      "abstract_en": "[Sample abstract] This policy brief summarises policy options to strengthen integrated primary care. Placeholder text.",
+      "authors": [
+        {
+          "name": "[Nama Penulis]",
+          "affiliation": "CHARIS, Yayasan Peduli Insan Rentan"
+        }
+      ],
+      "date_published": "2026-10-20",
+      "uploaded": "2026-11-15",
+      "sort_date": "2026-10-20",
+      "language": "id",
+      "keywords": [
+        "layanan primer",
+        "ILP"
+      ],
+      "service": "planning",
+      "project_id": "",
+      "doi": "",
+      "license": "CC BY 4.0",
+      "pages": 0,
+      "version": "1.0",
+      "cover": "repositori/2026-10-contoh-policy-brief-layanan-primer/_cover.jpg",
+      "thumb": "repositori/2026-10-contoh-policy-brief-layanan-primer/_thumb.jpg",
+      "preview": [
+        "repositori/2026-10-contoh-policy-brief-layanan-primer/_p1.jpg",
+        "repositori/2026-10-contoh-policy-brief-layanan-primer/_p2.jpg",
+        "repositori/2026-10-contoh-policy-brief-layanan-primer/_p3.jpg",
+        "repositori/2026-10-contoh-policy-brief-layanan-primer/_p4.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "request",
+      "featured": false
+    }
+  ]
+}
