@@ -6,7 +6,7 @@
    with sample content (useful for previewing the design).
    ============================================================ */
 window.CHARIS_CONFIG = {
-  API_URL: "",
+  API_URL: "https://script.google.com/macros/s/AKfycbz1Vo950aORV0beuoR48apqLzzAALu1J62dcsv3JKA4XzTQmto3-G9BAZRbyVPf1M6wOQ/exec",
   DEFAULT_LANG: "id",          // "id" or "en"
   CONTACT_EMAIL: "[email]",    // shown in footer & contact page
   CONTACT_PHONE: "[telepon]",
