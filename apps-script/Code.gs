@@ -6,9 +6,12 @@
  * API     : deployed as a Web App (Execute as: Me, Access: Anyone)
  *
  * First-time steps (see README):
- *   1. Run setup()            -> creates sheets, headers, Drive folder
- *   2. Edit + run setAdminPassword() once, then clear the password text
- *   3. Deploy > New deployment > Web app
+ *   1. Run setup()            -> creates sheets, headers, Drive folders, and opens a
+ *                                60-minute window to create the superuser account
+ *   2. Deploy > New deployment > Web app
+ *   3. Open /admin/ on the website, enter the script owner's email and a new password.
+ *      No password is ever written in this file: only a salted, stretched hash is kept
+ *      in Script Properties. Forgot it? Run resetAdmin() and repeat step 3.
  */
 
 const SCHEMA = {
@@ -128,17 +131,26 @@ function setup() {
   if (!PROPS.getProperty('NOTIFY_EMAIL')) {
     PROPS.setProperty('NOTIFY_EMAIL', Session.getEffectiveUser().getEmail());
   }
-  Logger.log('Setup complete. Upload folder: ' + PROPS.getProperty('FOLDER_ID'));
+  Logger.log('Setup selesai. Folder unggahan: ' + PROPS.getProperty('FOLDER_ID'));
+  if (!PROPS.getProperty('ADMIN_HASH')) openSetupWindow_();
+  else Logger.log('Akun superuser sudah ada (' + PROPS.getProperty('ADMIN_EMAIL') + '). Lupa password? Jalankan resetAdmin().');
 }
 
-/** Type a password below, run once, then DELETE the password text and save. */
-function setAdminPassword() {
-  const password = 'GANTI_DENGAN_PASSWORD_KUAT';
-  if (password.length < 10 || password === 'GANTI_DENGAN_PASSWORD_KUAT') throw new Error('Gunakan password minimal 10 karakter.');
-  const salt = Utilities.getUuid();
-  PROPS.setProperty('ADMIN_SALT', salt);
-  PROPS.setProperty('ADMIN_HASH', hash_(salt + password));
-  Logger.log('Password admin tersimpan. Hapus teks password dari kode sekarang.');
+/** Forgot the admin password? Run this from the editor, then create a new one at /admin/ within 60 minutes. */
+function resetAdmin() {
+  ['ADMIN_EMAIL', 'ADMIN_SALT', 'ADMIN_HASH', 'ADMIN_ITER'].forEach(function (k) { PROPS.deleteProperty(k); });
+  CacheService.getScriptCache().remove('login_fails');
+  openSetupWindow_();
+}
+
+/* The superuser account can only be created (a) while no account exists, (b) within 60 minutes
+   after setup()/resetAdmin() was run by the script owner, and (c) with the script owner's email. */
+const SETUP_WINDOW_MIN = 60;
+function openSetupWindow_() {
+  const owner = Session.getEffectiveUser().getEmail();
+  PROPS.setProperty('OWNER_EMAIL', owner);
+  PROPS.setProperty('SETUP_UNTIL', String(Date.now() + SETUP_WINDOW_MIN * 60000));
+  Logger.log('Buka panel admin website (/admin/) dalam ' + SETUP_WINDOW_MIN + ' menit, lalu buat akun superuser dengan email: ' + owner);
 }
 
 /** Set the public website address used in emails to members. */
@@ -170,7 +182,10 @@ function doPost(e) {
     switch (body.action) {
       case 'contact':  return json_(contact_(body));
       case 'subscribe': return json_(subscribe_(body));
-      case 'login':    return json_(login_(body.password));
+      case 'authStatus': return json_(authStatus_());
+      case 'bootstrap': return json_(bootstrap_(body));
+      case 'login':    return json_(login_(body.email, body.password));
+      case 'changePassword': requireAuth_(body.token); return json_(changePassword_(body));
       case 'logout':   requireAuth_(body.token); CacheService.getScriptCache().remove('s_' + body.token); return json_({ ok: true });
       case 'adminList': requireAuth_(body.token); return json_({ ok: true, data: readAll_(checkType_(body.type)).map(function (r) { delete r.code_hash; delete r.code_salt; return r; }) });
       case 'save':     requireAuth_(body.token); return json_({ ok: true, data: save_(checkType_(body.type), body.row) });
@@ -264,20 +279,77 @@ function subscribe_(b) {
 /* ============================================================
    AUTH
    ============================================================ */
-function login_(password) {
+const PW_ITER = 1000;                                   /* key stretching: slows down guessing if properties ever leak */
+function pwHash_(salt, password, iter) {
+  let h = hash_(salt + String(password));
+  for (let i = 1; i < (iter || 1); i++) h = hash_(h + salt);
+  return h;
+}
+function setupOpen_() { return Date.now() < Number(PROPS.getProperty('SETUP_UNTIL') || 0); }
+function pwProblem_(pw) {
+  pw = String(pw || '');
+  if (pw.length < 10) return 'Password minimal 10 karakter.';
+  if (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return 'Password harus berisi huruf dan angka.';
+  return '';
+}
+function newSession_() {
+  const token = Utilities.getUuid() + Utilities.getUuid();
+  CacheService.getScriptCache().put('s_' + token, '1', SESSION_HOURS * 3600);
+  return { ok: true, token: token, hours: SESSION_HOURS };
+}
+function storePassword_(password) {
+  const salt = Utilities.getUuid() + Utilities.getUuid();
+  PROPS.setProperties({ ADMIN_SALT: salt, ADMIN_ITER: String(PW_ITER), ADMIN_HASH: pwHash_(salt, password, PW_ITER) });
+}
+
+/* tells the admin page whether to show "create superuser" or the normal login */
+function authStatus_() {
+  const exists = !!PROPS.getProperty('ADMIN_HASH');
+  return { ok: true, hasAdmin: exists, setupOpen: !exists && setupOpen_() };
+}
+
+/* one-time creation of the superuser account from the admin page */
+function bootstrap_(b) {
+  return withLock_(function () {
+    if (PROPS.getProperty('ADMIN_HASH')) return { ok: false, error: 'Akun superuser sudah ada. Silakan masuk.' };
+    if (!setupOpen_()) return { ok: false, error: 'Waktu pembuatan akun sudah habis. Jalankan setup() atau resetAdmin() di Apps Script, lalu coba lagi dalam 60 menit.' };
+    const email = String(b.email || '').trim().toLowerCase(), owner = String(PROPS.getProperty('OWNER_EMAIL') || '').toLowerCase();
+    if (!owner || email !== owner) return { ok: false, error: 'Gunakan email akun Google pemilik Apps Script ini.' };
+    const problem = pwProblem_(b.password);
+    if (problem) return { ok: false, error: problem };
+    PROPS.setProperty('ADMIN_EMAIL', email);
+    storePassword_(b.password);
+    PROPS.deleteProperty('SETUP_UNTIL');
+    try { MailApp.sendEmail(owner, 'Akun superuser panel admin CHARIS dibuat', 'Akun superuser panel admin website CHARIS baru saja dibuat untuk ' + email + ' (' + new Date() + ').\n\nJika ini bukan Anda, buka Apps Script dan jalankan resetAdmin() segera.'); } catch (e) { /* mail quota */ }
+    return newSession_();
+  });
+}
+
+function login_(email, password) {
   const cache = CacheService.getScriptCache();
   const fails = Number(cache.get('login_fails') || 0);
   if (fails >= 5) return { ok: false, error: 'Terlalu banyak percobaan. Coba lagi 15 menit lagi.' };
   const salt = PROPS.getProperty('ADMIN_SALT'), stored = PROPS.getProperty('ADMIN_HASH');
-  if (!salt || !stored) return { ok: false, error: 'Password admin belum diatur (jalankan setAdminPassword).' };
-  if (hash_(salt + String(password || '')) !== stored) {
+  if (!salt || !stored) return { ok: false, error: 'Akun superuser belum dibuat. Jalankan setup() di Apps Script, lalu buka halaman ini lagi.' };
+  const adminEmail = String(PROPS.getProperty('ADMIN_EMAIL') || '').toLowerCase();
+  const emailOk = !adminEmail || String(email || '').trim().toLowerCase() === adminEmail;   /* accounts from older versions had no email */
+  if (!emailOk || pwHash_(salt, password, Number(PROPS.getProperty('ADMIN_ITER') || 1)) !== stored) {
     cache.put('login_fails', String(fails + 1), 900);
-    return { ok: false, error: 'Password salah.' };
+    return { ok: false, error: 'Email atau password salah.' };
   }
   cache.remove('login_fails');
-  const token = Utilities.getUuid() + Utilities.getUuid();
-  cache.put('s_' + token, '1', SESSION_HOURS * 3600);
-  return { ok: true, token: token, hours: SESSION_HOURS };
+  if (!adminEmail && email) PROPS.setProperty('ADMIN_EMAIL', String(email).trim().toLowerCase());
+  if (!PROPS.getProperty('ADMIN_ITER')) storePassword_(password);     /* upgrade old single-round hashes */
+  return newSession_();
+}
+
+function changePassword_(b) {
+  const salt = PROPS.getProperty('ADMIN_SALT');
+  if (pwHash_(salt, b.current, Number(PROPS.getProperty('ADMIN_ITER') || 1)) !== PROPS.getProperty('ADMIN_HASH')) return { ok: false, error: 'Password lama salah.' };
+  const problem = pwProblem_(b.password);
+  if (problem) return { ok: false, error: problem };
+  storePassword_(b.password);
+  return { ok: true };
 }
 
 function requireAuth_(token) {

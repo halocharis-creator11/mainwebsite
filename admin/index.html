@@ -17,15 +17,26 @@
   <section class="login-wrap" id="loginView">
     <form class="login-card" id="loginForm" novalidate>
       <div class="brand"><img src="../assets/img/charis-mark.svg" alt="CHARIS" width="150" height="40"></div>
-      <h1>Panel admin</h1>
-      <p class="muted">Masuk untuk mengelola konten website.</p>
+      <h1 id="loginTitle">Panel admin</h1>
+      <p class="muted" id="loginLead">Masuk untuk mengelola konten website.</p>
+      <p class="setup-note" id="setupNote" hidden>Ini pemasangan pertama. Buat akun superuser memakai <strong>email akun Google pemilik Apps Script</strong> dan password baru. Password tidak disimpan di kode, hanya sidik acaknya (hash) yang tersimpan di Script Properties.</p>
+      <p class="setup-note warn" id="setupClosed" hidden>Akun superuser belum dibuat dan waktu pembuatannya sudah habis. Buka Apps Script, jalankan fungsi <code>setup</code> (atau <code>resetAdmin</code>), lalu muat ulang halaman ini dalam 60 menit.</p>
+      <div class="field">
+        <label for="em">Email</label>
+        <input id="em" type="email" autocomplete="username" required>
+      </div>
       <div class="field">
         <label for="pw">Password</label>
         <input id="pw" type="password" autocomplete="current-password" required>
-        <p class="field-err" id="loginErr" role="alert"></p>
+        <p class="hint" id="pwHint" hidden>Minimal 10 karakter, berisi huruf dan angka.</p>
       </div>
+      <div class="field" id="pw2Field" hidden>
+        <label for="pw2">Ulangi password</label>
+        <input id="pw2" type="password" autocomplete="new-password">
+      </div>
+      <p class="field-err" id="loginErr" role="alert"></p>
       <button class="btn btn-primary" type="submit" id="loginBtn">Masuk</button>
-      <p class="demo-note" id="demoNote" hidden>Mode demo: API belum terhubung. Masukkan password apa saja; perubahan tidak disimpan.</p>
+      <p class="demo-note" id="demoNote" hidden>Mode demo: API belum terhubung. Masukkan email dan password apa saja; perubahan tidak disimpan.</p>
       <a class="back-site" href="../">← Kembali ke website</a>
     </form>
   </section>
@@ -44,11 +55,12 @@
         <button type="button" data-type="projects">Portofolio proyek</button>
         <button type="button" data-type="project_internal">Data internal proyek</button>
         <button type="button" data-type="team">Tim</button>
-        <button type="button" data-type="partners">Mitra & klien</button>
+        <button type="button" data-type="partners">Mitra & pengalaman tim</button>
         <button type="button" data-type="subscribers">Pelanggan kabar</button>
       </nav>
       <div class="side-foot">
         <a href="../" target="_blank" rel="noopener">Lihat website ↗</a>
+        <button type="button" class="link-btn" id="pwBtn">Ganti password</button>
         <button type="button" class="link-btn" id="logoutBtn">Keluar</button>
       </div>
     </aside>
@@ -94,6 +106,16 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
+  <dialog class="pw-dlg" id="pwDlg" aria-labelledby="pwDlgTitle">
+    <form method="dialog" id="pwForm" class="pw-form" novalidate>
+      <h2 id="pwDlgTitle">Ganti password</h2>
+      <div class="field"><label for="pwOld">Password lama</label><input id="pwOld" type="password" autocomplete="current-password"></div>
+      <div class="field"><label for="pwNew">Password baru</label><input id="pwNew" type="password" autocomplete="new-password"><p class="hint">Minimal 10 karakter, berisi huruf dan angka.</p></div>
+      <div class="field"><label for="pwNew2">Ulangi password baru</label><input id="pwNew2" type="password" autocomplete="new-password"></div>
+      <p class="field-err" id="pwErr" role="alert"></p>
+      <div class="pw-actions"><button type="button" class="btn" id="pwCancel">Batal</button><button type="submit" class="btn btn-primary" id="pwSave">Simpan password</button></div>
+    </form>
+  </dialog>
   <script src="../assets/js/config.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/demo-data.js"></script>

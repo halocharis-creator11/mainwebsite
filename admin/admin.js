@@ -121,19 +121,59 @@
   /* ---------- auth ---------- */
   function showApp(on) { $("loginView").hidden = on; $("appView").hidden = !on; }
   $("demoNote").hidden = !DEMO;
+  let setupMode = false;
+  const pwRule = pw => pw.length < 10 ? "Password minimal 10 karakter." : (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) ? "Password harus berisi huruf dan angka." : "";
+  function setMode(status) {
+    setupMode = !!(status && !status.hasAdmin && status.setupOpen);
+    const closed = !!(status && !status.hasAdmin && !status.setupOpen);
+    $("setupNote").hidden = !setupMode; $("setupClosed").hidden = !closed;
+    $("pw2Field").hidden = !setupMode; $("pwHint").hidden = !setupMode;
+    $("pw").autocomplete = setupMode ? "new-password" : "current-password";
+    $("loginTitle").textContent = setupMode ? "Buat akun superuser" : "Panel admin";
+    $("loginLead").hidden = setupMode || closed;
+    $("loginBtn").textContent = setupMode ? "Buat akun dan masuk" : "Masuk";
+    $("loginBtn").disabled = closed;
+  }
+  if (!DEMO && !token) api({ action: "authStatus" }).then(setMode).catch(() => {});
+
   $("loginForm").addEventListener("submit", async e => {
     e.preventDefault();
-    const pw = $("pw").value;
+    const em = $("em").value.trim(), pw = $("pw").value;
     $("loginErr").textContent = "";
+    if (!em || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { $("loginErr").textContent = "Masukkan email yang valid."; $("em").focus(); return; }
     if (!pw) { $("loginErr").textContent = "Masukkan password."; $("pw").focus(); return; }
+    if (setupMode) {
+      const p = pwRule(pw); if (p) { $("loginErr").textContent = p; $("pw").focus(); return; }
+      if (pw !== $("pw2").value) { $("loginErr").textContent = "Kedua password tidak sama."; $("pw2").focus(); return; }
+    }
+    const label = $("loginBtn").textContent;
     $("loginBtn").disabled = true; $("loginBtn").textContent = "Memeriksa…";
     try {
-      const r = await api({ action: "login", password: pw });
+      const r = await api({ action: setupMode ? "bootstrap" : "login", email: em, password: pw });
       if (!r.ok) throw new Error(r.error || "Gagal masuk");
       token = r.token; try { sessionStorage.setItem("charis_token", token); } catch (err) {}
-      $("pw").value = ""; showApp(true); select("inquiries");
+      $("pw").value = ""; $("pw2").value = "";
+      if (setupMode) toast("Akun superuser dibuat. Simpan password Anda di tempat aman.");
+      setMode({ hasAdmin: true }); showApp(true); select("inquiries");
     } catch (err) { $("loginErr").textContent = err.message; }
-    $("loginBtn").disabled = false; $("loginBtn").textContent = "Masuk";
+    $("loginBtn").disabled = false; $("loginBtn").textContent = label;
+  });
+
+  /* change password */
+  $("pwBtn").addEventListener("click", () => { $("pwForm").reset(); $("pwErr").textContent = ""; $("pwDlg").showModal(); $("pwOld").focus(); });
+  $("pwCancel").addEventListener("click", () => $("pwDlg").close());
+  $("pwForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const cur = $("pwOld").value, n1 = $("pwNew").value, n2 = $("pwNew2").value;
+    const p = !cur ? "Masukkan password lama." : pwRule(n1) || (n1 !== n2 ? "Kedua password baru tidak sama." : "");
+    if (p) { $("pwErr").textContent = p; return; }
+    $("pwSave").disabled = true;
+    try {
+      const r = DEMO ? { ok: true } : await api({ action: "changePassword", current: cur, password: n1 });
+      if (!r.ok) throw new Error(r.error || "Gagal mengganti password.");
+      $("pwDlg").close(); toast("Password diganti.");
+    } catch (err) { $("pwErr").textContent = err.message; }
+    $("pwSave").disabled = false;
   });
   function logout(silent) {
     if (!silent && !DEMO) api({ action: "logout" }).catch(() => {});

@@ -6,7 +6,7 @@ Website resmi **CHARIS – Center for Health Analytics, Research and Integrated 
 - **Database:** **Google Spreadsheet** (satu tab per jenis konten)
 - **Penyimpanan file:** **Google Drive** (PDF publikasi, foto berita, logo mitra)
 - **Backend/API:** **Google Apps Script** (dideploy sebagai Web App)
-- **Pengelolaan:** panel admin di `/admin/` dengan password
+- **Pengelolaan:** panel admin di `/admin/` dengan email dan password superuser
 - **Bahasa:** dwibahasa Indonesia/English (tombol ID/EN)
 
 ```
@@ -67,11 +67,10 @@ Beranda berisi: slider sorotan, sorotan layanan, Terbaru (tab Berita, Publikasi,
 ### 3b. Isi daftar pengalaman tim (sekali saja)
 Pilih fungsi **`seedTeamExperience`**, lalu klik **Jalankan**. Tab `partners` akan terisi 38 lembaga dari CV pendiri. Daftar ini tampil di beranda dan halaman Tentang Kami sebagai **"Pengalaman tim kami bersama"**. Setelah itu, daftar bisa diubah lewat panel admin › *Mitra & pengalaman tim*.
 
-### 4. Atur password admin
-1. Di `Code.gs`, cari fungsi `setAdminPassword`. Ganti `GANTI_DENGAN_PASSWORD_KUAT` dengan password Anda (minimal 10 karakter).
-2. Jalankan **`setAdminPassword`**.
-3. **Hapus kembali teks password dari kode**, lalu simpan. Password tersimpan dalam bentuk hash di *Script Properties*.
-4. Opsional: ubah email penerima notifikasi formulir kontak lewat fungsi `setNotifyEmail`. Bawaannya adalah email akun pemilik skrip.
+### 4. Email notifikasi (opsional)
+Email penerima notifikasi formulir kontak bawaannya adalah email akun pemilik skrip. Untuk menggantinya, gunakan fungsi `setNotifyEmail`.
+
+> Tidak ada password yang perlu ditulis di `Code.gs`. Akun admin dibuat langsung dari panel admin di langkah 8.
 
 ### 5. Deploy sebagai Web App
 1. Klik **Terapkan › Deployment baru** › jenis **Aplikasi web**.
@@ -99,6 +98,18 @@ Di file yang sama Anda juga bisa mengisi:
 3. **Settings › Pages** › *Source*: **Deploy from a branch** › *Branch*: `main` / `(root)` › Save.
 4. Setelah 1–2 menit website aktif di `https://<username>.github.io/charis-website/`.
 5. Panel admin: `https://<username>.github.io/charis-website/admin/`
+
+### 8. Buat akun superuser (sekali saja)
+1. Di Apps Script, jalankan **`setup`** sekali lagi. Fungsi ini aman dijalankan berulang dan tidak menghapus data. Di log akan muncul pesan "Buka panel admin website (/admin/) dalam 60 menit…".
+2. Dalam 60 menit, buka `https://<username>.github.io/<nama-repo>/admin/`. Halaman akan menampilkan formulir **Buat akun superuser**.
+3. Isi **email akun Google pemilik Apps Script** (email yang sama dengan yang tertulis di log), password baru (minimal 10 karakter, berisi huruf dan angka), dan ulangi password.
+4. Klik **Buat akun dan masuk**. Anda langsung masuk ke panel admin, dan email pemberitahuan dikirim ke akun pemilik.
+
+Setelah itu, masuk cukup dengan email dan password tersebut. Password tidak pernah tersimpan di kode atau Spreadsheet. Yang tersimpan hanya sidik acaknya (hash bergaram yang diulang 1.000 kali) di *Script Properties*.
+
+- **Mengganti password:** di panel admin, klik **Ganti password** di menu kiri bawah.
+- **Lupa password:** di Apps Script, jalankan **`resetAdmin`**, lalu ulangi langkah 2–4 dalam 60 menit.
+- **Keamanan:** formulir pembuatan akun hanya terbuka jika belum ada akun, hanya dalam 60 menit setelah `setup` atau `resetAdmin` dijalankan oleh pemilik skrip, dan hanya menerima email pemilik skrip. Di luar itu, formulirnya tertutup.
 
 ---
 
@@ -161,7 +172,7 @@ Setiap proyek wajib diberi **tingkat keterbukaan** sesuai perjanjian atau perset
 - Hilangkan centang **Tayangkan di website** untuk menyimpan sebagai draf.
 - Isi berita: pisahkan paragraf dengan **satu baris kosong**.
 - Data juga bisa diedit langsung di Spreadsheet. Kolom `published` diisi `TRUE`/`FALSE`.
-- Sesi admin berlaku 6 jam. Setelah 5 kali salah password, login dikunci 15 menit.
+- Sesi admin berlaku 6 jam. Setelah 5 kali salah email atau password, login dikunci 15 menit.
 
 ## Memperbarui kode backend
 Setelah mengubah `Code.gs`: **Terapkan › Kelola deployment › ✏️ Edit › Versi: Versi baru › Terapkan**. URL `/exec` tetap sama, jadi `config.js` tidak perlu diubah.

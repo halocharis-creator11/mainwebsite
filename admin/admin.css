@@ -94,3 +94,15 @@ dialog form { display: flex; flex-direction: column; max-height: calc(100vh - 2r
 .pill.lvl-B { background: #E8EEF9; color: #2C4F8C; }
 .pill.lvl-C { background: #FFF1E4; color: var(--accent-ink); }
 .pill.lvl-D { background: #EEF0EF; color: var(--muted); }
+
+/* first-run setup and password dialog */
+.setup-note { margin: 0; padding: .8rem 1rem; border-radius: 10px; background: #EAF1F0; color: #1D3B39; font-size: .9rem; line-height: 1.5; }
+.setup-note.warn { background: #FBF0E7; color: #6B3A12; }
+.setup-note code { font-size: .85em; background: rgba(0,0,0,.06); padding: 0 .3em; border-radius: 4px; }
+.login-card .hint, .pw-form .hint { margin: .3rem 0 0; font-size: .8rem; color: var(--muted); }
+.pw-dlg { border: 0; border-radius: 16px; padding: 0; width: min(92vw, 420px); }
+.pw-dlg::backdrop { background: rgba(8,30,28,.55); }
+.pw-form { display: grid; gap: .9rem; padding: 1.6rem; }
+.pw-form h2 { margin: 0; font-size: 1.25rem; }
+.pw-actions { display: flex; justify-content: flex-end; gap: .6rem; }
+.side-foot { display: grid; gap: .4rem; }
