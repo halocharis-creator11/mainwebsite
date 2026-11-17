@@ -106,3 +106,5 @@ dialog form { display: flex; flex-direction: column; max-height: calc(100vh - 2r
 .pw-form h2 { margin: 0; font-size: 1.25rem; }
 .pw-actions { display: flex; justify-content: flex-end; gap: .6rem; }
 .side-foot { display: grid; gap: .4rem; }
+
+.api-warn { margin: 0 0 1rem; padding: .85rem 1rem; border-radius: 10px; background: #FBF0E7; color: #6B3A12; font-size: .9rem; line-height: 1.5; border: 1px solid #F1D3B8; }

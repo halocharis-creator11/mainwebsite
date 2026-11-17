@@ -41,6 +41,9 @@ const PROJECT_CORE = ['id', 'disclosure', 'title_id', 'title_en', 'client_type',
   'summary_id', 'summary_en', 'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'date'];
 const PROJECT_NAMED = ['client', 'funder', 'partners', 'official_title', 'location_detail', 'image_url', 'testimonial_id', 'testimonial_en', 'testimonial_by'];
 const PROJECT_PUBLIC = { A: PROJECT_CORE.concat(PROJECT_NAMED, ['related_publications']), B: PROJECT_CORE.concat(PROJECT_NAMED), C: PROJECT_CORE };
+/* Bump when Code.gs changes. The admin panel compares it with the version it expects, so a stale
+   Web App deployment (Code.gs edited but no new deployment version) is reported on screen. */
+const API_VERSION = '2026-11-17';
 const SESSION_HOURS = 6;
 const PROPS = PropertiesService.getScriptProperties();
 
@@ -136,6 +139,20 @@ function setup() {
   else Logger.log('Akun superuser sudah ada (' + PROPS.getProperty('ADMIN_EMAIL') + '). Lupa password? Jalankan resetAdmin().');
 }
 
+/** Diagnostic: run from the editor and read the log when something does not appear in the admin panel. */
+function cekSistem() {
+  const ss = SpreadsheetApp.getActive();
+  Logger.log('Versi Code.gs: ' + API_VERSION);
+  Object.keys(SCHEMA).forEach(function (t) {
+    const sh = ss.getSheetByName(t);
+    Logger.log((sh ? 'OK   ' : 'HILANG ') + t + (sh ? ' — ' + Math.max(sh.getLastRow() - 1, 0) + ' baris' : ''));
+  });
+  Logger.log('Email notifikasi: ' + (PROPS.getProperty('NOTIFY_EMAIL') || '(kosong)'));
+  Logger.log('Akun superuser: ' + (PROPS.getProperty('ADMIN_EMAIL') || '(belum dibuat)'));
+  Logger.log('Sisa kuota email hari ini: ' + MailApp.getRemainingDailyQuota());
+  Logger.log('Ingat: setiap kali Code.gs diubah, buat versi baru di Terapkan › Kelola deployment › Edit (ikon pensil) › Versi: Versi baru › Terapkan.');
+}
+
 /** Forgot the admin password? Run this from the editor, then create a new one at /admin/ within 60 minutes. */
 function resetAdmin() {
   ['ADMIN_EMAIL', 'ADMIN_SALT', 'ADMIN_HASH', 'ADMIN_ITER'].forEach(function (k) { PROPS.deleteProperty(k); });
@@ -170,7 +187,7 @@ function doGet(e) {
   try {
     const p = (e && e.parameter) || {};
     if (p.action === 'list') return json_({ ok: true, data: listPublic_(p.type) });
-    return json_({ ok: true, service: 'CHARIS API' });
+    return json_({ ok: true, service: 'CHARIS API', version: API_VERSION });
   } catch (err) {
     return json_({ ok: false, error: String(err.message || err) });
   }
@@ -255,12 +272,14 @@ function contact_(b) {
 
   const to = PROPS.getProperty('NOTIFY_EMAIL');
   if (to) {
-    MailApp.sendEmail({
-      to: to, replyTo: email,
-      subject: '[CHARIS] Permintaan baru dari ' + name + (row.org ? ' (' + row.org + ')' : ''),
-      body: 'Nama: ' + name + '\nLembaga: ' + row.org + '\nEmail: ' + email + '\nTelepon: ' + row.phone +
-            '\nLayanan: ' + row.service + '\n\nPesan:\n' + message + '\n\n— Dikirim dari website CHARIS'
-    });
+    try {
+      MailApp.sendEmail({
+        to: to, replyTo: email,
+        subject: '[CHARIS] Permintaan baru dari ' + name + (row.org ? ' (' + row.org + ')' : ''),
+        body: 'Nama: ' + name + '\nLembaga: ' + row.org + '\nEmail: ' + email + '\nTelepon: ' + row.phone +
+              '\nLayanan: ' + row.service + '\n\nPesan:\n' + message + '\n\n— Dikirim dari website CHARIS'
+      });
+    } catch (e) { console.warn('contact_ email gagal: ' + e.message); }   /* the message is already saved */
   }
   return { ok: true };
 }
@@ -359,9 +378,26 @@ function requireAuth_(token) {
 /* ============================================================
    DATA
    ============================================================ */
+/* Returns the tab for a collection. Creates it, or adds missing header columns at the end,
+   so data written by a newer Code.gs never fails on an older spreadsheet. */
 function sheet_(type) {
-  const sh = SpreadsheetApp.getActive().getSheetByName(type);
-  if (!sh) throw new Error('Sheet "' + type + '" tidak ada. Jalankan setup().');
+  const ss = SpreadsheetApp.getActive();
+  let sh = ss.getSheetByName(type);
+  const want = SCHEMA[type] || [];
+  if (!sh) {
+    sh = ss.insertSheet(type);
+    if (want.length) { sh.getRange(1, 1, 1, want.length).setValues([want]).setFontWeight('bold').setBackground('#E8F0EF'); sh.setFrozenRows(1); }
+    return sh;
+  }
+  if (want.length) {
+    const last = Math.max(sh.getLastColumn(), 1);
+    const have = sh.getRange(1, 1, 1, last).getValues()[0].map(String);
+    const missing = want.filter(function (h) { return have.indexOf(h) < 0; });
+    if (missing.length) {
+      const start = have.join('') === '' ? 1 : last + 1;
+      sh.getRange(1, start, 1, missing.length).setValues([missing]).setFontWeight('bold').setBackground('#E8F0EF');
+    }
+  }
   return sh;
 }
 
@@ -461,21 +497,29 @@ function requestReport_(b) {
   };
   if (!r.report_id || !r.name || !r.institution || !r.reason || !EMAIL_RE.test(r.email)) return { ok: false, error: 'Invalid input' };
   const cache = CacheService.getScriptCache(), key = 'rq_' + r.email + '_' + r.report_id;
-  if (cache.get(key)) return { ok: true };
-  cache.put(key, '1', 300);
-  const dup = findBy_('requests', 'email', r.email).some(function (x) { return x.report_id === r.report_id && (x.status === 'menunggu' || x.status === 'disetujui'); });
+  if (cache.get(key)) return { ok: true, duplicate: true };          /* double click within 5 minutes */
+  const dup = findBy_('requests', 'email', r.email).some(function (x) { return x.report_id === r.report_id && x.status === 'menunggu'; });
   if (dup) return { ok: true, duplicate: true };
   withLock_(function () { appendRow_('requests', r); });
+  cache.put(key, '1', 300);                                          /* only after the row is really saved */
+  CacheService.getScriptCache().remove('pub_requests');
 
+  /* e-mails must never undo a saved request (quota, permission, bad address) */
+  const mailErrors = [];
   const to = PROPS.getProperty('NOTIFY_EMAIL');
-  if (to) MailApp.sendEmail({ to: to, replyTo: r.email, subject: '[CHARIS] Permintaan laporan: ' + r.report_title,
-    body: 'Permintaan baru untuk laporan lengkap.\n\nLaporan: ' + r.report_title + ' (' + r.report_id + ')\nNama: ' + r.name + '\nInstansi: ' + r.institution +
-          '\nEmail: ' + r.email + '\nAlasan:\n' + r.reason + '\n\nSetujui atau tolak di panel admin website (menu Permintaan laporan).' });
-  MailApp.sendEmail({ to: r.email, subject: r.lang === 'en' ? 'CHARIS: we received your request' : 'CHARIS: permintaan Anda sudah kami terima',
-    body: r.lang === 'en'
-      ? 'Dear ' + r.name + ',\n\nThank you for requesting "' + r.report_title + '". Our team will review your request and reply by email, usually within 2 working days.\n\nCHARIS'
-      : 'Yth. ' + r.name + ',\n\nTerima kasih atas permintaan Anda untuk laporan "' + r.report_title + '". Tim kami akan meninjau permintaan ini dan membalas melalui email, biasanya dalam 2 hari kerja.\n\nSalam,\nCHARIS' });
-  return { ok: true };
+  try {
+    if (to) MailApp.sendEmail({ to: to, replyTo: r.email, subject: '[CHARIS] Permintaan laporan: ' + r.report_title,
+      body: 'Permintaan baru untuk laporan lengkap.\n\nLaporan: ' + r.report_title + ' (' + r.report_id + ')\nNama: ' + r.name + '\nInstansi: ' + r.institution +
+            '\nEmail: ' + r.email + '\nAlasan:\n' + r.reason + '\n\nSetujui atau tolak di panel admin website (menu Permintaan laporan).' });
+  } catch (e) { mailErrors.push('admin: ' + e.message); }
+  try {
+    MailApp.sendEmail({ to: r.email, subject: r.lang === 'en' ? 'CHARIS: we received your request' : 'CHARIS: permintaan Anda sudah kami terima',
+      body: r.lang === 'en'
+        ? 'Dear ' + r.name + ',\n\nThank you for requesting "' + r.report_title + '". Our team will review your request and reply by email, usually within 2 working days.\n\nCHARIS'
+        : 'Yth. ' + r.name + ',\n\nTerima kasih atas permintaan Anda untuk laporan "' + r.report_title + '". Tim kami akan meninjau permintaan ini dan membalas melalui email, biasanya dalam 2 hari kerja.\n\nSalam,\nCHARIS' });
+  } catch (e) { mailErrors.push('pemohon: ' + e.message); }
+  if (mailErrors.length) console.warn('requestReport_ email gagal: ' + mailErrors.join(' | '));
+  return { ok: true, saved: true };
 }
 
 function decide_(id, decision, note) {

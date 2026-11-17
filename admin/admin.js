@@ -154,7 +154,7 @@
       token = r.token; try { sessionStorage.setItem("charis_token", token); } catch (err) {}
       $("pw").value = ""; $("pw2").value = "";
       if (setupMode) toast("Akun superuser dibuat. Simpan password Anda di tempat aman.");
-      setMode({ hasAdmin: true }); showApp(true); select("inquiries");
+      setMode({ hasAdmin: true }); showApp(true); select("inquiries"); checkApi();
     } catch (err) { $("loginErr").textContent = err.message; }
     $("loginBtn").disabled = false; $("loginBtn").textContent = label;
   });
@@ -195,12 +195,26 @@
       const r = await api({ action: "adminList", type: t });
       if (!r.ok) throw new Error(r.error);
       rows = r.data || [];
-      if (t === "inquiries") rows.sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+      if (["inquiries", "requests", "downloads", "subscribers"].includes(t)) rows.sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
       if (t === "inquiries") updateCount();
       if (t === "requests") { const n = rows.filter(r => r.status === "menunggu").length; $("reqCount").hidden = !n; $("reqCount").textContent = n; }
       draw();
     } catch (err) { $("tableState").textContent = err.message || "Gagal memuat data."; }
   }
+  $("reloadBtn").addEventListener("click", () => { if (type) select(type); });
+
+  /* Warn when the live Web App still runs an older Code.gs (edited, but no new deployment version) */
+  const EXPECTED_API = "2026-11-17";
+  function checkApi() {
+    if (DEMO) return;
+    fetch(cfg.API_URL).then(r => r.json()).then(j => {
+      const v = j && j.version;
+      if (v && v >= EXPECTED_API) return;
+      $("apiWarn").innerHTML = "<strong>Kode Apps Script yang aktif belum versi terbaru" + (v ? " (" + esc(v) + ")" : "") + ".</strong> Di Apps Script, buka <em>Terapkan › Kelola deployment</em>, klik ikon pensil, pilih <em>Versi: Versi baru</em>, lalu <em>Terapkan</em>. Selama belum diperbarui, sebagian data (misalnya permintaan laporan) bisa tidak tersimpan atau tidak tampil.";
+      $("apiWarn").hidden = false;
+    }).catch(() => {});
+  }
+
   function updateCount() {
     const n = rows.filter(r => r.status === "baru").length;
     $("newCount").hidden = !n; $("newCount").textContent = n;
@@ -324,6 +338,6 @@
 
   /* ---------- start ---------- */
   if (token) {
-    (DEMO ? Promise.resolve({ ok: true }) : api({ action: "session" })).then(r => { if (r.ok) { showApp(true); select("inquiries"); } else logout(true); }).catch(() => logout(true));
+    (DEMO ? Promise.resolve({ ok: true }) : api({ action: "session" })).then(r => { if (r.ok) { showApp(true); select("inquiries"); checkApi(); } else logout(true); }).catch(() => logout(true));
   }
 })();

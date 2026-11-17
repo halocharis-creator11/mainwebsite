@@ -195,6 +195,16 @@ Tab `partners` menampung dua jenis lembaga, yang dibedakan lewat kolom **Hubunga
 
 Cara menambah logo: minta file logo resmi dan izin tertulis (cukup lewat email) dari lembaga terkait. Unggah logonya di panel admin, lalu centang kolom izin. Simpan email izin itu sebagai arsip.
 
+## Jika data dari website tidak muncul di panel admin
+
+Periksa tiga hal berikut, berurutan:
+
+1. **Website masih dalam mode demo.** Jika `API_URL` di `assets/js/config.js` kosong, formulir tidak mengirim apa pun. Sekarang formulir menampilkan pesan "Mode demo…" alih-alih pura-pura berhasil. Isi `API_URL`, lalu push.
+2. **Apps Script belum di-deploy ulang.** Mengubah atau menempel `Code.gs` baru **tidak** otomatis memperbarui Web App. Buka **Terapkan › Kelola deployment**, klik ikon pensil, pilih **Versi: Versi baru**, lalu **Terapkan**. URL `/exec` tetap sama. Panel admin menampilkan peringatan oranye jika versi yang aktif masih lama.
+3. **Cek isi Spreadsheet.** Di Apps Script, jalankan **`cekSistem`**, lalu buka *Log eksekusi*. Log menampilkan versi kode, semua tab beserta jumlah barisnya, email notifikasi, dan sisa kuota email. Permintaan laporan tersimpan di tab `requests`.
+
+Di panel admin, gunakan tombol **Muat ulang** untuk mengambil data terbaru. Permintaan terbaru tampil paling atas.
+
 ## Keamanan dan batasan
 - Spreadsheet tetap privat. API hanya mengembalikan baris yang `published = TRUE`. Pesan masuk hanya bisa dibaca setelah login.
 - Formulir kontak dilindungi honeypot anti-bot dan batas 1 kiriman per menit per email.

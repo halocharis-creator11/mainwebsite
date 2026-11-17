@@ -73,9 +73,11 @@
         </div>
         <div class="head-actions">
           <label class="search"><span class="sr-only">Cari</span><input type="search" id="q" placeholder="Cari…"></label>
+          <button type="button" class="btn" id="reloadBtn" title="Ambil data terbaru dari Spreadsheet">Muat ulang</button>
           <button type="button" class="btn btn-primary" id="addBtn">+ Tambah</button>
         </div>
       </header>
+      <p class="api-warn" id="apiWarn" hidden></p>
       <div class="table-wrap">
         <table class="data-table" id="table">
           <thead></thead>
@@ -116,7 +118,7 @@
       <div class="pw-actions"><button type="button" class="btn" id="pwCancel">Batal</button><button type="submit" class="btn btn-primary" id="pwSave">Simpan password</button></div>
     </form>
   </dialog>
-  <script src="../assets/js/config.js"></script>
+  <script>document.write('<script src="../assets/js/config.js?t=' + Date.now() + '"><\/script>');</script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/demo-data.js"></script>
   <script src="admin.js"></script>

@@ -88,7 +88,8 @@
 
   <p class="demo-note" id="demoBar" hidden></p>
 
-  <script src="assets/js/config.js"></script>
+  <!-- config.js is loaded fresh each time so a new API_URL takes effect at once -->
+  <script>document.write('<script src="assets/js/config.js?t=' + Date.now() + '"><\/script>');</script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/demo-data.js"></script>
   <script src="assets/js/api.js"></script>

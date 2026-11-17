@@ -62,6 +62,7 @@ window.CharisAPI = (function () {
 
   async function post(payload) {
     if (isDemo) {
+      console.warn("CHARIS: mode demo, API_URL kosong di assets/js/config.js. Aksi \"" + payload.action + "\" tidak dikirim ke server.");
       await new Promise(r => setTimeout(r, 500));
       if (payload.action === "memberLogin") return String(payload.code || "").toUpperCase() === "DEMO-12345" ? { ok: true, mtoken: "demo", name: "Pengguna Demo" } : { ok: false, error: "invalid" };
       if (payload.action === "memberLibrary") return { ok: true, name: "Pengguna Demo", email: "demo@contoh.org", data: [

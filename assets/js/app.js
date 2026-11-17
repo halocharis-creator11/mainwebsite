@@ -387,7 +387,8 @@
         try {
           const res = await API.post(Object.assign({ action: "requestReport", lang }, data));
           if (!res.ok) throw new Error(res.error);
-          form.innerHTML = '<div class="req-done"><h2>' + esc(t("req.doneT")) + "</h2><p>" + esc(t("req.doneD")) + '</p><p><a href="' + esc(r.url) + '">' + esc(t("repo.readOpen")) + '</a> · <a href="#/research">' + esc(t("repo.t")) + "</a></p></div>";
+          if (res.demo) { s.textContent = t("req.demo"); s.classList.add("err"); btn.disabled = false; btn.textContent = t("req.submit"); return; }
+          form.innerHTML = '<div class="req-done"><h2>' + esc(t("req.doneT")) + "</h2><p>" + esc(res.duplicate ? t("req.dup") : t("req.doneD")) + '</p><p><a href="' + esc(r.url) + '">' + esc(t("repo.readOpen")) + '</a> · <a href="#/research">' + esc(t("repo.t")) + "</a></p></div>";
         } catch (err) { s.textContent = t("form.err"); s.classList.add("err"); btn.disabled = false; btn.textContent = t("req.submit"); }
       });
     },
@@ -594,6 +595,7 @@
     try {
       const res = await API.post(Object.assign({ action: "contact", lang: lang }, data));
       if (!res.ok) throw new Error(res.error || "failed");
+      if (res.demo) { status.textContent = t("form.demo"); status.classList.add("err"); btn.disabled = false; btn.textContent = t("form.submit"); return; }
       form.reset(); status.textContent = t("form.ok"); status.classList.add("ok");
     } catch (err) { status.textContent = t("form.err"); status.classList.add("err"); }
     btn.disabled = false; btn.textContent = t("form.submit");
