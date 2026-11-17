@@ -194,7 +194,7 @@ function bodyBlock(m, url, slug) {
     (a.orcid ? ` <a class="rp-orcid" href="https://orcid.org/${attr(a.orcid)}" aria-label="ORCID ${attr(a.name)}">iD</a>` : "") + "</li>").join("");
   const requestUrl = `../../index.html#/request/${encodeURIComponent(m.id)}`;
   return `  <header class="rp-bar"><div class="rp-wrap rp-bar-in">
-    <a class="rp-brand" href="../../index.html"><img src="../../assets/img/logo-symbol.svg" alt="" width="30" height="30"><span>charis</span></a>
+    <a class="rp-brand" href="../../index.html"><img src="../../assets/img/charis-mark.svg" alt="CHARIS" width="112" height="30"></a>
     <nav class="rp-crumbs" aria-label="Breadcrumb"><a href="../../index.html#/research">Repositori</a><span aria-hidden="true">/</span><span>${esc(m.type)}</span></nav>
     <a class="rp-bar-cta" href="${attr(requestUrl)}">Minta PDF lengkap</a>
   </div></header>
@@ -263,13 +263,15 @@ function browsePage(items) {
   <title>Repositori · ${esc(site.publisher_short)}</title>
   <meta name="description" content="Repositori produk pengetahuan ${esc(site.publisher)}: laporan riset, kertas kerja, policy brief, dan panduan sistem kesehatan.">
   <link rel="canonical" href="${attr(BASE)}/repositori/">
-  <link rel="icon" href="../assets/img/logo-symbol.svg" type="image/svg+xml">
+  <link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
   <link rel="stylesheet" href="assets/report.css">
 </head>
 <body>
   <!-- Dibuat otomatis oleh scripts/build-repo.mjs. Jangan diedit manual. -->
   <header class="rp-bar"><div class="rp-wrap rp-bar-in">
-    <a class="rp-brand" href="../index.html"><img src="../assets/img/logo-symbol.svg" alt="" width="30" height="30"><span>charis</span></a>
+    <a class="rp-brand" href="../index.html"><img src="../assets/img/charis-mark.svg" alt="CHARIS" width="112" height="30"></a>
     <nav class="rp-crumbs" aria-label="Breadcrumb"><a href="../index.html#/research">Repositori interaktif</a></nav>
   </div></header>
   <section class="rp-hero"><div class="rp-wrap"><h1 class="rp-title">Repositori ${esc(site.publisher_short)}</h1>

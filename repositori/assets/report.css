@@ -13,7 +13,8 @@ a { color: var(--teal); text-underline-offset: 3px; }
 /* top bar */
 .rp-bar { position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid var(--rule); }
 .rp-bar-in { display: flex; align-items: center; gap: 20px; min-height: 64px; }
-.rp-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: 22px; letter-spacing: -0.045em; color: var(--teal); }
+.rp-brand { display: flex; align-items: center; text-decoration: none; }
+.rp-brand img { display: block; height: 30px; width: auto; }
 .rp-crumbs { display: flex; gap: 8px; font-size: 14px; color: var(--muted); }
 .rp-crumbs a { color: var(--muted); }
 .rp-bar-cta { margin-left: auto; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 6px; }
