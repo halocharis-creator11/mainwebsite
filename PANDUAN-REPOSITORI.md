@@ -110,7 +110,7 @@ Setiap produk otomatis mendapat **gambar sampul** dan **thumbnail**. Sampul tamp
 4. file ringkasan PDF (`pdf_summary`): halaman pertama;
 5. PDF lain apa pun di folder.
 
-**Cara termudah:** ekspor halaman sampul laporan dari Word sebagai PDF satu halaman, beri nama `sampul.pdf`, dan unggah bersama `index.html`. File `_cover.jpg`, `_thumb.jpg`, dan `_cover.json` dibuat otomatis. Jangan diedit. Jika sampul diganti, cukup unggah file baru dengan nama yang sama.
+**Cara termudah:** ekspor halaman sampul laporan dari Word sebagai PDF satu halaman, beri nama `sampul.pdf`, dan unggah bersama `index.html`. File `auto-cover.jpg`, `auto-thumb.jpg`, dan `auto-info.json` dibuat otomatis. Jangan diedit. Untuk hasil tajam, gunakan PDF (bukan foto atau tangkapan layar) atau gambar dengan lebar minimal 1200 px. Jika sampul diganti, cukup unggah file baru dengan nama yang sama.
 
 Sampul untuk **Portofolio** diunggah ke folder `portofolio/<ID-PROYEK>/` dengan aturan yang sama (lihat `portofolio/README.md`). Sampul ini hanya tampil untuk proyek tingkat A dan B.
 
@@ -121,7 +121,7 @@ Pembaca bisa membalik **lima halaman pertama** laporan seperti buku, langsung da
 1. Dari Word atau PDF laporan, simpan **hanya halaman 1–5** (sampul, daftar isi, ringkasan, dan seterusnya) sebagai `pratinjau.pdf`.
    Di Word: *File → Save as → PDF → Options → Pages from 1 to 5*. Di Adobe/Preview: ekstrak halaman 1–5.
 2. Unggah `pratinjau.pdf` ke folder produk, bersama `index.html` dan `sampul.pdf`.
-3. GitHub Actions membuat gambar `_p1.jpg` sampai `_p5.jpg`. Jika PDF lebih dari 5 halaman, hanya 5 halaman pertama yang dipakai.
+3. GitHub Actions membuat gambar `auto-p1.jpg` sampai `auto-p5.jpg`. Jika PDF lebih dari 5 halaman, hanya 5 halaman pertama yang dipakai.
 
 **Jangan unggah PDF laporan lengkap ke GitHub.** Semua isi repo bisa diunduh publik. Jika `pratinjau.pdf` tidak ada, sistem memakai file ringkasan (`pdf_summary`) bila tersedia. Tanpa keduanya, sampul tetap tampil tetapi tanpa flipbook.
 

@@ -2,8 +2,8 @@
   "count": 1,
   "covers": {
     "PRJ-2026-001": {
-      "cover": "portofolio/PRJ-2026-001/_cover.jpg",
-      "thumb": "portofolio/PRJ-2026-001/_thumb.jpg"
+      "cover": "portofolio/PRJ-2026-001/auto-cover.jpg",
+      "thumb": "portofolio/PRJ-2026-001/auto-thumb.jpg"
     }
   }
 }

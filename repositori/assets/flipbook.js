@@ -1,7 +1,7 @@
 /* CHARIS flipbook: previews the first pages (max 5) of a report as a book.
    Used by the website (assets/js/app.js) and by each report page in repositori/.
    CharisFlipbook.open({ pages: [...image urls], title, requestUrl, readUrl, lang })
-   Report pages: any element with data-flip-pages='["_p1.jpg", ...]' opens it on click. */
+   Report pages: any element with data-flip-pages='["auto-p1.jpg", ...]' opens it on click. */
 (function () {
   "use strict";
   if (window.CharisFlipbook) return;

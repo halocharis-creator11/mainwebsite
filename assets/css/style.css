@@ -367,7 +367,7 @@ address { font-style: normal; }
 .chips .clear { background: none; border-color: transparent; text-decoration: underline; }
 .repo-list { display: grid; gap: 0; border-top: 1px solid var(--rule); }
 .ritem { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 28px; padding: 28px 0; border-bottom: 1px solid var(--rule); }
-.ritem-cover { aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; }
+.ritem-cover { aspect-ratio: 210 / 297; background: #fff; border-radius: 6px; overflow: hidden; }
 .ritem-cover img { width: 100%; height: 100%; object-fit: cover; }
 .ritem h2 { font-size: 21px; line-height: 1.3; margin: 0 0 6px; }
 .ritem h2 a { color: var(--ink); text-decoration: none; }
@@ -459,14 +459,14 @@ address { font-style: normal; }
 
 /* ---------- covers ---------- */
 .cover-btn { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: var(--mist-2); cursor: zoom-in; }
-.cover-btn img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s ease; }
-.cover-btn:hover img { transform: scale(1.03); }
+.cover-btn img { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; transition: transform .25s ease; }
+.cover-btn:hover img { transform: translateY(-2px); }
 .ritem-cover { box-shadow: 0 6px 16px rgba(20,40,38,.14); }
 .card-media.is-cover { background: var(--mist); position: relative; }
 .card-media.is-cover img { position: absolute; top: 16px; bottom: 16px; left: 0; right: 0; margin: auto; height: calc(100% - 32px); width: auto; max-width: 90%; object-fit: contain; box-shadow: 0 6px 16px rgba(20,40,38,.18); border-radius: 3px; }
 .pj-cover { background: var(--mist); display: grid; place-items: center; padding: 24px; }
-.pj-cover .cover-btn { width: 180px; height: auto; aspect-ratio: 3 / 4; box-shadow: 0 10px 24px rgba(20,40,38,.2); border-radius: 4px; overflow: hidden; background: #fff; }
-.req-cover { width: 150px; aspect-ratio: 3 / 4; border-radius: 4px; overflow: hidden; margin-bottom: 18px; box-shadow: 0 8px 20px rgba(20,40,38,.18); }
+.pj-cover .cover-btn { width: 180px; height: auto; aspect-ratio: 210 / 297; box-shadow: 0 10px 24px rgba(20,40,38,.2); border-radius: 4px; overflow: hidden; background: #fff; }
+.req-cover { width: 150px; aspect-ratio: 210 / 297; background: #fff; border-radius: 4px; overflow: hidden; margin-bottom: 18px; box-shadow: 0 8px 20px rgba(20,40,38,.18); }
 dialog.zoom { border: 0; padding: 0; background: transparent; max-width: min(92vw, 820px); max-height: 94vh; overflow: visible; }
 dialog.zoom::backdrop { background: rgba(8,30,28,.82); }
 dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radius: 6px; }
@@ -500,7 +500,7 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
 .card a:hover { transform: translateY(-5px); box-shadow: 0 18px 36px rgba(20,40,38,.12); }
 .card-media img { transition: transform .5s cubic-bezier(.25,.1,.2,1); }
 .card a:hover .card-media img { transform: scale(1.05); }
-.card a:hover .card-media.is-cover img { transform: translateY(-4px) rotate(-1.2deg); }
+.card a:hover .card-media.is-cover img { transform: translateY(-4px); }
 .pillar { transition: transform .3s cubic-bezier(.25,.1,.2,1), box-shadow .3s; }
 .pillar:hover { transform: translateY(-5px); box-shadow: 0 16px 32px rgba(20,40,38,.1); }
 .pillar .shape, .pgroup2-head .shape { transition: transform .4s cubic-bezier(.3,1.6,.5,1); }
@@ -511,7 +511,7 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
 .ritem { transition: background .25s; border-radius: 10px; }
 .ritem:hover { background: linear-gradient(90deg, var(--mist) 0%, rgba(237,242,240,0) 85%); }
 .ritem-cover { transition: transform .3s cubic-bezier(.25,.1,.2,1), box-shadow .3s; }
-.ritem:hover .ritem-cover { transform: translateY(-3px) rotate(-1.5deg); box-shadow: 0 12px 24px rgba(20,40,38,.2); }
+.ritem:hover .ritem-cover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(20,40,38,.2); }
 .pj { transition: box-shadow .3s, border-color .3s, transform .3s; }
 .pj:hover { box-shadow: 0 18px 40px rgba(20,40,38,.1); border-color: var(--teal-60); transform: translateY(-3px); }
 .tabs button, .filters button { transition: background .2s, color .2s, border-color .2s; }
@@ -573,7 +573,7 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
 .ex-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .ex { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding: 14px; border: 1px solid var(--rule); border-radius: 10px; background: #fff; transition: transform .3s cubic-bezier(.25,.1,.2,1), box-shadow .3s, border-color .3s; }
 .ex:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(20,40,38,.1); border-color: var(--teal-60); }
-.ex-cover { aspect-ratio: 3 / 4; border-radius: 4px; overflow: hidden; box-shadow: 0 6px 14px rgba(20,40,38,.16); }
+.ex-cover { aspect-ratio: 210 / 297; background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 6px 14px rgba(20,40,38,.16); }
 .ex-cover .tile { width: 100%; height: 100%; }
 .ex-body .card-meta { margin-bottom: 4px; font-size: 13px; }
 .ex h4 { font-size: 16px; line-height: 1.35; font-weight: 700; margin: 0 0 10px; }

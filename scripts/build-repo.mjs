@@ -54,6 +54,12 @@ const HAS_PDFTOPPM = tool("pdftoppm"), HAS_CONVERT = tool("convert") || tool("ma
 const IMG_EXT = /\.(jpe?g|png|webp)$/i;
 const sha = f => crypto.createHash("sha1").update(fs.readFileSync(f)).digest("hex");
 const warnings = [];
+/* Generated files are named auto-*. They must NOT start with "_": GitHub Pages (Jekyll) hides such files
+   whenever .nojekyll is missing, which shows up as broken covers. GEN_VERSION forces a re-render when settings change. */
+const GEN_VERSION = 2;
+function legacyCleanup(dir) {
+  for (const f of fs.readdirSync(dir)) if (/^_(cover\.(jpg|json)|thumb\.jpg|p-?\d+\.jpg)$/.test(f)) fs.unlinkSync(path.join(dir, f));
+}
 
 function resolveCover(dir, prefer, extraPdf) {
   const exists = f => f && fs.existsSync(path.join(dir, f));
@@ -61,32 +67,40 @@ function resolveCover(dir, prefer, extraPdf) {
   const pick = names => names.find(exists);
   let img = prefer && IMG_EXT.test(prefer) && exists(prefer) ? prefer
     : pick(["sampul.jpg", "sampul.jpeg", "sampul.png", "sampul.webp", "cover.jpg", "cover.jpeg", "cover.png", "cover.webp"]);
-  const recFile = path.join(dir, "_cover.json");
+  legacyCleanup(dir);
+  const recFile = path.join(dir, "auto-info.json");
   let rec = {}; try { rec = JSON.parse(fs.readFileSync(recFile, "utf8")); } catch (e) { /* first run */ }
+  if (rec.v !== GEN_VERSION) rec = { v: GEN_VERSION };   /* new render settings: make everything again */
   if (!img) {
     const pdf = (prefer && /\.pdf$/i.test(prefer) && exists(prefer) && prefer) || pick(["sampul.pdf", "cover.pdf", "pratinjau.pdf", "preview.pdf", extraPdf]) || files.find(f => /\.pdf$/i.test(f));
     if (pdf) {
       const h = sha(path.join(dir, pdf));
-      if (!(exists("_cover.jpg") && rec.source === pdf && rec.sha === h)) {
+      if (!(exists("auto-cover.jpg") && rec.source === pdf && rec.sha === h)) {
         if (!HAS_PDFTOPPM) { warnings.push(`${path.relative(ROOT, dir)}: pdftoppm tidak tersedia, sampul dari PDF tidak dibuat`); }
         else {
-          execFileSync("pdftoppm", ["-f", "1", "-l", "1", "-jpeg", "-jpegopt", "quality=85", "-scale-to", "1400", "-singlefile", path.join(dir, pdf), path.join(dir, "_cover")]);
+          execFileSync("pdftoppm", ["-f", "1", "-l", "1", "-jpeg", "-jpegopt", "quality=92", "-scale-to", "1800", "-aa", "yes", "-aaVector", "yes", "-singlefile", path.join(dir, pdf), path.join(dir, "auto-cover")]);
           rec = { source: pdf, sha: h };
         }
       }
-      if (exists("_cover.jpg")) img = "_cover.jpg";
+      if (exists("auto-cover.jpg")) img = "auto-cover.jpg";
     }
   } else if (rec.source) { delete rec.source; delete rec.sha; }                /* an image now takes priority over an old PDF render */
   if (!img) { delete rec.source; delete rec.sha; delete rec.thumbOf; delete rec.thumbSha; if (fs.existsSync(recFile)) fs.writeFileSync(recFile, JSON.stringify(rec, null, 2) + "\n"); return { cover: "", thumb: "" }; }
   let thumb = img;
+  if (IMG_EXT.test(img) && img !== "auto-cover.jpg" && HAS_CONVERT) {
+    try {
+      const wpx = +execFileSync(tool("magick") ? "magick" : "identify", (tool("magick") ? ["identify"] : []).concat(["-format", "%w", path.join(dir, img) + "[0]"])).toString();
+      if (wpx && wpx < 900) warnings.push(`${path.relative(ROOT, dir)}/${img}: lebar sampul hanya ${wpx} px, sehingga tampak buram. Gunakan gambar minimal 1200 px atau unggah sampul.pdf.`);
+    } catch (e) { /* size check is advisory */ }
+  }
   if (HAS_CONVERT) {
     const h = sha(path.join(dir, img));
-    if (!(exists("_thumb.jpg") && rec.thumbOf === img && rec.thumbSha === h)) {
+    if (!(exists("auto-thumb.jpg") && rec.thumbOf === img && rec.thumbSha === h)) {
       const bin = tool("magick") ? "magick" : "convert";
-      execFileSync(bin, [path.join(dir, img) + "[0]", "-resize", "520x", "-strip", "-quality", "82", path.join(dir, "_thumb.jpg")]);
+      execFileSync(bin, [path.join(dir, img) + "[0]", "-colorspace", "sRGB", "-background", "white", "-alpha", "remove", "-filter", "Lanczos", "-resize", "720x>", "-unsharp", "0x0.6+0.6+0", "-strip", "-sampling-factor", "4:4:4", "-quality", "90", path.join(dir, "auto-thumb.jpg")]);
       rec.thumbOf = img; rec.thumbSha = h;
     }
-    thumb = "_thumb.jpg";
+    thumb = "auto-thumb.jpg";
   }
   const out = JSON.stringify(rec, null, 2) + "\n";
   if (!fs.existsSync(recFile) || fs.readFileSync(recFile, "utf8") !== out) fs.writeFileSync(recFile, out);
@@ -98,8 +112,8 @@ const MAX_PREVIEW = 5;
 function resolvePreview(dir, extraPdf) {
   const exists = f => f && fs.existsSync(path.join(dir, f));
   const files = fs.readdirSync(dir);
-  const old = files.filter(f => /^_p\d+\.jpg$/.test(f));
-  const recFile = path.join(dir, "_cover.json");
+  const old = files.filter(f => /^auto-p\d+\.jpg$/.test(f));
+  const recFile = path.join(dir, "auto-info.json");
   let rec = {}; try { rec = JSON.parse(fs.readFileSync(recFile, "utf8")); } catch (e) { /* none */ }
   const pdf = ["pratinjau.pdf", "preview.pdf", extraPdf].find(exists);
   const clear = () => { old.forEach(f => fs.unlinkSync(path.join(dir, f))); return []; };
@@ -109,16 +123,16 @@ function resolvePreview(dir, extraPdf) {
     clear();
     let n = MAX_PREVIEW;
     try { n = Math.min(MAX_PREVIEW, +execFileSync("pdfinfo", [path.join(dir, pdf)]).toString().match(/Pages:\s+(\d+)/)[1]); } catch (e) { /* assume 5 */ }
-    execFileSync("pdftoppm", ["-f", "1", "-l", String(n), "-jpeg", "-jpegopt", "quality=82", "-scale-to", "1100", path.join(dir, pdf), path.join(dir, "_p")]);
-    /* pdftoppm pads numbers (_p-1 or _p-01); normalise to _p1.jpg … */
-    fs.readdirSync(dir).filter(f => /^_p-\d+\.jpg$/.test(f)).forEach(f => fs.renameSync(path.join(dir, f), path.join(dir, "_p" + parseInt(f.slice(3), 10) + ".jpg")));
-    const made = fs.readdirSync(dir).filter(f => /^_p\d+\.jpg$/.test(f));
+    execFileSync("pdftoppm", ["-f", "1", "-l", String(n), "-jpeg", "-jpegopt", "quality=88", "-scale-to", "1600", "-aa", "yes", "-aaVector", "yes", path.join(dir, pdf), path.join(dir, "auto-p")]);
+    /* pdftoppm pads numbers (auto-p-1 or auto-p-01); normalise to auto-p1.jpg … */
+    fs.readdirSync(dir).filter(f => /^auto-p-\d+\.jpg$/.test(f)).forEach(f => fs.renameSync(path.join(dir, f), path.join(dir, "auto-p" + parseInt(f.slice(7), 10) + ".jpg")));
+    const made = fs.readdirSync(dir).filter(f => /^auto-p\d+\.jpg$/.test(f));
     rec.previewOf = pdf; rec.previewSha = h; rec.previewCount = made.length;
     fs.writeFileSync(recFile, JSON.stringify(rec, null, 2) + "\n");
   }
-  return fs.readdirSync(dir).filter(f => /^_p\d+\.jpg$/.test(f)).sort(byNum);
+  return fs.readdirSync(dir).filter(f => /^auto-p\d+\.jpg$/.test(f)).sort(byNum);
 }
-const byNum = (a, b) => parseInt(a.slice(2), 10) - parseInt(b.slice(2), 10);
+const byNum = (a, b) => parseInt(a.slice(6), 10) - parseInt(b.slice(6), 10);
 
 function replaceBlock(html, name, content) {
   const re = new RegExp(`(<!-- CHARIS:AUTO:${name}:START -->)[\\s\\S]*?(<!-- CHARIS:AUTO:${name}:END -->)`);
@@ -205,7 +219,7 @@ function bodyBlock(m, url, slug) {
     ${m.title_en ? `<p class="rp-title-en" lang="en">${esc(m.title_en)}</p>` : ""}
     <ul class="rp-authors">${authors}</ul>
     ${affs.length ? `<ol class="rp-affs">${affs.map(a => `<li>${esc(a)}</li>`).join("")}</ol>` : ""}
-  </div>${m.cover ? `<a class="rp-cover" href="${attr(m.cover)}" ${m.preview.length > 1 ? `data-flip-pages="${attr(JSON.stringify(m.preview))}" data-flip-title="${attr(m.title_id)}" data-flip-request="${attr(requestUrl)}" aria-label="Pratinjau ${m.preview.length} halaman pertama"` : `data-zoom aria-label="Perbesar sampul"`}><img src="${attr(m.thumb || m.cover)}" alt="Sampul ${attr(m.title_id)}" width="260">${m.preview.length > 1 ? `<span class="rp-cover-tag">Pratinjau ${m.preview.length} halaman</span>` : ""}</a>` : ""}</div></section>
+  </div>${m.cover ? `<a class="rp-cover" href="${attr(m.cover)}" ${m.preview.length > 1 ? `data-flip-pages="${attr(JSON.stringify(m.preview))}" data-flip-title="${attr(m.title_id)}" data-flip-request="${attr(requestUrl)}" aria-label="Pratinjau ${m.preview.length} halaman pertama"` : `data-zoom aria-label="Perbesar sampul"`}><img src="${attr(m.thumb || m.cover)}"${m.thumb && m.thumb !== m.cover ? ` srcset="${attr(m.thumb)} 720w, ${attr(m.cover)} 1800w" sizes="(max-width: 960px) 170px, 240px"` : ""} alt="Sampul ${attr(m.title_id)}" width="240" height="339" decoding="async">${m.preview.length > 1 ? `<span class="rp-cover-tag">Pratinjau ${m.preview.length} halaman</span>` : ""}</a>` : ""}</div></section>
   <section class="rp-front"><div class="rp-wrap rp-front-in">
     <div class="rp-abstracts">
       <section class="rp-abstract" lang="id"><h2>Abstrak</h2><p>${esc(m.abstract_id)}</p></section>
