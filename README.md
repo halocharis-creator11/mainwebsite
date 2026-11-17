@@ -64,6 +64,9 @@ Beranda berisi: slider sorotan, sorotan layanan, Terbaru (tab Berita, Publikasi,
 2. Berikan izin akses saat diminta. Jika muncul peringatan "aplikasi belum diverifikasi", pilih *Lanjutan › Buka (tidak aman)*. Ini normal untuk skrip milik sendiri.
 3. Hasilnya: tab `news`, `team`, `projects`, `project_internal`, `partners`, `inquiries`, `subscribers`, `reports`, `requests`, `members`, dan `downloads` dibuat otomatis (tab `publications` tidak lagi dipakai karena publikasi dikelola lewat Repositori), beserta folder Drive **CHARIS Website Uploads**.
 
+### 3b. Isi daftar pengalaman tim (sekali saja)
+Pilih fungsi **`seedTeamExperience`**, lalu klik **Jalankan**. Tab `partners` akan terisi 38 lembaga dari CV pendiri. Daftar ini tampil di beranda dan halaman Tentang Kami sebagai **"Pengalaman tim kami bersama"**. Setelah itu, daftar bisa diubah lewat panel admin › *Mitra & pengalaman tim*.
+
 ### 4. Atur password admin
 1. Di `Code.gs`, cari fungsi `setAdminPassword`. Ganti `GANTI_DENGAN_PASSWORD_KUAT` dengan password Anda (minimal 10 karakter).
 2. Jalankan **`setAdminPassword`**.
@@ -167,6 +170,19 @@ Setelah mengubah `Code.gs`: **Terapkan › Kelola deployment › ✏️ Edit ›
 1. Di repository, buat file `CNAME` berisi nama domain, misalnya `charis.or.id`.
 2. Di pengelola DNS domain, tambahkan record `CNAME` (`www` → `<username>.github.io`) atau record `A` ke IP GitHub Pages (lihat dokumentasi GitHub Pages "Managing a custom domain").
 3. Di **Settings › Pages**, isi *Custom domain* dan centang **Enforce HTTPS**.
+
+## Mitra dan pengalaman tim
+
+Tab `partners` menampung dua jenis lembaga, yang dibedakan lewat kolom **Hubungan**:
+
+| Hubungan | Tampil sebagai | Untuk |
+|---|---|---|
+| `tim` | "Pengalaman tim kami bersama" | Lembaga tempat anggota tim pernah bekerja, meneliti, atau menjadi konsultan sebelum atau di luar CHARIS |
+| `mitra` | "Mitra CHARIS" | Lembaga yang sudah punya kerja sama atau kontrak dengan CHARIS. Bagian ini otomatis tersembunyi selama belum ada isinya |
+
+**Logo lembaga hanya tampil jika kolom "Sudah ada izin tertulis memakai logo" dicentang.** Tanpa izin, website menampilkan singkatan dan nama lengkap lembaga sebagai teks. Aturan ini ditegakkan di server (Apps Script), sehingga logo tanpa izin tidak pernah terkirim ke pengunjung.
+
+Cara menambah logo: minta file logo resmi dan izin tertulis (cukup lewat email) dari lembaga terkait. Unggah logonya di panel admin, lalu centang kolom izin. Simpan email izin itu sebagai arsip.
 
 ## Keamanan dan batasan
 - Spreadsheet tetap privat. API hanya mengembalikan baris yang `published = TRUE`. Pesan masuk hanya bisa dibaca setelah login.

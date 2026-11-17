@@ -22,7 +22,8 @@ const SCHEMA = {
                  'date', 'published'],
   /* Internal project data: NEVER returned by the public API. */
   project_internal: ['id', 'contract_no', 'contract_date', 'contract_value', 'employer_contact', 'team', 'disclosure_basis', 'consent_link', 'last_review', 'notes'],
-  partners:     ['id', 'name', 'logo_url', 'url', 'published'],
+  /* new columns are appended at the end so existing sheets keep their data */
+  partners:     ['id', 'name', 'logo_url', 'url', 'published', 'short', 'category', 'relation', 'logo_ok', 'order'],
   inquiries:    ['id', 'timestamp', 'name', 'org', 'email', 'phone', 'service', 'message', 'lang', 'status', 'notes'],
   subscribers:  ['id', 'timestamp', 'email', 'lang', 'status'],
   /* knowledge products: full PDFs kept privately in Drive, matched to repository ids */
@@ -43,6 +44,66 @@ const PROPS = PropertiesService.getScriptProperties();
 /* ============================================================
    SETUP (run manually from the editor)
    ============================================================ */
+/* Fills the "partners" tab with organisations the team has worked with (from the founder's CV).
+   Run once from the editor. Nothing is added if rows with relation "tim" already exist. */
+function seedTeamExperience() {
+  const sh = SpreadsheetApp.getActive().getSheetByName('partners');
+  if (!sh) throw new Error('Jalankan setup() dulu.');
+  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  const col = function (k) { return head.indexOf(k); };
+  const existing = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, head.length).getValues() : [];
+  if (existing.some(function (r) { return String(r[col('relation')]) === 'tim'; })) { Logger.log('Sudah ada data pengalaman tim. Tidak ada yang ditambahkan.'); return; }
+  const list = [
+    ["Kementerian Kesehatan Republik Indonesia", "KEMENKES", "gov"],
+    ["Kementerian Kesehatan Timor-Leste", "MOH TL", "gov"],
+    ["Dinas Kesehatan Kabupaten Badung", "DINKES BADUNG", "gov"],
+    ["Dinas Kesehatan Kabupaten Gianyar", "DINKES GIANYAR", "gov"],
+    ["Dinas Kesehatan Kota Denpasar", "DINKES DENPASAR", "gov"],
+    ["Dinas Kesehatan Kabupaten Buton", "DINKES BUTON", "gov"],
+    ["Dinas Kesehatan Kabupaten Sumba Barat Daya", "DINKES SBD", "gov"],
+    ["Dinas Kesehatan Kabupaten Sorong", "DINKES SORONG", "gov"],
+    ["Perwakilan BKKBN Provinsi Bali", "BKKBN BALI", "gov"],
+    ["Rumah Sakit Mata Bali Mandara", "RSMBM", "gov"],
+    ["World Health Organization – Indonesia", "WHO", "un"],
+    ["World Health Organization – Timor-Leste", "WHO", "un"],
+    ["UNAIDS Indonesia", "UNAIDS", "un"],
+    ["UNICEF Indonesia", "UNICEF", "un"],
+    ["UNFPA Indonesia", "UNFPA", "un"],
+    ["The Global Fund to Fight AIDS, Tuberculosis and Malaria", "THE GLOBAL FUND", "intl"],
+    ["USAID – EPIC, FHI 360", "USAID", "intl"],
+    ["U.S. Centers for Disease Control and Prevention", "US CDC", "intl"],
+    ["Oxford Policy Management", "OPM", "intl"],
+    ["Global Alliance for Improved Nutrition", "GAIN", "intl"],
+    ["The David and Lucile Packard Foundation", "PACKARD", "intl"],
+    ["World Mosquito Program", "WMP", "intl"],
+    ["Plan International Indonesia", "PLAN", "intl"],
+    ["International SOS", "INTERNATIONAL SOS", "intl"],
+    ["Liam Charitable Fund", "LIAM", "intl"],
+    ["APCASO", "APCASO", "ngo"],
+    ["Indonesia AIDS Coalition", "IAC", "ngo"],
+    ["Yayasan Spiritia", "SPIRITIA", "ngo"],
+    ["Jaringan Indonesia Positif", "JIP", "ngo"],
+    ["PKBI DKI Jakarta", "PKBI DKI", "ngo"],
+    ["Organisasi Perubahan Sosial Indonesia", "OPSI", "ngo"],
+    ["Yayasan Gemilang Sehat Indonesia", "YGSI", "ngo"],
+    ["Yayasan Siklus Sehat Indonesia", "SIKLUS", "ngo"],
+    ["YKIS", "YKIS", "ngo"],
+    ["Universitas Udayana – Center for Public Health Innovation", "UNUD", "uni"],
+    ["Institute for Population and Social Research, Mahidol University", "MAHIDOL", "uni"],
+    ["The Kirby Institute, UNSW Sydney", "KIRBY", "uni"],
+    ["Fakultas Kedokteran dan Ilmu Kesehatan, Universitas Warmadewa", "WARMADEWA", "uni"]
+  ];
+  const rows = list.map(function (o, i) {
+    const r = new Array(head.length).fill('');
+    r[col('id')] = 'ORG-' + String(i + 1).padStart(3, '0'); r[col('name')] = o[0]; r[col('short')] = o[1]; r[col('category')] = o[2];
+    r[col('relation')] = 'tim'; r[col('logo_ok')] = false; r[col('order')] = i + 1; r[col('published')] = true;
+    return r;
+  });
+  sh.getRange(sh.getLastRow() + 1, 1, rows.length, head.length).setValues(rows);
+  CacheService.getScriptCache().remove('pub_partners');
+  Logger.log(rows.length + ' lembaga ditambahkan.');
+}
+
 function setup() {
   const ss = SpreadsheetApp.getActive();
   Object.keys(SCHEMA).forEach(function (type) {
@@ -149,6 +210,13 @@ function listPublic_(type) {
       allowed.forEach(function (k) { o[k] = r[k]; });
       o.disclosure = String(r.disclosure).trim().toUpperCase();
       return o;
+    });
+  }
+  if (type === 'partners') {
+    /* a logo is shown only when written permission is recorded; otherwise the name is shown as text */
+    rows = rows.map(function (r) {
+      return { id: r.id, name: r.name, short: r.short, category: r.category, relation: r.relation || 'tim', url: r.url,
+               order: r.order, logo_url: isTrue_(r.logo_ok) ? r.logo_url : '' };
     });
   }
   try { cache.put('pub_' + type, JSON.stringify(rows), 300); } catch (e) { /* too large to cache */ }

@@ -39,6 +39,7 @@ window.CharisAPI = (function () {
     if (isDemo) {
       let rows = (window.DEMO_DATA[type] || []).filter(r => r.published !== false);
       if (type === "projects") rows = rows.filter(r => ["A", "B", "C"].includes(r.disclosure)).map(publicProject);   /* mirrors Code.gs */
+      if (type === "partners") rows = rows.map(r => Object.assign({}, r, { logo_url: r.logo_ok === true || r.logo_ok === "TRUE" ? r.logo_url : "" }));
       cache[type] = rows;
       return cache[type];
     }

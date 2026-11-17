@@ -145,14 +145,50 @@
   }
 
   /* ---------- partners (scrolling row when there are many) ---------- */
+  /* ---------- partners & team experience ---------- */
+  const CATS = ["gov", "un", "intl", "ngo", "uni"];
+  const ord = (x, y) => (Number(x.order) || 999) - (Number(y.order) || 999);
+  /* a logo only when permission is recorded (the API blanks it otherwise); else a typeset name tile */
+  const orgTile = (r, hide) => {
+    const inner = (r.logo_url ? '<span class="org-logo"><img src="' + esc(API.img(r.logo_url, 400)) + '" alt="' + (hide ? "" : esc(r.name)) + '" loading="lazy"></span>'
+      : '<span class="org-short"' + (r.short && r.short.toLowerCase() !== String(r.name).toLowerCase() ? ' aria-hidden="true"' : "") + ">" + esc(r.short || r.name) + "</span>") +
+      (r.logo_url || (r.short && r.short.toLowerCase() !== String(r.name).toLowerCase()) ? '<span class="org-name">' + esc(r.name) + "</span>" : "");
+    return '<li class="org" data-cat="' + esc(r.category || "") + '"' + (hide ? ' aria-hidden="true"' : "") + ">" +
+      (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener"' + (hide ? ' tabindex="-1"' : "") + ">" + inner + "</a>" : "<div>" + inner + "</div>") + "</li>";
+  };
   async function buildPartners() {
-    const host = document.getElementById("partners");
-    const rows = await safeList("partners");
-    if (!rows || !rows.length) { host.closest("section").hidden = true; return; }
-    const item = (r, hide) => "<li" + (hide ? ' aria-hidden="true"' : "") + ">" + (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener"' + (hide ? ' tabindex="-1"' : "") + ">" : "<span>") +
-      (r.logo_url ? '<img src="' + esc(API.img(r.logo_url, 400)) + '" alt="' + (hide ? "" : esc(r.name)) + '" loading="lazy">' : '<span class="pname">' + esc(r.name) + "</span>") + (r.url ? "</a>" : "</span>") + "</li>";
-    const scroll = rows.length > 4 && !reduceMotion;
-    host.innerHTML = '<ul class="marquee' + (scroll ? " run" : "") + '">' + rows.map(r => item(r)).join("") + (scroll ? rows.map(r => item(r, true)).join("") : "") + "</ul>";
+    const rows = (await safeList("partners") || []).slice().sort(ord);
+    const mitra = rows.filter(r => r.relation === "mitra"), team = rows.filter(r => r.relation !== "mitra");
+    const mHost = document.getElementById("partners"), eHost = document.getElementById("experience");
+    if (mHost) {
+      if (!mitra.length) mHost.closest("section").hidden = true;
+      else {
+        const scroll = mitra.length > 4 && !reduceMotion;
+        mHost.innerHTML = '<ul class="orgs marquee' + (scroll ? " run" : "") + '">' + mitra.map(r => orgTile(r)).join("") + (scroll ? mitra.map(r => orgTile(r, true)).join("") : "") + "</ul>";
+      }
+    }
+    if (eHost) {
+      if (!team.length) { eHost.closest("section").hidden = true; return; }
+      /* two rows that drift in opposite directions; pauses on hover */
+      const half = Math.ceil(team.length / 2), rowsHtml = [team.slice(0, half), team.slice(half)].map((g, k) =>
+        '<div class="orgs-lane"><ul class="orgs marquee' + (reduceMotion ? "" : " run" + (k ? " rev" : "")) + '">' + g.map(r => orgTile(r)).join("") + (reduceMotion ? "" : g.map(r => orgTile(r, true)).join("")) + "</ul></div>").join("");
+      eHost.innerHTML = rowsHtml;
+      const foot = document.getElementById("expFoot");
+      if (foot) foot.innerHTML = "<span>" + esc(t("exp.count").replace("{n}", team.length)) + '</span><a class="btn-text" href="#/about" data-pillar="exp">' + esc(t("exp.more")) + "</a>";
+    }
+  }
+  async function buildExperienceGrid(host) {
+    const rows = (await safeList("partners") || []).filter(r => r.relation !== "mitra").sort(ord);
+    if (!rows.length) { host.closest("section").hidden = true; return; }
+    const cats = CATS.filter(c => rows.some(r => r.category === c));
+    host.innerHTML = '<div class="tabs exp-tabs" role="tablist">' + ["all"].concat(cats).map((c, i) =>
+      '<button type="button" role="tab" data-cat="' + c + '" aria-selected="' + (i === 0) + '">' + esc(c === "all" ? t("exp.all") : t("cat." + c)) + ' <small>' + (c === "all" ? rows.length : rows.filter(r => r.category === c).length) + "</small></button>").join("") + "</div>" +
+      '<ul class="orgs org-grid">' + rows.map(r => orgTile(r)).join("") + "</ul>";
+    host.querySelector(".exp-tabs").addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      host.querySelectorAll(".exp-tabs button").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+      host.querySelectorAll(".org-grid .org").forEach(li => { li.hidden = b.dataset.cat !== "all" && li.dataset.cat !== b.dataset.cat; });
+    });
   }
 
   /* ---------- newsletter ---------- */
@@ -197,6 +233,7 @@
         '<section class="sec sec-tint"><div class="wrap">' + secHead(t("work.t"), "#/work") + '<p class="sec-lead">' + esc(t("work.lead")) + "</p>" + pillars(true) + "</div></section>" +
         '<section class="sec"><div class="wrap team-sec"><div class="team-intro">' + secHead(t("team.t"), "#/team") + "<p>" + esc(t("team.lead")) + '</p></div><div id="homeTeam"></div></div></section>' +
         '<section class="sec partners-sec"><div class="wrap">' + secHead(t("partners.t")) + '<div id="partners" class="partners"></div></div></section>' +
+        '<section class="sec exp-sec"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p></div><div id="experience" class="experience"></div><div class="wrap"><p class="exp-foot" id="expFoot"></p></div></section>' +
         newsletter();
       buildSlider(); buildLatest("homeLatest", 6); buildTeam("homeTeam"); buildPartners(); bindNewsletter();
     },
@@ -207,8 +244,13 @@
         '<aside class="vm"><h2>' + esc(t("about.vision")) + "</h2><p>" + esc(t("about.vision.d")) + "</p><h2>" + esc(t("about.mission")) + "</h2><ol>" +
         [1, 2, 3].map(i => "<li>" + esc(t("mis" + i)) + "</li>").join("") + "</ol></aside></div></section>" +
         '<section class="sec sec-tint"><div class="wrap logo-mean"><img src="assets/img/logo-symbol.svg" alt="" width="160" height="160"><div><h2>' + esc(t("about.logo")) + "</h2>" + pillars(false, ["a", "r", "s"]) + "</div></div></section>" +
-        '<section class="sec"><div class="wrap">' + secHead(t("steps.t")) + steps() + "</div></section>" + newsletter();
+        '<section class="sec" id="experience-all"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p><div id="expGrid"></div><p class="exp-note">' + esc(t("exp.note")) + "</p></div></section>" +
+        '<section class="sec sec-tint"><div class="wrap">' + secHead(t("steps.t")) + steps() + "</div></section>" + newsletter();
       bindNewsletter();
+      const toExp = pendingPillar === "exp";
+      buildExperienceGrid(document.getElementById("expGrid")).then(() => {
+        if (toExp) requestAnimationFrame(() => document.getElementById("experience-all").scrollIntoView({ block: "start" }));
+      });
     },
 
     async services(focus) {
