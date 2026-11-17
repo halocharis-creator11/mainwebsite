@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel Admin · CHARIS</title>
+  <link rel="icon" href="../assets/img/logo-symbol.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin">
+
+  <!-- Login -->
+  <section class="login-wrap" id="loginView">
+    <form class="login-card" id="loginForm" novalidate>
+      <div class="brand"><img src="../assets/img/logo-symbol.svg" alt="" width="36" height="36"><span class="brand-word">charis</span></div>
+      <h1>Panel admin</h1>
+      <p class="muted">Masuk untuk mengelola konten website.</p>
+      <div class="field">
+        <label for="pw">Password</label>
+        <input id="pw" type="password" autocomplete="current-password" required>
+        <p class="field-err" id="loginErr" role="alert"></p>
+      </div>
+      <button class="btn btn-primary" type="submit" id="loginBtn">Masuk</button>
+      <p class="demo-note" id="demoNote" hidden>Mode demo: API belum terhubung. Masukkan password apa saja; perubahan tidak disimpan.</p>
+      <a class="back-site" href="../">← Kembali ke website</a>
+    </form>
+  </section>
+
+  <!-- App -->
+  <div class="admin-app" id="appView" hidden>
+    <aside class="side">
+      <div class="brand"><img src="../assets/img/logo-symbol.svg" alt="" width="30" height="30"><span class="brand-word">charis</span><span class="badge">admin</span></div>
+      <nav class="side-nav" id="sideNav" aria-label="Menu admin">
+        <button type="button" data-type="inquiries">Pesan masuk <span class="count" id="newCount" hidden></span></button>
+        <button type="button" data-type="requests">Permintaan laporan <span class="count" id="reqCount" hidden></span></button>
+        <button type="button" data-type="reports">Laporan lengkap (PDF)</button>
+        <button type="button" data-type="members">Member</button>
+        <button type="button" data-type="downloads">Riwayat unduhan</button>
+        <button type="button" data-type="news">Berita & kegiatan</button>
+        <button type="button" data-type="projects">Portofolio proyek</button>
+        <button type="button" data-type="project_internal">Data internal proyek</button>
+        <button type="button" data-type="team">Tim</button>
+        <button type="button" data-type="partners">Mitra & klien</button>
+        <button type="button" data-type="subscribers">Pelanggan kabar</button>
+      </nav>
+      <div class="side-foot">
+        <a href="../" target="_blank" rel="noopener">Lihat website ↗</a>
+        <button type="button" class="link-btn" id="logoutBtn">Keluar</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-head">
+        <div>
+          <h1 id="viewTitle">Konten</h1>
+          <p class="muted" id="viewHint"></p>
+        </div>
+        <div class="head-actions">
+          <label class="search"><span class="sr-only">Cari</span><input type="search" id="q" placeholder="Cari…"></label>
+          <button type="button" class="btn btn-primary" id="addBtn">+ Tambah</button>
+        </div>
+      </header>
+      <div class="table-wrap">
+        <table class="data-table" id="table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+        <p class="state" id="tableState"></p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit dialog -->
+  <dialog id="editDlg" aria-labelledby="dlgTitle">
+    <form method="dialog" id="editForm" novalidate>
+      <header class="dlg-head">
+        <h2 id="dlgTitle">Edit</h2>
+        <button type="button" class="icon-btn" id="dlgClose" aria-label="Tutup">✕</button>
+      </header>
+      <div class="dlg-body" id="dlgBody"></div>
+      <footer class="dlg-foot">
+        <button type="button" class="btn btn-danger-outline" id="delBtn">Hapus</button>
+        <span class="spacer"></span>
+        <p class="form-status" id="dlgStatus" role="status"></p>
+        <button type="button" class="btn btn-outline" id="cancelBtn">Batal</button>
+        <button type="submit" class="btn btn-primary" id="saveBtn">Simpan</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/demo-data.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
