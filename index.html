@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CHARIS · Center for Health Analytics, Research and Integrated Services</title>
+  <meta name="description" content="CHARIS adalah unit kajian dan konsultansi sistem kesehatan dari Yayasan Peduli Insan Rentan (PINAR Foundation): pembiayaan, data dan analitik, riset dan evaluasi, perencanaan, SDM, serta mutu layanan.">
+  <meta property="og:title" content="CHARIS · Center for Health Analytics, Research and Integrated Services">
+  <meta property="og:description" content="Analitik, riset, dan layanan terintegrasi untuk sistem kesehatan yang tangguh dan inklusif.">
+  <meta name="theme-color" content="#0E5A55">
+  <link rel="icon" href="assets/img/logo-symbol.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip" href="#app" data-i18n="skip">Lompat ke konten utama</a>
+
+  <div class="utility">
+    <div class="wrap utility-in">
+      <form class="site-search" id="siteSearch" role="search">
+        <label for="q" class="sr-only" data-i18n="search.label">Cari di situs</label>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="q" type="search" autocomplete="off">
+      </form>
+      <a class="util-link" href="#/member" data-i18n="nav.member">Masuk member</a>
+      <div class="lang" role="group" aria-label="Bahasa / Language">
+        <button type="button" data-lang="id" aria-pressed="true" aria-label="Bahasa Indonesia"><span class="l-long">Bahasa Indonesia</span><span class="l-short">ID</span></button>
+        <button type="button" data-lang="en" aria-pressed="false" aria-label="English"><span class="l-long">English</span><span class="l-short">EN</span></button>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap header-in">
+      <a class="brand" href="#/" aria-label="CHARIS">
+        <img src="assets/img/logo-symbol.svg" alt="" width="40" height="40">
+        <span class="brand-text"><span class="brand-word">charis</span><span class="brand-name">Center for Health Analytics,<br>Research and Integrated Services</span></span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
+        <a href="#/about" data-i18n="nav.about">Tentang Kami</a>
+        <a href="#/services" data-i18n="nav.work">Kerja Kami</a>
+        <a href="#/research" data-i18n="nav.research">Repositori</a>
+        <a href="#/projects" data-i18n="nav.projects">Portofolio</a>
+        <a href="#/latest" data-i18n="nav.latest">Terbaru</a>
+        <a href="#/contact" data-i18n="nav.contact">Hubungi Kami</a>
+        <a href="#/member" class="nav-member" data-i18n="nav.member">Masuk member</a>
+        <a href="#/contact" class="nav-cta" data-i18n="nav.cta">Ajukan Kerja Sama</a>
+      </nav>
+      <button type="button" class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="mainNav">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-top">
+      <div class="footer-id">
+        <div class="footer-brand">
+          <img src="assets/img/logo-symbol.svg" alt="" width="48" height="48">
+          <div><p class="brand-word">charis</p><p class="footer-name">Center for Health Analytics, Research and Integrated Services</p></div>
+        </div>
+        <address id="footerAddr"></address>
+        <p class="footer-line"><span id="footerMail"></span><br><span id="footerPhone"></span></p>
+        <ul class="social" id="social"></ul>
+      </div>
+      <nav class="footer-cols" aria-label="Footer">
+        <div><h2 data-i18n="f.about"></h2><ul>
+          <li><a href="#/about" data-i18n="nav.about"></a></li><li><a href="#/services" data-i18n="nav.work"></a></li><li><a href="#/team" data-i18n="nav.team"></a></li></ul></div>
+        <div><h2 data-i18n="f.research"></h2><ul>
+          <li><a href="#/research" data-i18n="nav.research"></a></li><li><a href="repositori/">Indeks</a></li><li><a href="#/member" data-i18n="nav.member"></a></li><li><a href="#/projects" data-i18n="nav.projects"></a></li><li><a href="#/research" data-i18n="f.reports"></a></li></ul></div>
+        <div><h2 data-i18n="f.latest"></h2><ul>
+          <li><a href="#/latest" data-i18n="tab.news"></a></li><li><a href="#/latest" data-i18n="tab.all"></a></li></ul></div>
+        <div><h2 data-i18n="f.join"></h2><ul>
+          <li><a href="#/services" data-i18n="f.howto"></a></li><li><a href="#/contact" data-i18n="nav.cta"></a></li></ul></div>
+        <div><h2 data-i18n="f.help"></h2><ul>
+          <li><a href="#/privacy" data-i18n="f.privacy"></a></li><li><a href="#/contact" data-i18n="nav.contact"></a></li></ul></div>
+      </nav>
+    </div>
+    <div class="wrap footer-base">
+      <p><span data-i18n="footer.legal"></span>. NIB <span id="footerNib"></span>.</p>
+      <p>&copy; <span id="year"></span> CHARIS</p>
+    </div>
+  </footer>
+
+  <p class="demo-note" id="demoBar" hidden></p>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/demo-data.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/icons.js"></script>
+  <script src="repositori/assets/flipbook.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
