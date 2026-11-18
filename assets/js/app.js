@@ -1,6 +1,14 @@
 /* CHARIS site: hash router + bilingual rendering. */
 (function () {
   const cfg = window.CHARIS_CONFIG || {};
+  /* official contact: CONTACT_EMAILS / CONTACT_PHONE in config.js, with the CHARIS defaults as fallback */
+  const CONTACT_DEFAULT = { emails: ["halo@charisforhealth.org", "halo.charis@gmail.com"], phone: "+62 859-3520-1571" };
+  const isReal = v => typeof v === "string" && v.trim() && !/^\[/.test(v.trim());
+  const contactEmails = () => { const a = (Array.isArray(cfg.CONTACT_EMAILS) ? cfg.CONTACT_EMAILS : []).filter(isReal); return a.length ? a : CONTACT_DEFAULT.emails; };
+  const contactPhone = () => (Array.isArray(cfg.CONTACT_EMAILS) && isReal(cfg.CONTACT_PHONE) ? cfg.CONTACT_PHONE : CONTACT_DEFAULT.phone);
+  const mailLinks = sep => contactEmails().map(e => '<a href="mailto:' + esc(e) + '">' + esc(e) + "</a>").join(sep || "<br>");
+  const phoneLinks = () => { const p = contactPhone(), d = p.replace(/[^0-9+]/g, ""), w = d.replace(/^\+/, "");
+    return '<a href="tel:' + esc(d) + '">' + esc(p) + '</a> <span class="wa-sep">(</span><a href="https://wa.me/' + esc(w) + '" target="_blank" rel="noopener">WhatsApp</a><span class="wa-sep">)</span>'; };
   const API = window.CharisAPI;
   const app = document.getElementById("app");
   const SV = window.SERVICES;
@@ -649,7 +657,7 @@
         '<div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>' +
         '<p class="consent">' + esc(t("form.consent")) + ' <a href="#/privacy">' + esc(t("f.privacy")) + "</a>.</p>" +
         '<div class="form-end"><button type="submit" class="btn" id="sendBtn">' + esc(t("form.submit")) + '</button><p class="form-status" id="formStatus" role="status"></p></div></form>' +
-        '<aside class="contact-side"><dl><div><dt>' + L[0] + "</dt><dd>" + esc(cfg.ADDRESS) + "</dd></div><div><dt>" + L[1] + "</dt><dd>" + esc(cfg.CONTACT_EMAIL) + "</dd></div><div><dt>" + L[2] + "</dt><dd>" + esc(cfg.CONTACT_PHONE) + "</dd></div></dl></aside></div></section>";
+        '<aside class="contact-side"><dl><div><dt>' + L[0] + "</dt><dd>" + esc(cfg.ADDRESS) + "</dd></div><div><dt>" + L[1] + "</dt><dd>" + mailLinks("<br>") + "</dd></div><div><dt>" + L[2] + "</dt><dd>" + phoneLinks() + "</dd></div></dl></aside></div></section>";
       document.getElementById("contactForm").addEventListener("submit", submitContact);
     },
 
@@ -805,8 +813,8 @@
   document.getElementById("social").innerHTML = Object.keys(SOC).filter(k => cfg.SOCIAL && cfg.SOCIAL[k]).map(k =>
     '<li><a href="' + esc(cfg.SOCIAL[k]) + '" target="_blank" rel="noopener" aria-label="' + k + '">' + svgI(SOC[k]) + "</a></li>").join("");
   document.getElementById("footerAddr").textContent = cfg.ADDRESS || "";
-  document.getElementById("footerMail").textContent = cfg.CONTACT_EMAIL || "";
-  document.getElementById("footerPhone").textContent = cfg.CONTACT_PHONE || "";
+  document.getElementById("footerMail").innerHTML = mailLinks("<br>");
+  document.getElementById("footerPhone").innerHTML = phoneLinks();
   document.getElementById("footerNib").textContent = cfg.NIB || "";
   document.getElementById("year").textContent = new Date().getFullYear();
   window.addEventListener("hashchange", route);

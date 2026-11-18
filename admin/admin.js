@@ -209,7 +209,7 @@
   $("reloadBtn").addEventListener("click", () => { if (type) select(type); });
 
   /* Warn when the live Web App still runs an older Code.gs (edited, but no new deployment version) */
-  const EXPECTED_API = "2026-11-18c";
+  const EXPECTED_API = "2026-11-19a";
   function checkApi() {
     if (DEMO) return;
     fetch(cfg.API_URL).then(r => r.json()).then(j => {

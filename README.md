@@ -84,8 +84,8 @@ Email penerima notifikasi formulir kontak bawaannya adalah email akun pemilik sk
 Buka `assets/js/config.js` dan isi:
 ```js
 API_URL: *https://script.google.com/macros/s/XXXX/exec*,
-CONTACT_EMAIL: *info@domainanda.org*,
-CONTACT_PHONE: *+62 ...*,
+CONTACT_EMAILS: [*halo@charisforhealth.org*, *halo.charis@gmail.com*],
+CONTACT_PHONE: *+62 859-3520-1571*,
 ```
 Selama `API_URL` kosong, website berjalan dalam **mode demo** dengan konten contoh bertanda `[Contoh]`.
 
@@ -99,12 +99,12 @@ Di file yang sama Anda juga bisa mengisi:
    - Paling aman lewat **GitHub Desktop** atau `git push`, karena keduanya ikut mengunggah file tersembunyi.
    - Jika memakai *Add file › Upload files* di browser, folder `.github` sering tidak ikut terunggah (Windows dan macOS menyembunyikannya). Periksa setelah upload. Jika tidak ada, buat lewat *Add file › Create new file*, ketik nama `.github/workflows/build-repository.yml`, lalu tempel isi file tersebut. Lakukan hal yang sama untuk `.nojekyll` (boleh kosong).
 3. **Settings › Pages** › *Source*: **Deploy from a branch** › *Branch*: `main` / `(root)` › Save.
-4. Setelah 1 sampai 2 menit website aktif di `https://<username>.github.io/charis-website/`.
-5. Panel admin: `https://<username>.github.io/charis-website/admin/`
+4. Setelah 1 sampai 2 menit website aktif di `https://charisforhealth.org/` (alamat lama `https://<username>.github.io/charis-website/` otomatis dialihkan).
+5. Panel admin: `https://charisforhealth.org/admin/`
 
 ### 8. Buat akun superuser (sekali saja)
 1. Di Apps Script, jalankan **`setup`** sekali lagi. Fungsi ini aman dijalankan berulang dan tidak menghapus data. Di log akan muncul pesan *Buka panel admin website (/admin/) dalam 60 menit*.
-2. Dalam 60 menit, buka `https://<username>.github.io/<nama-repo>/admin/`. Halaman akan menampilkan formulir **Buat akun superuser**.
+2. Dalam 60 menit, buka `https://charisforhealth.org/admin/`. Halaman akan menampilkan formulir **Buat akun superuser**.
 3. Isi **email akun Google pemilik Apps Script** (email yang sama dengan yang tertulis di log), password baru (minimal 10 karakter, berisi huruf dan angka), dan ulangi password.
 4. Klik **Buat akun dan masuk**. Anda langsung masuk ke panel admin, dan email pemberitahuan dikirim ke akun pemilik.
 
@@ -180,10 +180,12 @@ Setiap proyek wajib diberi **tingkat keterbukaan** sesuai perjanjian atau perset
 ## Memperbarui kode backend
 Setelah mengubah `Code.gs`: **Terapkan › Kelola deployment › ✏️ Edit › Versi: Versi baru › Terapkan**. URL `/exec` tetap sama, jadi `config.js` tidak perlu diubah.
 
-## Menyambungkan domain sendiri (nanti)
-1. Di repository, buat file `CNAME` berisi nama domain, misalnya `charis.or.id`.
-2. Di pengelola DNS domain, tambahkan record `CNAME` (`www` mengarah ke `<username>.github.io`) atau record `A` ke IP GitHub Pages (lihat dokumentasi GitHub Pages *Managing a custom domain*).
-3. Di **Settings › Pages**, isi *Custom domain* dan centang **Enforce HTTPS**.
+## Domain dan kontak resmi
+Website memakai domain **charisforhealth.org** (file `CNAME` di root repository; jangan dihapus).
+1. DNS: empat record `A` ke 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153; empat record `AAAA` ke 2606:50c0:8000::153 sampai 2606:50c0:8003::153; record `CNAME` `www` ke `<username>.github.io`.
+2. **Settings › Pages**: *Custom domain* `charisforhealth.org`, centang **Enforce HTTPS**.
+3. Alamat dasar untuk metadata, sitemap, dan sitasi ada di `repositori/site.json` (`base_url`).
+4. Kontak resmi: halo@charisforhealth.org dan halo.charis@gmail.com, telepon dan WhatsApp +62 859-3520-1571. Di website diatur lewat `CONTACT_EMAILS` dan `CONTACT_PHONE` di `assets/js/config.js`; di email keluar diatur lewat konstanta `CONTACT` di `apps-script/Code.gs`.
 
 ## Mitra dan pengalaman tim
 

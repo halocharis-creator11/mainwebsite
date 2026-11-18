@@ -45,7 +45,27 @@ const PROJECT_NAMED = ['client', 'funder', 'partners', 'official_title', 'locati
 const PROJECT_PUBLIC = { A: PROJECT_CORE.concat(PROJECT_NAMED, ['related_publications']), B: PROJECT_CORE.concat(PROJECT_NAMED), C: PROJECT_CORE };
 /* Bump when Code.gs changes. The admin panel compares it with the version it expects, so a stale
    Web App deployment (Code.gs edited but no new deployment version) is reported on screen. */
-const API_VERSION = '2026-11-18c';
+const API_VERSION = '2026-11-19a';
+
+/* Official CHARIS contact. Outgoing emails show the sender name CHARIS, set Reply-To to the main address,
+   and end with this contact block, so every reply reaches the CHARIS inbox. */
+const CONTACT = {
+  site: 'https://charisforhealth.org/',
+  email: 'halo@charisforhealth.org',
+  email2: 'halo.charis@gmail.com',
+  phone: '+62 859-3520-1571',
+  notify: 'halo.charis@gmail.com'
+};
+const SIGNATURE_ = '\n\n--\nCHARIS (Center for Health Analytics, Research and Integrated Services)\nYayasan Peduli Insan Rentan (PINAR Foundation)\n' +
+  'Email: ' + CONTACT.email + ' / ' + CONTACT.email2 + '\nTelepon dan WhatsApp: ' + CONTACT.phone + '\n' + CONTACT.site;
+/** Send an email to a requester or member: sender name, Reply-To, and the contact block. */
+function mail_(o) {
+  MailApp.sendEmail({ to: o.to, subject: o.subject, body: o.body + SIGNATURE_, name: 'CHARIS', replyTo: o.replyTo || CONTACT.email });
+}
+/** Notify the CHARIS team (Reply-To stays with the person who wrote in). */
+function notify_(o) {
+  MailApp.sendEmail({ to: o.to, subject: o.subject, body: o.body, name: 'Website CHARIS', replyTo: o.replyTo });
+}
 const SESSION_HOURS = 6;
 const PROPS = PropertiesService.getScriptProperties();
 
@@ -128,13 +148,13 @@ function setup() {
     const pf = DriveApp.createFolder('CHARIS Laporan Lengkap (PRIVAT)');
     PROPS.setProperty('PRIVATE_FOLDER_ID', pf.getId());
   }
-  if (!PROPS.getProperty('SITE_URL')) PROPS.setProperty('SITE_URL', 'https://USERNAME.github.io/charis-website/');
+  if (!PROPS.getProperty('SITE_URL')) PROPS.setProperty('SITE_URL', CONTACT.site);
   if (!PROPS.getProperty('FOLDER_ID')) {
     const folder = DriveApp.createFolder('CHARIS Website Uploads');
     PROPS.setProperty('FOLDER_ID', folder.getId());
   }
   if (!PROPS.getProperty('NOTIFY_EMAIL')) {
-    PROPS.setProperty('NOTIFY_EMAIL', Session.getEffectiveUser().getEmail());
+    PROPS.setProperty('NOTIFY_EMAIL', CONTACT.notify);
   }
   Logger.log('Setup selesai. Folder unggahan: ' + PROPS.getProperty('FOLDER_ID'));
   if (!PROPS.getProperty('ADMIN_HASH')) openSetupWindow_();
@@ -232,14 +252,21 @@ function openSetupWindow_() {
   Logger.log('Buka panel admin website (/admin/) dalam ' + SETUP_WINDOW_MIN + ' menit, lalu buat akun superuser dengan email: ' + owner);
 }
 
-/** Set the public website address used in emails to members. */
-function setSiteUrl() {
-  PROPS.setProperty('SITE_URL', 'https://USERNAME.github.io/charis-website/');
+/** Run once after moving to charisforhealth.org: website address in emails and the inbox for notifications. */
+function terapkanDomainBaru() {
+  PROPS.setProperty('SITE_URL', CONTACT.site);
+  PROPS.setProperty('NOTIFY_EMAIL', CONTACT.notify);
+  Logger.log('SITE_URL: ' + PROPS.getProperty('SITE_URL') + ' | NOTIFY_EMAIL: ' + PROPS.getProperty('NOTIFY_EMAIL'));
 }
 
-/** Optional: change the email that receives contact-form notifications. */
+/** Set the public website address used in emails to members. */
+function setSiteUrl() {
+  PROPS.setProperty('SITE_URL', CONTACT.site);
+}
+
+/** Optional: change the email that receives contact-form and request notifications (several addresses: separate with commas). */
 function setNotifyEmail() {
-  PROPS.setProperty('NOTIFY_EMAIL', 'email@contoh.org');
+  PROPS.setProperty('NOTIFY_EMAIL', CONTACT.notify);
 }
 
 /* ============================================================
@@ -339,7 +366,7 @@ function contact_(b) {
   const to = PROPS.getProperty('NOTIFY_EMAIL');
   if (to) {
     try {
-      MailApp.sendEmail({
+      notify_({
         to: to, replyTo: email,
         subject: '[CHARIS] Permintaan baru dari ' + name + (row.org ? ' (' + row.org + ')' : ''),
         body: 'Nama: ' + name + '\nLembaga: ' + row.org + '\nEmail: ' + email + '\nTelepon: ' + row.phone +
@@ -549,7 +576,7 @@ function upload_(b) {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MEMBER_SESSION_HOURS = 12;
 
-function siteUrl_() { return (PROPS.getProperty('SITE_URL') || '').replace(/\/?$/, '/'); }
+function siteUrl_() { const u = PROPS.getProperty('SITE_URL') || ''; return (!u || /USERNAME|github\.io/.test(u) ? CONTACT.site : u).replace(/\/?$/, '/'); }
 function findBy_(type, key, value) {
   return readAll_(type).filter(function (r) { return String(r[key]).toLowerCase() === String(value).toLowerCase(); });
 }
@@ -574,12 +601,12 @@ function requestReport_(b) {
   const mailErrors = [];
   const to = PROPS.getProperty('NOTIFY_EMAIL');
   try {
-    if (to) MailApp.sendEmail({ to: to, replyTo: r.email, subject: '[CHARIS] Permintaan laporan: ' + r.report_title,
+    if (to) notify_({ to: to, replyTo: r.email, subject: '[CHARIS] Permintaan laporan: ' + r.report_title,
       body: 'Permintaan baru untuk laporan lengkap.\n\nLaporan: ' + r.report_title + ' (' + r.report_id + ')\nNama: ' + r.name + '\nInstansi: ' + r.institution +
             '\nEmail: ' + r.email + '\nAlasan:\n' + r.reason + '\n\nSetujui atau tolak di panel admin website (menu Permintaan laporan).' });
   } catch (e) { mailErrors.push('admin: ' + e.message); }
   try {
-    MailApp.sendEmail({ to: r.email, subject: r.lang === 'en' ? 'CHARIS: we received your request' : 'CHARIS: permintaan Anda sudah kami terima',
+    mail_({ to: r.email, subject: r.lang === 'en' ? 'CHARIS: we received your request' : 'CHARIS: permintaan Anda sudah kami terima',
       body: r.lang === 'en'
         ? 'Dear ' + r.name + ',\n\nThank you for requesting "' + r.report_title + '". Our team will review your request and reply by email, usually within 2 working days.\n\nCHARIS'
         : 'Yth. ' + r.name + ',\n\nTerima kasih atas permintaan Anda untuk laporan "' + r.report_title + '". Tim kami akan meninjau permintaan ini dan membalas melalui email, biasanya dalam 2 hari kerja.\n\nSalam,\nCHARIS' });
@@ -595,7 +622,7 @@ function decide_(id, decision, note) {
   save_('requests', { id: id, status: decision, decided_at: Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd HH:mm'), decided_note: clean_(note, 1000) });
   const en = req.lang === 'en';
   if (decision === 'ditolak') {
-    MailApp.sendEmail({ to: req.email, subject: en ? 'CHARIS: about your report request' : 'CHARIS: tentang permintaan laporan Anda',
+    mail_({ to: req.email, subject: en ? 'CHARIS: about your report request' : 'CHARIS: tentang permintaan laporan Anda',
       body: (en ? 'Dear ' + req.name + ',\n\nThank you for your interest in "' + req.report_title + '". We are unable to share the full report for this request.'
                 : 'Yth. ' + req.name + ',\n\nTerima kasih atas minat Anda pada laporan "' + req.report_title + '". Saat ini kami belum dapat membagikan laporan lengkap untuk permintaan ini.') +
             (note ? '\n\n' + note : '') + (en ? '\n\nThe full HTML version remains open on our website.\n\nCHARIS' : '\n\nVersi HTML laporan tetap dapat dibaca terbuka di website kami.\n\nSalam,\nCHARIS') });
@@ -610,7 +637,7 @@ function decide_(id, decision, note) {
       code_hash: hash_(salt + code), code_salt: salt, created: new Date(), last_login: '', status: 'aktif' }); });
   }
   const link = siteUrl_() + '#/member';
-  MailApp.sendEmail({ to: req.email, subject: en ? 'CHARIS: your report request is approved' : 'CHARIS: permintaan laporan Anda disetujui',
+  mail_({ to: req.email, subject: en ? 'CHARIS: your report request is approved' : 'CHARIS: permintaan laporan Anda disetujui',
     body: en
       ? 'Dear ' + req.name + ',\n\nYour request for "' + req.report_title + '" has been approved.\n\nSign in to the CHARIS member area to download it:\n' + link + '\nEmail: ' + req.email +
         (code ? '\nAccess code: ' + code + '\n\nKeep this code private. You can request a new code from the sign-in page at any time.' : '\nUse the access code you received earlier, or request a new one from the sign-in page.') +
@@ -654,7 +681,7 @@ function memberNewCode_(b) {
   if (m && m.status === 'aktif') {             /* always answer ok so emails cannot be probed */
     const code = newCode_(), salt = Utilities.getUuid();
     save_('members', { id: m.id, code_hash: hash_(salt + code), code_salt: salt });
-    MailApp.sendEmail({ to: email, subject: 'CHARIS: kode akses baru / new access code',
+    mail_({ to: email, subject: 'CHARIS: kode akses baru / new access code',
       body: 'Kode akses baru Anda / Your new access code: ' + code + '\n\n' + siteUrl_() + '#/member\n\nJika Anda tidak memintanya, abaikan email ini. / If you did not ask for this, ignore this email.\n\nCHARIS' });
   }
   return { ok: true };

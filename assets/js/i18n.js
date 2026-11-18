@@ -81,11 +81,11 @@ window.I18N = {
     "research.lead": "Laporan, policy brief, dan panduan yang bisa Anda unduh dan gunakan.",
     "projects.lead": "Pekerjaan yang sudah dan sedang kami kerjakan bersama mitra.",
     "latest.lead": "Semua yang baru di CHARIS: berita dan kegiatan, publikasi di Repositori, dan proyek di Portofolio, dari yang paling baru ditambahkan.",
-    "contact.lead": "Ceritakan secara singkat kebutuhan lembaga Anda. Kami membalas dalam 2 hari kerja.",
+    "contact.lead": "Ceritakan secara singkat kebutuhan lembaga Anda. Kami membalas dalam 2 hari kerja. Anda juga dapat menulis ke halo@charisforhealth.org atau menghubungi WhatsApp +62 859-3520-1571.",
     "form.name": "Nama lengkap", "form.org": "Lembaga / instansi", "form.email": "Email", "form.phone": "Telepon / WhatsApp",
     "form.service": "Layanan yang diminati", "form.message": "Pesan", "form.submit": "Kirim pesan",
     "form.sending": "Mengirim", "form.ok": "Terima kasih. Pesan Anda sudah kami terima dan akan dibalas dalam 2 hari kerja.",
-    "form.err": "Pesan belum terkirim. Coba lagi, atau kirim email langsung ke kami.",
+    "form.err": "Pesan belum terkirim. Coba lagi, atau kirim email langsung ke halo@charisforhealth.org.",
     "form.required": "Isi kolom ini terlebih dahulu.", "form.invalidEmail": "Masukkan alamat email yang valid.",
     "form.choose": "Pilih layanan (opsional)", "form.other": "Lainnya", "form.consent": "Dengan mengirim formulir ini, Anda menyetujui",
     "filter.all": "Semua", "search.titles": "Cari judul",
@@ -98,7 +98,7 @@ window.I18N = {
     "f.reports": "Laporan Tahunan", "f.privacy": "Kebijakan Privasi", "f.services": "Layanan", "f.howto": "Cara bekerja sama",
     "footer.legal": "CHARIS adalah unit Yayasan Peduli Insan Rentan (PINAR Foundation)",
     "privacy.t": "Kebijakan Privasi",
-    "privacy.body": "Halaman ini menjelaskan data apa yang kami kumpulkan melalui situs CHARIS dan bagaimana kami menggunakannya.\n\nData yang kami kumpulkan. Saat Anda mengisi formulir kontak, kami menyimpan nama, lembaga, email, nomor telepon, layanan yang diminati, dan isi pesan. Saat Anda berlangganan kabar CHARIS, kami menyimpan alamat email Anda.\n\nUntuk apa data digunakan. Data formulir kontak hanya digunakan untuk menanggapi permintaan Anda. Email pelanggan hanya digunakan untuk mengirim kabar dan publikasi CHARIS. Kami tidak menjual atau membagikan data Anda kepada pihak lain untuk kepentingan pemasaran.\n\nPenyimpanan. Data disimpan di Google Spreadsheet milik Yayasan Peduli Insan Rentan dan hanya dapat diakses oleh pengelola CHARIS.\n\nHak Anda. Anda dapat meminta salinan, perbaikan, atau penghapusan data Anda, atau berhenti berlangganan kapan saja, dengan menghubungi kami melalui email yang tercantum di halaman Hubungi Kami.\n\nHalaman ini dapat diperbarui sewaktu-waktu. Pembaruan terakhir: November 2026."
+    "privacy.body": "Halaman ini menjelaskan data apa yang kami kumpulkan melalui situs CHARIS dan bagaimana kami menggunakannya.\n\nData yang kami kumpulkan. Saat Anda mengisi formulir kontak, kami menyimpan nama, lembaga, email, nomor telepon, layanan yang diminati, dan isi pesan. Saat Anda berlangganan kabar CHARIS, kami menyimpan alamat email Anda.\n\nUntuk apa data digunakan. Data formulir kontak hanya digunakan untuk menanggapi permintaan Anda. Email pelanggan hanya digunakan untuk mengirim kabar dan publikasi CHARIS. Kami tidak menjual atau membagikan data Anda kepada pihak lain untuk kepentingan pemasaran.\n\nPenyimpanan. Data disimpan di Google Spreadsheet milik Yayasan Peduli Insan Rentan dan hanya dapat diakses oleh pengelola CHARIS.\n\nHak Anda. Anda dapat meminta salinan, perbaikan, atau penghapusan data Anda, atau berhenti berlangganan kapan saja, dengan menghubungi kami melalui email halo@charisforhealth.org atau halo.charis@gmail.com.\n\nHalaman ini dapat diperbarui sewaktu-waktu. Pembaruan terakhir: November 2026."
   },
   en: {
     "skip": "Skip to main content", "search.label": "Search the site", "search.ph": "Search publications, news, projects",
@@ -181,11 +181,11 @@ window.I18N = {
     "research.lead": "Reports, policy briefs, and guides you can download and use.",
     "projects.lead": "Work we have done and are doing with our partners.",
     "latest.lead": "Everything new at CHARIS: news and activities, publications in the Repository, and projects in the Portfolio, most recently added first.",
-    "contact.lead": "Tell us briefly what your organization needs. We reply within 2 working days.",
+    "contact.lead": "Tell us briefly what your organization needs. We reply within 2 working days. You can also write to halo@charisforhealth.org or message us on WhatsApp at +62 859-3520-1571.",
     "form.name": "Full name", "form.org": "Organization", "form.email": "Email", "form.phone": "Phone / WhatsApp",
     "form.service": "Service of interest", "form.message": "Message", "form.submit": "Send message",
     "form.sending": "Sending", "form.ok": "Thank you. We have received your message and will reply within 2 working days.",
-    "form.err": "Your message was not sent. Try again, or email us directly.",
+    "form.err": "Your message was not sent. Try again, or email us directly at halo@charisforhealth.org.",
     "form.required": "Please fill in this field.", "form.invalidEmail": "Enter a valid email address.",
     "form.choose": "Choose a service (optional)", "form.other": "Other", "form.consent": "By sending this form, you agree to our",
     "filter.all": "All", "search.titles": "Search titles",
@@ -198,7 +198,7 @@ window.I18N = {
     "f.reports": "Annual Reports", "f.privacy": "Privacy Policy", "f.services": "Services", "f.howto": "How we work with you",
     "footer.legal": "CHARIS is a unit of Yayasan Peduli Insan Rentan (PINAR Foundation)",
     "privacy.t": "Privacy Policy",
-    "privacy.body": "This page explains what data we collect through the CHARIS website and how we use it.\n\nData we collect. When you fill in the contact form, we store your name, organization, email, phone number, service of interest, and message. When you subscribe to CHARIS updates, we store your email address.\n\nHow we use it. Contact form data is used only to respond to your request. Subscriber emails are used only to send CHARIS news and publications. We do not sell or share your data with others for marketing.\n\nStorage. Data is stored in a Google Spreadsheet owned by Yayasan Peduli Insan Rentan and can only be accessed by CHARIS staff.\n\nYour rights. You can ask for a copy, correction, or deletion of your data, or unsubscribe at any time, by contacting us at the email listed on the Contact Us page.\n\nThis page may be updated from time to time. Last updated: November 2026."
+    "privacy.body": "This page explains what data we collect through the CHARIS website and how we use it.\n\nData we collect. When you fill in the contact form, we store your name, organization, email, phone number, service of interest, and message. When you subscribe to CHARIS updates, we store your email address.\n\nHow we use it. Contact form data is used only to respond to your request. Subscriber emails are used only to send CHARIS news and publications. We do not sell or share your data with others for marketing.\n\nStorage. Data is stored in a Google Spreadsheet owned by Yayasan Peduli Insan Rentan and can only be accessed by CHARIS staff.\n\nYour rights. You can ask for a copy, correction, or deletion of your data, or unsubscribe at any time, by contacting us at halo@charisforhealth.org or halo.charis@gmail.com.\n\nThis page may be updated from time to time. Last updated: November 2026."
   }
 };
 

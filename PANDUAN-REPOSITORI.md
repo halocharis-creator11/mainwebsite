@@ -157,7 +157,7 @@ Yang perlu Anda lakukan:
 2. Daftarkan website di **Google Search Console** dan kirim `sitemap.xml`.
 3. Pastikan file ringkasan PDF publik **di bawah 5 MB** dan teksnya bisa dicari (bukan hasil scan).
 4. Bersabar. Indeksasi Google Scholar biasanya memakan waktu beberapa minggu dan tidak bisa dipercepat secara manual.
-5. Catatan: dengan alamat `username.github.io/nama-repo`, file `robots.txt` tidak berada di root domain. Setelah memakai domain sendiri (mis. `charis.or.id`), `robots.txt` di repository ini akan aktif.
+5. Website memakai domain sendiri (`charisforhealth.org`), sehingga `robots.txt` dan `sitemap.xml` berada di root domain dan dibaca mesin pencari. Daftarkan `https://charisforhealth.org/sitemap.xml` di Google Search Console.
 
 ---
 

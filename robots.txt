@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 
-Sitemap: https://USERNAME.github.io/charis-website/sitemap.xml
+Sitemap: https://charisforhealth.org/sitemap.xml
