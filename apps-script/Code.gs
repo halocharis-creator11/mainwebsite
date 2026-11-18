@@ -33,7 +33,9 @@ const SCHEMA = {
   reports:      ['id', 'title', 'drive_file_id', 'file_name', 'notes', 'updated'],
   requests:     ['id', 'timestamp', 'report_id', 'report_title', 'name', 'institution', 'email', 'reason', 'lang', 'status', 'decided_at', 'decided_note'],
   members:      ['id', 'email', 'name', 'institution', 'code_hash', 'code_salt', 'created', 'last_login', 'status'],
-  downloads:    ['id', 'timestamp', 'email', 'report_id']
+  downloads:    ['id', 'timestamp', 'email', 'report_id'],
+  /* public counters per repository product, news item or project: reads, full-PDF downloads, shares */
+  stats:        ['id', 'kind', 'reads', 'downloads', 'shares', 'updated']
 };
 const PUBLIC_TYPES = ['publications', 'news', 'team', 'projects', 'partners'];
 /* Columns of a project shown publicly, by disclosure level. Level D (or empty) is never shown. */
@@ -43,7 +45,7 @@ const PROJECT_NAMED = ['client', 'funder', 'partners', 'official_title', 'locati
 const PROJECT_PUBLIC = { A: PROJECT_CORE.concat(PROJECT_NAMED, ['related_publications']), B: PROJECT_CORE.concat(PROJECT_NAMED), C: PROJECT_CORE };
 /* Bump when Code.gs changes. The admin panel compares it with the version it expects, so a stale
    Web App deployment (Code.gs edited but no new deployment version) is reported on screen. */
-const API_VERSION = '2026-11-17';
+const API_VERSION = '2026-11-18';
 const SESSION_HOURS = 6;
 const PROPS = PropertiesService.getScriptProperties();
 
@@ -246,6 +248,7 @@ function doGet(e) {
   try {
     const p = (e && e.parameter) || {};
     if (p.action === 'list') return json_({ ok: true, data: listPublic_(p.type) });
+    if (p.action === 'stats') return json_({ ok: true, data: publicStats_() });
     return json_({ ok: true, service: 'CHARIS API', version: API_VERSION });
   } catch (err) {
     return json_({ ok: false, error: String(err.message || err) });
@@ -270,6 +273,7 @@ function doPost(e) {
       case 'session':  requireAuth_(body.token); return json_({ ok: true });
       /* knowledge products: public */
       case 'requestReport': return json_(requestReport_(body));
+      case 'track':         return json_(track_(body));
       case 'memberLogin':   return json_(memberLogin_(body));
       case 'memberNewCode': return json_(memberNewCode_(body));
       /* knowledge products: member session */
@@ -680,7 +684,51 @@ function memberDownload_(mtoken, reportId) {
   if (!rep || !rep.drive_file_id) return { ok: false, error: 'not_available' };
   const blob = DriveApp.getFileById(rep.drive_file_id).getBlob();
   withLock_(function () { appendRow_('downloads', { id: Utilities.getUuid().slice(0, 8), timestamp: new Date(), email: email, report_id: reportId }); });
+  bump_(reportId, 'downloads');
   return { ok: true, name: rep.file_name || (reportId + '.pdf'), mimeType: blob.getContentType(), data: Utilities.base64Encode(blob.getBytes()) };
+}
+
+/* ============================================================
+   PUBLIC COUNTERS (reads, downloads, shares)
+   ============================================================ */
+const STAT_EVENTS = { read: 'reads', share: 'shares' };   /* downloads are only counted by memberDownload_ */
+function publicStats_() {
+  const cache = CacheService.getScriptCache(), hit = cache.get('stats_pub');
+  if (hit) return JSON.parse(hit);
+  const out = {};
+  readAll_('stats').forEach(function (r) { out[r.id] = { reads: Number(r.reads) || 0, downloads: Number(r.downloads) || 0, shares: Number(r.shares) || 0 }; });
+  cache.put('stats_pub', JSON.stringify(out), 60);
+  return out;
+}
+function track_(b) {
+  const id = clean_(b.id, 60), field = STAT_EVENTS[b.event];
+  if (!field || !/^[A-Za-z0-9_.-]{1,60}$/.test(id)) return { ok: false, error: 'invalid' };
+  /* soft limit against scripted inflation: at most 30 events per item per minute */
+  const cache = CacheService.getScriptCache(), key = 'tr_' + id + '_' + Math.floor(Date.now() / 60000);
+  const n = Number(cache.get(key) || 0);
+  if (n >= 30) return { ok: true, limited: true };
+  cache.put(key, String(n + 1), 120);
+  bump_(id, field);
+  return { ok: true };
+}
+function bump_(id, field) {
+  withLock_(function () {
+    const sh = sheet_('stats'), values = sh.getDataRange().getValues(), head = values[0];
+    const ci = head.indexOf(field), cu = head.indexOf('updated');
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][0]) === id) {
+        sh.getRange(i + 1, ci + 1).setValue((Number(values[i][ci]) || 0) + 1);
+        sh.getRange(i + 1, cu + 1).setValue(new Date());
+        CacheService.getScriptCache().remove('stats_pub');
+        return;
+      }
+    }
+    const kind = /^CHARIS-/.test(id) ? 'repositori' : (/^PRJ-/.test(id) ? 'portofolio' : 'berita');
+    const row = { id: id, kind: kind, reads: 0, downloads: 0, shares: 0, updated: new Date() };
+    row[field] = 1;
+    appendRow_('stats', row);
+    CacheService.getScriptCache().remove('stats_pub');
+  });
 }
 
 function uploadPrivate_(b) {

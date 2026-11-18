@@ -47,8 +47,25 @@
     return '<div class="tile' + (big ? " tile-big" : "") + '" aria-hidden="true"><div class="tile-in">' + L.map((k, i) => '<span class="ts ts' + k + '" style="left:' + pos[i][0] + ";top:" + pos[i][1] + '"></span>').join("") + "</div></div>";
   }
   const media = (url, alt, seed, w) => url ? '<img src="' + esc(API.img(url, w)) + '" alt="' + esc(alt || "") + '" loading="lazy">' : tile(seed);
-  /* cover thumbnail that opens the full cover in a lightbox */
-  const openPdf = (r) => /^https?:\/\//.test(r.full_pdf || "");   /* open-access products link straight to their PDF */
+  /* product type in the current language */
+  const typeLabel = r => (lang === "en" ? (r.type_en || r.type) : r.type) || "";
+  /* short, even-length teaser for cards and slides: subtitle first, then the abstract without its "Background:" label */
+  const brief = (s, n) => {
+    s = String(s || "").replace(/^\s*(Latar belakang|Background|Konteks|Context)\s*:\s*/i, "").replace(/\s+/g, " ").trim();
+    n = n || 190; if (s.length <= n) return s;
+    const cut = s.slice(0, n), dot = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "));
+    return dot > n * 0.55 ? cut.slice(0, dot + 1) : cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:]$/, "");
+  };
+  const CS = window.CharisShare;
+  const shareBox = (id, url, title) => CS ? CS.html({ id, url, title, compact: true, label: t("share") }) : "";
+  const absHash = h => location.origin + location.pathname + h;
+  /* Creative Commons badge for a licence string such as "CC BY-NC 4.0" */
+  const ccBadge = lic => {
+    const m = /^CC\s+(BY(?:-NC)?(?:-ND|-SA)?)\s+(\d\.\d)$/i.exec(String(lic || "").trim());
+    if (!m) return lic ? '<span class="badge">' + esc(lic) + "</span>" : "";
+    const code = m[1].toLowerCase();
+    return '<a class="cc-badge" href="https://creativecommons.org/licenses/' + code + "/" + m[2] + '/" target="_blank" rel="license noopener" title="' + esc(lic) + '"><img src="repositori/assets/cc/' + code.replace(/-/g, "_") + '.svg" alt="' + esc(lic) + '" width="63" height="22" loading="lazy"></a>';
+  };
   const flipAttrs = (r) => ' data-flip-pages="' + esc(JSON.stringify(r.preview)) + '" data-flip-title="' + esc(f(r, "title")) + '" data-flip-request="#/request/' + encodeURIComponent(r.id) + '" data-flip-read="' + esc(r.url || "") + '"';
   const hasFlip = r => r && Array.isArray(r.preview) && r.preview.length > 1;
   const coverBox = (thumb, full, alt, seed, r) => thumb
@@ -68,9 +85,9 @@
 
   /* unified feed item for news / publications / projects */
   function toItem(type, r) {
-    if (type === "news") return { type, id: r.id, cat: r.category || t("type.news"), title: f(r, "title"), text: f(r, "excerpt"), img: r.image_url, date: r.date, href: "#/latest/" + encodeURIComponent(r.id), featured: isTrue(r.featured) };
-    if (type === "publications") return { type, id: r.id, cat: r.category || t("type.publications"), title: f(r, "title"), text: f(r, "summary"), img: r.cover_url, isCover: !!r.cover_url, date: r.date, href: r.url || "#/research", featured: isTrue(r.featured) };
-    return { type, id: r.id, cat: serviceName(r.service) || t("type.projects"), title: f(r, "title"), text: f(r, "summary"), img: r.image_url, date: r.date || (r.year_start ? r.year_start + "-01-01" : ""), href: "#/projects", featured: false };
+    if (type === "news") return { type, id: r.id, cat: r.category || t("type.news"), title: f(r, "title"), text: brief(f(r, "excerpt")), img: r.image_url, date: r.date, href: "#/latest/" + encodeURIComponent(r.id), featured: isTrue(r.featured) };
+    if (type === "publications") return { type, id: r.id, cat: typeLabel(r) || t("type.publications"), title: f(r, "title"), text: brief((lang === "en" ? r.subtitle_en : r.subtitle_id) || f(r, "summary")), img: r.cover_url, isCover: !!r.cover_url, date: r.date, href: r.url || "#/research", featured: isTrue(r.featured) };
+    return { type, id: r.id, cat: serviceName(r.service) || t("type.projects"), title: f(r, "title"), text: brief(f(r, "summary")), img: r.image_url, date: r.date || (r.year_start ? r.year_start + "-01-01" : ""), href: "#/projects/" + encodeURIComponent(r.id), featured: false };
   }
   const card = it => '<li class="card"><a href="' + esc(it.href) + '"><div class="card-media' + (it.isCover ? " is-cover" : "") + '">' + media(it.img, it.title, it.id, 800) + '</div><div class="card-body">' +
     '<p class="card-meta"><span class="card-cat">' + esc(it.cat) + "</span>" + (it.date && it.type !== "projects" ? "<time>" + fmtDate(it.date) + "</time>" : "") + "</p><h3>" + esc(it.title) + "</h3></div></a></li>";
@@ -83,10 +100,13 @@
     let feat = items.filter(i => i.featured).sort(byDate);
     if (!feat.length) feat = items.sort(byDate).slice(0, 3);
     const hero = photo("hero");
+    /* publications show their cover as a framed thumbnail, not as a background behind the text; long titles keep the part before the colon */
+    const short = tt => { const i = tt.indexOf(": "); return tt.length > 70 && i >= 25 ? tt.slice(0, i) : tt; };
+    feat = feat.map(i => i.type === "publications" ? Object.assign({}, i, { title: short(i.title), cover: i.img, img: "" }) : i);
     const slides = [{ mission: true, cat: t("slide.mission.cat"), title: t("slide.mission.t"), text: t("slide.mission.d"), href: "#/about", id: "mission", img: hero ? hero.src : "", credit: hero }].concat(feat.slice(0, 4));
     host.innerHTML = '<div class="slides">' + slides.map((s, i) =>
-      '<article class="slide' + (s.img ? " has-img" : "") + '" aria-roledescription="slide" aria-label="' + (i + 1) + " / " + slides.length + '"' + (i ? " hidden" : "") + ">" +
-      (s.img ? '<img class="slide-bg" src="' + esc(API.img(s.img, 1800)) + '" alt="">' : '<div class="slide-art" aria-hidden="true">' + (s.mission ? '<span class="sa sa0"></span><span class="sa sa1"></span><span class="sa sa2"></span>' : tile(s.id, true)) + "</div>") +
+      '<article class="slide' + (s.img ? " has-img" : "") + (i ? "" : " on") + '" aria-roledescription="slide" aria-label="' + (i + 1) + " / " + slides.length + '"' + (i ? ' aria-hidden="true" inert' : "") + ">" +
+      (s.img ? '<img class="slide-bg" src="' + esc(API.img(s.img, 1800)) + '" alt="">' : '<div class="slide-art" aria-hidden="true">' + (s.mission ? '<span class="sa sa0"></span><span class="sa sa1"></span><span class="sa sa2"></span>' : s.cover ? '<span class="slide-cover"><img src="' + esc(API.img(s.cover, 900)) + '" alt="" loading="lazy" decoding="async"></span>' : tile(s.id, true)) + "</div>") +
       '<div class="wrap slide-in"><div class="slide-copy"><p class="slide-cat">' + esc(s.cat) + "</p><h2>" + esc(s.title) + "</h2><p>" + esc(s.text) + '</p><a class="btn btn-light" href="' + esc(s.href) + '">' + esc(t("more")) + "</a></div></div>" + (s.credit && s.credit.credit ? '<p class="slide-credit">' + esc(t("photo.by")) + " " + esc(s.credit.credit) + "</p>" : "") + "</article>").join("") + "</div>" +
       '<div class="wrap slider-ctrl"><button type="button" class="sc-btn" id="scPrev" aria-label="' + esc(t("prev")) + '">' + svgI('<path d="m15 6-6 6 6 6"/>') + "</button>" +
       '<div class="dots" role="group">' + slides.map((s, i) => '<button type="button" class="dot" data-i="' + i + '" aria-label="' + (i + 1) + '" aria-current="' + (i === 0) + '"></button>').join("") + "</div>" +
@@ -95,7 +115,7 @@
     let cur = 0, paused = reduceMotion, hover = false;
     const go = i => {
       cur = (i + slides.length) % slides.length;
-      host.querySelectorAll(".slide").forEach((el, k) => { el.hidden = k !== cur; });
+      host.querySelectorAll(".slide").forEach((el, k) => { const on = k === cur; el.classList.toggle("on", on); el.inert = !on; if (on) el.removeAttribute("aria-hidden"); else el.setAttribute("aria-hidden", "true"); });
       host.querySelectorAll(".dot").forEach((d, k) => d.setAttribute("aria-current", String(k === cur)));
     };
     host.querySelector("#scPrev").addEventListener("click", () => go(cur - 1));
@@ -304,7 +324,7 @@
       app.querySelectorAll("[data-ex]").forEach(box => {
         const items = repo.filter(r => r.service === box.dataset.ex).sort((a, b) => b.sort_date.localeCompare(a.sort_date)).slice(0, 3);
         box.querySelector(".ex-row").innerHTML = items.length ? items.map(r =>
-          '<div class="ex">' + '<div class="ex-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + '</div><div class="ex-body"><p class="card-meta"><span class="card-cat">' + esc(r.type) + "</span><time>" + fmtDate(r.date_published) + "</time></p>" +
+          '<div class="ex">' + '<div class="ex-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + '</div><div class="ex-body"><p class="card-meta"><span class="card-cat">' + esc(typeLabel(r)) + "</span><time>" + fmtDate(r.date_published) + "</time></p>" +
           '<h4><a href="' + esc(r.url) + '">' + esc(f(r, "title")) + '</a></h4><p class="ex-act">' + (hasFlip(r) ? '<button type="button" class="link-btn"' + flipAttrs(r) + ">" + esc(t("flip.open").replace("{n}", r.preview.length)) + "</button>" : "") + '<a href="' + esc(r.url) + '">' + esc(t("repo.read")) + "</a></p></div></div>").join("")
           : '<p class="ex-empty">' + esc(t("svc.none")) + "</p>";
       });
@@ -324,7 +344,8 @@
       try { rows = await API.repo(); } catch (e) { document.getElementById("repoList").innerHTML = errMsg(); return; }
       const st = { q: "", type: new Set(), service: new Set(focus && rows.some(r => r.service === focus) ? [focus] : []), year: new Set(), sort: "new" };
       const yr = r => (r.date_published || "").slice(0, 4);
-      const facetDefs = [["type", t("repo.f.type"), r => r.type, v => v], ["service", t("repo.f.topic"), r => r.service, v => serviceName(v)], ["year", t("repo.f.year"), yr, v => v]];
+      const typeEn = {}; rows.forEach(r => { typeEn[r.type] = r.type_en || r.type; });
+      const facetDefs = [["type", t("repo.f.type"), r => r.type, v => (lang === "en" ? typeEn[v] || v : v)], ["service", t("repo.f.topic"), r => r.service, v => serviceName(v)], ["year", t("repo.f.year"), yr, v => v]];
       const years = [...new Set(rows.map(yr))];
       document.getElementById("repoStats").textContent = rows.length + " " + t("repo.products") + (years.length ? ", " + (Math.min(...years) === Math.max(...years) ? Math.min(...years) : Math.min(...years) + (lang === "en" ? " to " : " sampai ") + Math.max(...years)) : "");
       const match = (r, skip) => {
@@ -351,13 +372,15 @@
         if (st.q) chips.unshift('<button type="button" data-chip="q"><em>' + esc(st.q) + '</em> <span aria-hidden="true">×</span></button>');
         document.getElementById("repoChips").innerHTML = chips.length ? chips.join("") + '<button type="button" class="clear" data-chip="all">' + esc(t("repo.clear")) + "</button>" : "";
         list.innerHTML = sel.length ? sel.map(r => '<li class="ritem"><div class="ritem-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + '</div><div class="ritem-body">' +
-          '<p class="card-meta"><span class="card-cat">' + esc(r.type) + "</span>" + (r.series ? "<span>" + esc(r.series) + "</span>" : "") + "<time>" + fmtDate(r.date_published) + "</time></p>" +
+          '<p class="card-meta"><span class="card-cat">' + esc(typeLabel(r)) + "</span>" + (r.series ? "<span>" + esc(r.series) + "</span>" : "") + "<time>" + fmtDate(r.date_published) + "</time></p>" +
           '<h2><a href="' + esc(r.url) + '">' + esc(f(r, "title")) + "</a></h2><p class=\"ritem-auth\">" + esc(authorsStr(r.authors)) + '</p><p class="ritem-abs">' + esc(f(r, "abstract")) + "</p>" +
           '<p class="badges">' + (r.doi ? '<a class="badge doi" href="https://doi.org/' + esc(r.doi) + '">DOI ' + esc(r.doi) + "</a>" : "") + '<span class="badge open">' + esc(t("repo.html")) + "</span>" +
-          (openPdf(r) ? '<span class="badge open">' + esc(t("repo.pdfOpen")) + "</span>" : '<span class="badge lock">' + esc(t("repo.pdfReq")) + "</span>") + (r.license ? '<span class="badge">' + esc(r.license) + "</span>" : "") + "</p>" +
-          '<p class="ritem-act"><a class="btn btn-sm" href="' + esc(r.url) + '">' + esc(t("repo.read")) + "</a>" + (hasFlip(r) ? '<button type="button" class="btn btn-sm btn-ghost"' + flipAttrs(r) + ">" + esc(t("flip.open").replace("{n}", r.preview.length)) + "</button>" : "") + (openPdf(r) ? '<a class="btn btn-sm btn-ghost" href="' + esc(r.full_pdf) + '" rel="noopener">' + esc(t("repo.download")) + "</a>" : '<a class="btn btn-sm btn-ghost" href="#/request/' + encodeURIComponent(r.id) + '">' + esc(t("repo.request")) + "</a>") + "</p></div></li>").join("")
+          '<span class="badge lock">' + esc(t("repo.pdfReq")) + "</span>" + ccBadge(r.license) + "</p>" +
+          '<p class="ritem-stats" data-stats-for="' + esc(r.id) + '"></p>' +
+          '<div class="ritem-act"><a class="btn btn-sm" href="' + esc(r.url) + '">' + esc(t("repo.read")) + "</a>" + '<a class="btn btn-sm btn-ghost" href="#/request/' + encodeURIComponent(r.id) + '">' + esc(t("repo.request")) + "</a>" + (hasFlip(r) ? '<button type="button" class="btn btn-sm btn-ghost"' + flipAttrs(r) + ">" + esc(t("flip.open").replace("{n}", r.preview.length)) + "</button>" : "") + shareBox(r.id, r.url, f(r, "title")) + "</div></div></li>").join("")
           : '<li class="state">' + esc(t("repo.none")) + "</li>";
         drawFacets();
+        if (CS) CS.paint();
       }
       facets.addEventListener("change", e => { const c = e.target.closest("[data-f]"); if (!c) return; const s = st[c.dataset.f]; c.checked ? s.add(c.value) : s.delete(c.value); draw(); });
       document.getElementById("repoChips").addEventListener("click", e => {
@@ -381,7 +404,7 @@
       const r = rows.find(x => x.id === id);
       const box = app.querySelector(".req");
       if (!r) { box.innerHTML = '<p class="state">' + esc(t("req.notfound")) + ' <a href="#/research">' + esc(t("repo.t")) + "</a></p>"; return; }
-      box.innerHTML = '<aside class="req-item">' + (r.thumb || r.cover ? '<div class="req-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + "</div>" : "") + '<p class="card-meta"><span class="card-cat">' + esc(r.type) + "</span><time>" + fmtDate(r.date_published) + "</time></p><h2>" + esc(f(r, "title")) + "</h2>" +
+      box.innerHTML = '<aside class="req-item">' + (r.thumb || r.cover ? '<div class="req-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + "</div>" : "") + '<p class="card-meta"><span class="card-cat">' + esc(typeLabel(r)) + "</span><time>" + fmtDate(r.date_published) + "</time></p><h2>" + esc(f(r, "title")) + "</h2>" +
         "<p>" + esc(r.authors.map(a => a.name).join(", ")) + "</p>" + (r.doi ? '<p>DOI <a href="https://doi.org/' + esc(r.doi) + '">' + esc(r.doi) + "</a></p>" : "") +
         '<a href="' + esc(r.url) + '">' + esc(t("repo.readOpen")) + "</a></aside>" +
         '<form class="form" id="reqForm" novalidate><input type="hidden" name="report_id" value="' + esc(r.id) + '"><input type="hidden" name="report_title" value="' + esc(r.title_id) + '">' +
@@ -473,7 +496,7 @@
       if (mt) showLibrary(); else showLogin();
     },
 
-    async projects(focus) {
+    async projects(focus, pid) {
       app.innerHTML = pageTop(t("nav.projects"), t("projects.lead")) +
         '<section class="sec"><div class="wrap"><div class="proj-filters"><div class="filters" id="projFilters" role="group" aria-label="' + esc(t("proj.f.service")) + '"></div>' +
         '<label class="sort">' + esc(t("proj.f.client")) + ' <select id="projClient"><option value="">' + esc(t("filter.all")) + "</option></select></label></div>" +
@@ -489,6 +512,7 @@
       sel.innerHTML += ctypes.map(c => '<option value="' + esc(c) + '">' + esc(c) + "</option>").join("");
       const filt = document.getElementById("projFilters");
       let svcK = focus && keys.includes(focus) ? focus : "all";
+      if (pid && !rows.some(r => r.id === pid)) pid = null;
       const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + (lang === "en" ? " to " : " sampai ") + r.year_end : (r.year_start || r.year_end || "");
       const roleLabel = v => { const k = "role." + v, x = t(k); return x === k ? v : x; };
       const row = (label, val) => val ? "<div><dt>" + esc(label) + "</dt><dd>" + esc(val) + "</dd></div>" : "";
@@ -497,7 +521,7 @@
         const pubs = String(r.related_publications || "").split(",").map(x => x.trim()).filter(Boolean).map(id => repo.find(p => p.id === id)).filter(Boolean);
         const comp = t("comp." + (r.component || ""));
         const cv = named && pcov[r.id];                       /* GitHub covers only for levels A and B */
-        return '<li class="pj">' + (cv ? '<div class="pj-media pj-cover">' + coverBox(cv.thumb, cv.cover, f(r, "title"), r.id) + "</div>"
+        return '<li class="pj" id="pj-' + esc(r.id) + '">' + (cv ? '<div class="pj-media pj-cover">' + coverBox(cv.thumb, cv.cover, f(r, "title"), r.id) + "</div>"
           : named && r.image_url ? '<div class="pj-media">' + media(r.image_url, f(r, "title"), r.id, 800) + "</div>" : "") +
           '<div class="pj-body"><p class="card-meta"><span class="card-cat">' + esc(serviceName(r.service)) + "</span>" + (r.component ? "<span>" + esc(comp) + "</span>" : "") +
           '<span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span>" +
@@ -511,13 +535,18 @@
           (named && f(r, "testimonial") ? '<blockquote class="pj-quote"><p>' + esc(f(r, "testimonial")) + "</p>" + (r.testimonial_by ? "<cite>" + esc(r.testimonial_by) + "</cite>" : "") + "</blockquote>" : "") +
           (pubs.length ? '<p class="pj-pubs"><span>' + esc(t("proj.pubs")) + ":</span> " + pubs.map(p => '<a href="' + esc(p.url) + '">' + esc(f(p, "title")) + "</a>").join("; ") + "</p>" : "") +
           (r.keywords ? '<p class="badges">' + String(r.keywords).split(",").map(k => k.trim()).filter(Boolean).map(k => '<span class="badge">' + esc(k) + "</span>").join("") + "</p>" : "") +
-          "</div></li>";
+          '<div class="pj-share">' + shareBox(r.id, absHash("#/projects/" + encodeURIComponent(r.id)), f(r, "title")) + "</div></div></li>";
       };
       const draw = () => {
         filt.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === svcK)));
         const out = rows.filter(r => (svcK === "all" || r.service === svcK) && (!sel.value || r.client_type === sel.value));
         document.getElementById("projCount").textContent = out.length + " " + t("proj.count");
         list.innerHTML = out.length ? out.map(item).join("") : msg("empty");
+        if (pid) {   /* opened from a shared link: bring that project into view */
+          const el = document.getElementById("pj-" + pid);
+          if (el) { app.dataset.keep = "1"; el.classList.add("pj-focus"); requestAnimationFrame(() => el.scrollIntoView({ block: "start" })); setTimeout(() => { delete app.dataset.keep; }, 800); }
+          pid = null;
+        }
       };
       filt.innerHTML = keys.map(k => '<button type="button" data-k="' + k + '">' + esc(k === "all" ? t("filter.all") : serviceName(k)) + "</button>").join("");
       filt.addEventListener("click", e => { const b = e.target.closest("button"); if (b) { svcK = b.dataset.k; draw(); } });
@@ -553,8 +582,9 @@
       document.title = f(n, "title") + " | CHARIS";
       app.innerHTML = '<article class="sec"><div class="wrap narrow"><a class="back" href="#/latest">' + esc(t("back")) + '</a><p class="card-meta"><span class="card-cat">' + esc(n.category || t("type.news")) + "</span><time>" + fmtDate(n.date) + "</time></p>" +
         '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (n.image_url ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
-        '<div class="prose">' + paras(f(n, "body")) + "</div></div></article>" + newsletter();
+        '<div class="prose">' + paras(f(n, "body")) + '</div><div class="share-row"><span>' + esc(t("share.this")) + "</span>" + shareBox(String(n.id), absHash("#/latest/" + encodeURIComponent(n.id)), f(n, "title")) + "</div></div></article>" + newsletter();
       bindNewsletter();
+      if (CS) CS.track(String(n.id), "read");
     },
 
     team() {
@@ -673,6 +703,7 @@
     if (page === "latest" && id) out = views.article(decodeURIComponent(id));
     else if (page === "search") out = views.search(decodeURIComponent(id || ""));
     else if (page === "request") out = views.request(decodeURIComponent(id || ""));
+    else if (page === "projects" && id) out = views.projects(null, decodeURIComponent(id));
     else if (page === "services" || page === "research" || page === "projects") out = views[page](pendingPillar);
     else out = (views[page] || views.home)();
     const focusing = pendingPillar && page === "services";

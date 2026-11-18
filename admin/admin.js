@@ -78,6 +78,9 @@
     downloads: { title: "Riwayat unduhan", hint: "Catatan setiap unduhan laporan lengkap oleh member.", readonlyAdd: true, readonly: true,
       cols: [["timestamp", "Waktu"], ["email", "Email"], ["report_id", "ID laporan"]],
       fields: [["timestamp", "Waktu", "readonly"], ["email", "Email", "readonly"], ["report_id", "ID laporan", "readonly"]] },
+    stats: { title: "Statistik", hint: "Jumlah dibaca, diunduh (PDF lengkap oleh member), dan dibagikan untuk setiap produk repositori, berita, dan proyek. Angka ini tampil publik di halaman repositori.", readonlyAdd: true,
+      cols: [["id", "ID"], ["kind", "Jenis"], ["reads", "Dibaca"], ["downloads", "Diunduh"], ["shares", "Dibagikan"], ["updated", "Terakhir"]],
+      fields: [["id", "ID", "readonly"], ["kind", "Jenis", "readonly"], ["reads", "Dibaca"], ["downloads", "Diunduh"], ["shares", "Dibagikan"], ["updated", "Terakhir", "readonly"]] },
     subscribers: { title: "Pelanggan kabar", hint: "Email yang mendaftar lewat formulir berlangganan. Ubah status ke 'berhenti' jika mereka minta berhenti.", readonlyAdd: true,
       cols: [["timestamp", "Waktu"], ["email", "Email"], ["lang", "Bahasa"], ["status", "Status"]],
       fields: [["timestamp", "Waktu", "readonly"], ["email", "Email", "readonly"], ["lang", "Bahasa", "readonly"], ["status", "Status", "select", [["aktif", "Aktif"], ["berhenti", "Berhenti"]]]] },
@@ -91,7 +94,7 @@
   const demoStore = JSON.parse(JSON.stringify(Object.assign({
     requests: [{ id: "rq1", timestamp: "2026-11-14 10:30", report_id: "CHARIS-2026-001", report_title: "[Contoh] Biaya Satuan Layanan Rawat Jalan Puskesmas di Kabupaten X", name: "[Contoh] Nama Pemohon", institution: "[Contoh] Dinas Kesehatan", email: "contoh@email.org", reason: "Contoh alasan permintaan untuk bahan perencanaan.", lang: "id", status: "menunggu", decided_at: "", decided_note: "" }],
     reports: [{ id: "CHARIS-2026-001", title: "[Contoh] Biaya Satuan Layanan Rawat Jalan Puskesmas di Kabupaten X", drive_file_id: "", file_name: "", notes: "", updated: "" }],
-    members: [], downloads: [], project_internal: [],
+    members: [], downloads: [], project_internal: [], stats: [{ id: "CHARIS-2026-004", kind: "repositori", reads: 12, downloads: 1, shares: 3, updated: "2026-11-18 10:00" }],
     subscribers: [{ id: "s1", timestamp: "2026-11-14 09:00", email: "contoh@email.org", lang: "id", status: "aktif" }], inquiries: [
     { id: "q1", timestamp: "2026-11-14 10:12", name: "[Contoh] Nama Pengirim", org: "[Contoh] Dinas Kesehatan", email: "contoh@email.org", phone: "", service: "financing", message: "Contoh pesan masuk dari formulir kontak.", lang: "id", status: "baru", notes: "" }
   ] }, window.DEMO_DATA)));
@@ -195,7 +198,8 @@
       const r = await api({ action: "adminList", type: t });
       if (!r.ok) throw new Error(r.error);
       rows = r.data || [];
-      if (["inquiries", "requests", "downloads", "subscribers"].includes(t)) rows.sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
+      if (t === "stats") rows.sort((a, b) => (Number(b.reads) || 0) - (Number(a.reads) || 0));
+      else if (["inquiries", "requests", "downloads", "subscribers"].includes(t)) rows.sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
       if (t === "inquiries") updateCount();
       if (t === "requests") { const n = rows.filter(r => r.status === "menunggu").length; $("reqCount").hidden = !n; $("reqCount").textContent = n; }
       draw();
@@ -204,7 +208,7 @@
   $("reloadBtn").addEventListener("click", () => { if (type) select(type); });
 
   /* Warn when the live Web App still runs an older Code.gs (edited, but no new deployment version) */
-  const EXPECTED_API = "2026-11-17";
+  const EXPECTED_API = "2026-11-18";
   function checkApi() {
     if (DEMO) return;
     fetch(cfg.API_URL).then(r => r.json()).then(j => {
@@ -233,7 +237,7 @@
     const d = DEF[type], q = $("q").value.trim().toLowerCase();
     const sel = rows.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
     $("table").querySelector("tbody").innerHTML = sel.map(r => "<tr>" + d.cols.map((c, i) => (i === 0 ? '<th scope="row">' : "<td>") + cell(c[0], r[c[0]]) + (i === 0 ? "</th>" : "</td>")).join("") +
-      '<td class="act"><button type="button" class="btn btn-outline sm" data-edit="' + esc(r.id) + '">' + (["inquiries", "requests", "members", "downloads", "subscribers"].includes(type) ? "Buka" : "Edit") + "</button></td></tr>").join("");
+      '<td class="act"><button type="button" class="btn btn-outline sm" data-edit="' + esc(r.id) + '">' + (["inquiries", "requests", "members", "downloads", "subscribers", "stats"].includes(type) ? "Buka" : "Edit") + "</button></td></tr>").join("");
     $("tableState").textContent = sel.length ? "" : "Belum ada data.";
   }
   $("q").addEventListener("input", draw);

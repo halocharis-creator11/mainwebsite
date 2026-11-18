@@ -1,6 +1,6 @@
 # Panduan Repositori Pengetahuan CHARIS
 
-Panduan ini menjelaskan cara menerbitkan produk pengetahuan (laporan riset, kertas kerja, policy brief, panduan) agar:
+Panduan ini menjelaskan cara menerbitkan produk pengetahuan (artikel ilmiah, laporan penelitian, laporan evaluasi, kertas kerja, policy brief) agar:
 
 - tampil otomatis di halaman **Repositori**, dengan yang terbaru paling atas;
 - terbaca dan terindeks **Google Scholar**;
@@ -53,7 +53,7 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 | Kolom | Isi | Wajib |
 |---|---|---|
 | `id` | ID produk, mis. `CHARIS-2026-003` | ✔ |
-| `type` | `Laporan riset`, `Kertas kerja`, `Policy brief`, `Panduan`, `Laporan evaluasi` | ✔ |
+| `type` | salah satu dari `Artikel ilmiah`, `Laporan penelitian`, `Laporan evaluasi`, `Kertas kerja`, `Policy brief` (tipe lain membuat build berhenti dengan pesan) | ✔ |
 | `series` | mis. `Kertas Kerja CHARIS No. 2` | |
 | `title_id`, `title_en` | Judul Indonesia dan Inggris | ✔ (`title_id`) |
 | `abstract_id`, `abstract_en` | Abstrak lengkap, 150 sampai 300 kata | ✔ (`abstract_id`) |
@@ -64,7 +64,7 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 | `project_id` | ID proyek asal di Portofolio (mis. `PRJ-2026-001`), kosongkan untuk kajian mandiri. Tidak ditampilkan di halaman laporan | |
 | `service` | Lini layanan: `financing`, `analytics`, `evaluation`, `planning`, `workforce`, `quality` | |
 | `doi` | DOI dari Zenodo, mis. `10.5281/zenodo.1234567` | |
-| `license` | mis. `CC BY 4.0` | |
+| `license` | mis. `CC BY 4.0` atau `CC BY-NC 4.0`. Lisensi CC tampil otomatis sebagai badge resmi Creative Commons yang menaut ke teks lisensinya | |
 | `pages` | Jumlah halaman versi PDF | |
 | `cover` | Opsional. Kosongkan agar sampul dideteksi otomatis (lihat bagian Sampul) | |
 | `pdf_summary` | Nama file ringkasan PDF publik (opsional, **maks. 5 MB** agar diindeks Scholar) | |
@@ -168,3 +168,12 @@ Yang perlu Anda lakukan:
 **Bisa menerbitkan dalam bahasa Inggris saja?** Bisa. Isi `language: *en*`, tulis isi laporan dalam bahasa Inggris, dan tetap isi `title_id` serta `abstract_id` (boleh sama dengan versi Inggris).
 
 **Berapa batas ukuran?** Upload lewat browser GitHub maksimal 25 MB per file. Usahakan total repository di bawah 1 GB. PDF lengkap di Drive maksimal 25 MB per file lewat panel admin.
+
+
+## PDF lengkap, DOI, statistik, dan tur simulator
+
+- **PDF lengkap selalu lewat permintaan.** Tombol di setiap produk adalah *Minta PDF lengkap*. Permintaan masuk ke panel admin › *Permintaan laporan*, lalu admin memilih *Setujui* atau *Tolak*. Unggah PDF lengkap privat di menu *Laporan lengkap (PDF)* dengan ID produk yang sama, supaya member yang disetujui bisa mengunduhnya.
+- **Zenodo hanya memuat pratinjau.** Unggah file pratinjau (misalnya `pratinjau.pdf`) sebagai file terbuka di rekaman Zenodo, dan jangan unggah PDF lengkap sebagai file terbuka. Kolom `full_pdf` tidak dipakai lagi.
+- **Statistik dibaca, diunduh, dan dibagikan** dihitung otomatis dan tersimpan di tab `stats` (menu admin *Statistik*). *Dibaca* dihitung sekali per peramban per hari, *diunduh* dihitung setiap kali member mengunduh PDF lengkap, dan *dibagikan* dihitung setiap kali tombol bagikan dipakai.
+- **Simulator interaktif** (`<section class="sim-box interactive" id="...">`) otomatis diberi penanda berpendar, pemberitahuan di awal laporan, dan tombol *Mulai tur singkat*. Tidak perlu pengaturan tambahan.
+- **Daftar pustaka** (`<ol class="refs">` atau `<ol class="references">`) otomatis diberi tautan DOI/URL yang bisa diklik, serta tautan *Artikel* dan *Google Scholar* di akhir setiap rujukan.

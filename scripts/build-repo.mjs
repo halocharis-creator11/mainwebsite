@@ -204,8 +204,20 @@ function headBlock(m, url, slug) {
 /* ---------- visible header (bilingual: spans marked data-l="id" or data-l="en"; report.js shows one) ---------- */
 const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const fmtDateEn = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ""); return m ? `${Number(m[3])} ${MONTHS_EN[Number(m[2]) - 1]} ${m[1]}` : (d || ""); };
-const TYPE_EN = { "Kertas kerja": "Working paper", "Laporan riset": "Research report", "Policy brief": "Policy brief", "Panduan": "Guide",
-  "Laporan evaluasi": "Evaluation report", "Presentasi": "Presentation", "Presentasi interaktif": "Interactive presentation" };
+/* Product types: a short, academic list. Anything else stops the build with a clear message. */
+const TYPE_EN = { "Artikel ilmiah": "Research article", "Laporan penelitian": "Research report", "Laporan evaluasi": "Evaluation report",
+  "Kertas kerja": "Working paper", "Policy brief": "Policy brief" };
+const TYPE_OLD = { "Laporan riset": "Laporan penelitian" };   /* older names, mapped automatically */
+/* Creative Commons licence: badge image (CC trademark policy allows the official buttons to mark licensed works) and deed link */
+function ccInfo(lic) {
+  const m = /^CC\s+(BY(?:-NC)?(?:-ND|-SA)?)\s+(\d\.\d)$/i.exec(String(lic || "").trim());
+  if (!m) return null;
+  const code = m[1].toLowerCase(), ver = m[2];
+  const names = { "by": ["Atribusi", "Attribution"], "by-nc": ["Atribusi-NonKomersial", "Attribution-NonCommercial"], "by-sa": ["Atribusi-BerbagiSerupa", "Attribution-ShareAlike"],
+    "by-nd": ["Atribusi-TanpaTurunan", "Attribution-NoDerivatives"], "by-nc-sa": ["Atribusi-NonKomersial-BerbagiSerupa", "Attribution-NonCommercial-ShareAlike"], "by-nc-nd": ["Atribusi-NonKomersial-TanpaTurunan", "Attribution-NonCommercial-NoDerivatives"] };
+  return { code, ver, badge: code.replace(/-/g, "_") + ".svg", deed: `https://creativecommons.org/licenses/${code}/${ver}/`, id: `Creative Commons ${names[code][0]} ${ver} Internasional`, en: `Creative Commons ${names[code][1]} ${ver} International` };
+}
+const ccBadge = (lic, h) => { const c = ccInfo(lic); return c ? `<a class="rp-cc" href="${c.deed}" rel="license noopener" target="_blank" title="${attr(c.en)}"><img src="../assets/cc/${c.badge}" alt="${attr(lic)}" width="${Math.round(h * 120 / 42)}" height="${h}"></a>` : ""; };
 const L2 = (id, en) => id === en ? esc(id) : `<span data-l="id">${esc(id)}</span><span data-l="en" lang="en">${esc(en)}</span>`;
 const L2h = (id, en) => `<span data-l="id">${id}</span><span data-l="en" lang="en">${en}</span>`;   /* already-escaped HTML */
 function bodyBlock(m, url, slug) {
@@ -215,9 +227,10 @@ function bodyBlock(m, url, slug) {
   const authors = m.authors.map(a => `<li><span class="rp-author">${esc(a.name)}</span>${a.affiliation ? `<sup>${affs.indexOf(a.affiliation) + 1}</sup>` : ""}` +
     (a.orcid ? ` <a class="rp-orcid" href="https://orcid.org/${attr(a.orcid)}" aria-label="ORCID ${attr(a.name)}">iD</a>` : "") + "</li>").join("");
   const requestUrl = `../../index.html#/request/${encodeURIComponent(m.id)}`;
-  const openPdf = /^https?:\/\//.test(m.full_pdf || "");   /* open-access product: link the PDF instead of a request form */
-  const ctaUrl = openPdf ? m.full_pdf : requestUrl;
-  const ctaText = openPdf ? L2("Unduh PDF lengkap", "Download full PDF") : L2("Minta PDF lengkap", "Request full PDF");
+  /* every full PDF goes through a request that the CHARIS admin approves */
+  const ctaUrl = requestUrl;
+  const ctaText = L2("Minta PDF lengkap", "Request full PDF");
+  const ctaShort = L2("Minta PDF", "Request PDF");
   const bilingual = !!m.bilingual;
   const n = m.preview.length;
   const flip = n > 1 ? `data-flip-pages="${attr(JSON.stringify(m.preview))}" data-flip-title="${attr(m.title_id)}" data-flip-request="${attr(requestUrl)}"` : "";
@@ -225,7 +238,7 @@ function bodyBlock(m, url, slug) {
     <a class="rp-brand" href="../../index.html"><img src="../../assets/img/charis-mark.svg" alt="CHARIS" width="112" height="30"></a>
     <nav class="rp-crumbs" aria-label="Breadcrumb"><a href="../../index.html#/research">${L2("Repositori", "Repository")}</a><span aria-hidden="true">/</span><span>${L2(m.type, typeEn)}</span></nav>
     ${bilingual ? `<div class="rp-lang" role="group" aria-label="Bahasa / Language"><button type="button" data-setlang="id" aria-pressed="true">ID</button><button type="button" data-setlang="en" aria-pressed="false">EN</button></div>` : ""}
-    <a class="rp-bar-cta" href="${attr(ctaUrl)}">${ctaText}</a>
+    <a class="rp-bar-cta" href="${attr(ctaUrl)}"><span class="cta-long">${ctaText}</span><span class="cta-short" aria-hidden="true">${ctaShort}</span></a>
   </div></header>
   <section class="rp-hero"><div class="rp-wrap${m.cover ? " rp-hero-cover" : ""}"><div class="rp-hero-text">
     <p class="rp-kind"><span>${L2(m.type, typeEn)}</span>${m.series ? `<span>${L2(m.series, m.series_en || m.series)}</span>` : ""}${svc ? `<span>${L2(svc[0], svc[1])}</span>` : ""}</p>
@@ -248,15 +261,17 @@ function bodyBlock(m, url, slug) {
         <div><dt>${L2("Nomor", "Number")}</dt><dd>${m.series ? L2(m.series, m.series_en || m.series) : esc(m.id)}</dd></div>
         ${m.pages ? `<div><dt>${L2("Halaman", "Pages")}</dt><dd>${esc(m.pages)}</dd></div>` : ""}
         <div><dt>${L2("Bahasa", "Language")}</dt><dd>${bilingual ? L2("Indonesia dan Inggris", "Indonesian and English") : (m.language === "en" ? L2("Inggris", "English") : L2("Indonesia", "Indonesian"))}</dd></div>
-        ${m.license ? `<div><dt>${L2("Lisensi", "Licence")}</dt><dd>${esc(m.license)}</dd></div>` : ""}
+        ${m.license ? `<div><dt>${L2("Lisensi", "Licence")}</dt><dd class="rp-lic">${ccBadge(m.license, 28) || esc(m.license)}</dd></div>` : ""}
       </dl>
       <div class="rp-actions">
         <a class="rp-btn" href="${attr(ctaUrl)}">${ctaText}</a>
         ${n > 1 ? `<button type="button" class="rp-btn rp-btn-ghost" ${flip}>${L2(`Pratinjau ${n} halaman pertama`, `Preview first ${n} pages`)}</button>` : ""}
         ${m.pdf_summary ? `<a class="rp-btn rp-btn-ghost" href="${attr(m.pdf_summary)}">${L2("Unduh ringkasan (PDF)", "Download summary (PDF)")}</a>` : ""}
         <button type="button" class="rp-btn rp-btn-ghost" data-open-cite>${L2("Kutip", "Cite")}</button>
+        <div class="rp-share" data-share-slot data-share-id="${attr(m.id)}"></div>
       </div>
-      <p class="rp-note">${openPdf ? L2("PDF lengkap tersedia terbuka di arsip Zenodo.", "The full PDF is openly available in the Zenodo archive.") : L2("Versi lengkap dalam format PDF diberikan setelah permintaan disetujui tim CHARIS.", "The full PDF is shared once the CHARIS team approves a request.")}</p>
+      <p class="rp-stats" data-stats-for="${attr(m.id)}" aria-label="${attr("Statistik / Metrics")}"></p>
+      <p class="rp-note">${L2("Versi HTML terbuka untuk dibaca. PDF lengkap diberikan setelah permintaan disetujui admin CHARIS; arsip DOI memuat pratinjau dokumen.", "The HTML version is open to read. The full PDF is shared once a CHARIS admin approves a request; the DOI archive holds a document preview.")}</p>
     </aside>
   </div></section>
   <section class="rp-cite" id="cite" hidden><div class="rp-wrap">
@@ -274,8 +289,11 @@ function bodyBlock(m, url, slug) {
 function footBlock(m) {
   return `  <footer class="rp-foot"><div class="rp-wrap rp-foot-in">
     <p><strong>${esc(site.publisher_short)}</strong>, ${esc(site.institution)}, ${esc(site.place)}</p>
-    <p>${m.license ? L2(`Karya ini dilisensikan di bawah ${m.license}. `, `This work is licensed under ${m.license}. `) : ""}<span class="rp-foot-links"><a href="../../index.html#/research">${L2("Kembali ke Repositori", "Back to the Repository")}</a><a href="../../index.html#/privacy">${L2("Kebijakan Privasi", "Privacy Policy")}</a></span></p>
+    ${ccInfo(m.license) ? `<p class="rp-foot-lic">${ccBadge(m.license, 31)}<span>${L2h(`Karya ini dilisensikan di bawah <a href="${ccInfo(m.license).deed}" rel="license noopener" target="_blank">${esc(ccInfo(m.license).id)}</a>.`, `This work is licensed under a <a href="${ccInfo(m.license).deed}" rel="license noopener" target="_blank">${esc(ccInfo(m.license).en)}</a> licence.`)}</span></p>` : (m.license ? `<p>${L2(`Karya ini dilisensikan di bawah ${m.license}.`, `This work is licensed under ${m.license}.`)}</p>` : "")}
+    <p><span class="rp-foot-links"><a href="../../index.html#/research">${L2("Kembali ke Repositori", "Back to the Repository")}</a><a href="../../index.html#/privacy">${L2("Kebijakan Privasi", "Privacy Policy")}</a></span></p>
   </div></footer>
+  <script>document.write('<script src="../../assets/js/config.js?t=' + Date.now() + '"><\\/script>');</script>
+  <script src="../../assets/js/share.js"></script>
   <script src="../assets/flipbook.js" defer></script>`;
 }
 
@@ -332,6 +350,8 @@ for (const slug of folders) {
   const miss = ["id", "type", "title_id", "abstract_id", "date_published"].filter(k => !m[k]);
   if (!Array.isArray(m.authors) || !m.authors.length) miss.push("authors");
   if (miss.length) { errors.push(`${slug}: kolom wajib kosong: ${miss.join(", ")}`); continue; }
+  if (TYPE_OLD[m.type]) m.type = TYPE_OLD[m.type];
+  if (!TYPE_EN[m.type]) { errors.push(`${slug}: type "${m.type}" tidak dikenal. Pilih salah satu: ${Object.keys(TYPE_EN).join(", ")}`); continue; }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(m.date_published)) { errors.push(`${slug}: date_published harus berformat YYYY-MM-DD`); continue; }
   if (ids.has(m.id)) { errors.push(`${slug}: id "${m.id}" sudah dipakai produk lain`); continue; }
   ids.add(m.id);
@@ -351,12 +371,12 @@ for (const slug of folders) {
   write(path.join(REPO, slug, "cite.bib"), citeBib(m, url) + "\n");
   const uploaded = firstCommitDate(file);
   items.push({
-    id: m.id, slug, url: `repositori/${slug}/`, type: m.type, series: m.series || "", title_id: m.title_id, title_en: m.title_en || "",
+    id: m.id, slug, url: `repositori/${slug}/`, type: m.type, type_en: m.type_en || TYPE_EN[m.type], series: m.series || "", subtitle_id: m.subtitle || "", subtitle_en: m.subtitle_en !== undefined ? m.subtitle_en : (m.subtitle || ""), title_id: m.title_id, title_en: m.title_en || "",
     abstract_id: m.abstract_id, abstract_en: m.abstract_en || "", authors: m.authors.map(a => ({ name: a.name, affiliation: a.affiliation || "" })),
     date_published: m.date_published, uploaded, sort_date: m.date_published || uploaded, language: m.language || "id", keywords: m.keywords || [],
     service: m.service || "", project_id: m.project_id || "", doi: cleanDoi(m.doi), license: m.license || "", pages: m.pages || 0, version: m.version || "",
     cover: m.cover ? `repositori/${slug}/${m.cover}` : "", thumb: m.thumb ? `repositori/${slug}/${m.thumb}` : "", preview: m.preview.map(f => `repositori/${slug}/${f}`), pdf_summary: m.pdf_summary ? `repositori/${slug}/${m.pdf_summary}` : "",
-    full_pdf: m.full_pdf || "request", featured: !!m.featured
+    full_pdf: "request", featured: !!m.featured
   });
 }
 
