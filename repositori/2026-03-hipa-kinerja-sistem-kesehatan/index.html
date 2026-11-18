@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- CHARIS:AUTO:HEAD:START -->
+  <title>Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia | CHARIS</title>
+  <script>try{var q=new URLSearchParams(location.search).get("lang"),s=localStorage.getItem("charis_lang"),l=q||s;if(l==="en"||l==="id")document.documentElement.lang=l}catch(e){}</script>
+  <meta name="description" content="Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance">
+  <link rel="canonical" href="https://USERNAME.github.io/charis-website/repositori/2026-03-hipa-kinerja-sistem-kesehatan/">
+  <meta name="citation_title" content="Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia">
+  <meta name="citation_author" content="Ngakan Putu Anom Harjana">
+  <meta name="citation_author_institution" content="Universitas Udayana, Bali, Indonesia">
+  <meta name="citation_author_orcid" content="0000-0002-4649-7185">
+  <meta name="citation_publication_date" content="2026/03/23">
+  <meta name="citation_online_date" content="2026/03/23">
+  <meta name="citation_technical_report_institution" content="CHARIS, Yayasan Peduli Insan Rentan (PINAR Foundation)">
+  <meta name="citation_technical_report_number" content="CHARIS-2026-006">
+  <meta name="citation_publisher" content="CHARIS (Center for Health Analytics, Research and Integrated Services)">
+  <meta name="citation_doi" content="10.5281/zenodo.19177382">
+  <meta name="citation_language" content="id">
+  <meta name="citation_keywords" content="sistem kesehatan; integrasi layanan; kinerja; efisiensi; indeks komposit; analisis spasial; kemiskinan; Profil Kesehatan Indonesia; pemantauan">
+  <meta name="citation_abstract_html_url" content="https://USERNAME.github.io/charis-website/repositori/2026-03-hipa-kinerja-sistem-kesehatan/">
+  <meta name="citation_fulltext_html_url" content="https://USERNAME.github.io/charis-website/repositori/2026-03-hipa-kinerja-sistem-kesehatan/">
+  <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+  <meta name="DC.title" content="Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia">
+  <meta name="DC.creator" content="Ngakan Putu Anom Harjana">
+  <meta name="DC.date" content="2026-03-23">
+  <meta name="DC.publisher" content="CHARIS (Center for Health Analytics, Research and Integrated Services)">
+  <meta name="DC.type" content="Text.Report">
+  <meta name="DC.language" content="id">
+  <meta name="DC.rights" content="CC BY-NC 4.0">
+  <meta name="DC.description" content="Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance Analytics (HIPA) untuk memantau integrasi, efisiensi, dan luaran sistem kesehatan secara baku. Metode: HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia. Indikator dinormalisasi dan digabungkan menjadi indeks kapasitas, kesiapan, integrasi layanan (IILK), luaran, dan konteks sosial-ekonomi. Analisis mencakup skor efisiensi (luaran aktual dibanding yang diharapkan), model multivariabel dan spasial, simulasi kebijakan, dan analisis efektivitas biaya. Hasil: Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas, yang hampir tidak berhubungan dengan luaran. Provinsi berkapasitas setara mencapai luaran yang sangat berbeda, dan lebih dari sepertiga provinsi-tahun berkinerja di bawah harapan. Kesenjangan terpusat di Indonesia bagian timur. Kemiskinan merupakan penentu terkuat (β = −0,826; p &lt; 0,001) dan memoderasi efek integrasi. Kenaikan integrasi 10% sampai 20% diperkirakan menaikkan indeks luaran dari 0,638 menjadi 0,658 sampai 0,677, dan investasi integrasi memberi efek 0,553 per unit biaya dibanding 0,029 untuk kapasitas. Kesimpulan: Peluang terbesar terletak pada perbaikan cara sistem bekerja, bukan penambahan sumber daya. Integrasi layanan perlu menjadi tuas kebijakan utama, investasi dialihkan ke penguatan integrasi, intervensi disasarkan menurut tipologi provinsi, dan HIPA dilembagakan sebagai sistem pemantauan tahunan.">
+  <meta name="DC.identifier" content="doi:10.5281/zenodo.19177382">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia">
+  <meta property="og:description" content="Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan,">
+  <meta property="og:url" content="https://USERNAME.github.io/charis-website/repositori/2026-03-hipa-kinerja-sistem-kesehatan/">
+  <meta property="og:image" content="https://USERNAME.github.io/charis-website/repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-cover.jpg">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Report","name":"Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia","alternateName":"Proposing the Health Integration and Performance Analytics (HIPA) Framework for Monitoring Health System Performance in Indonesia","headline":"Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia","abstract":"Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance Analytics (HIPA) untuk memantau integrasi, efisiensi, dan luaran sistem kesehatan secara baku. Metode: HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia. Indikator dinormalisasi dan digabungkan menjadi indeks kapasitas, kesiapan, integrasi layanan (IILK), luaran, dan konteks sosial-ekonomi. Analisis mencakup skor efisiensi (luaran aktual dibanding yang diharapkan), model multivariabel dan spasial, simulasi kebijakan, dan analisis efektivitas biaya. Hasil: Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas, yang hampir tidak berhubungan dengan luaran. Provinsi berkapasitas setara mencapai luaran yang sangat berbeda, dan lebih dari sepertiga provinsi-tahun berkinerja di bawah harapan. Kesenjangan terpusat di Indonesia bagian timur. Kemiskinan merupakan penentu terkuat (β = −0,826; p \u003c 0,001) dan memoderasi efek integrasi. Kenaikan integrasi 10% sampai 20% diperkirakan menaikkan indeks luaran dari 0,638 menjadi 0,658 sampai 0,677, dan investasi integrasi memberi efek 0,553 per unit biaya dibanding 0,029 untuk kapasitas. Kesimpulan: Peluang terbesar terletak pada perbaikan cara sistem bekerja, bukan penambahan sumber daya. Integrasi layanan perlu menjadi tuas kebijakan utama, investasi dialihkan ke penguatan integrasi, intervensi disasarkan menurut tipologi provinsi, dan HIPA dilembagakan sebagai sistem pemantauan tahunan.","author":[{"@type":"Person","name":"Ngakan Putu Anom Harjana","affiliation":{"@type":"Organization","name":"Universitas Udayana, Bali, Indonesia"},"sameAs":"https://orcid.org/0000-0002-4649-7185"}],"datePublished":"2026-03-23","inLanguage":"id","keywords":"sistem kesehatan, integrasi layanan, kinerja, efisiensi, indeks komposit, analisis spasial, kemiskinan, Profil Kesehatan Indonesia, pemantauan","license":"CC BY-NC 4.0","publisher":{"@type":"Organization","name":"CHARIS (Center for Health Analytics, Research and Integrated Services)"},"url":"https://USERNAME.github.io/charis-website/repositori/2026-03-hipa-kinerja-sistem-kesehatan/","identifier":{"@type":"PropertyValue","propertyID":"DOI","value":"10.5281/zenodo.19177382"},"reportNumber":"CHARIS-2026-006","isAccessibleForFree":true}</script>
+  <!-- CHARIS:AUTO:HEAD:END -->
+  <link rel="icon" href="../../assets/img/favicon.ico" sizes="32x32">
+  <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/report.css">
+  <link rel="stylesheet" href="../../assets/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="lab.css">
+
+  <!-- ============ DATA PRODUK ============ -->
+  <script type="application/json" id="charis-meta">
+{
+  "id": "CHARIS-2026-006",
+  "type": "Kertas kerja",
+  "type_en": "Working paper",
+  "series": "",
+  "title_id": "Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia",
+  "title_en": "Proposing the Health Integration and Performance Analytics (HIPA) Framework for Monitoring Health System Performance in Indonesia",
+  "subtitle": "Bukti 2017 sampai 2024 dan implikasinya bagi kebijakan",
+  "subtitle_en": "Evidence from 2017 to 2024 and implications for future policy",
+  "abstract_id": "Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance Analytics (HIPA) untuk memantau integrasi, efisiensi, dan luaran sistem kesehatan secara baku. Metode: HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia. Indikator dinormalisasi dan digabungkan menjadi indeks kapasitas, kesiapan, integrasi layanan (IILK), luaran, dan konteks sosial-ekonomi. Analisis mencakup skor efisiensi (luaran aktual dibanding yang diharapkan), model multivariabel dan spasial, simulasi kebijakan, dan analisis efektivitas biaya. Hasil: Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas, yang hampir tidak berhubungan dengan luaran. Provinsi berkapasitas setara mencapai luaran yang sangat berbeda, dan lebih dari sepertiga provinsi-tahun berkinerja di bawah harapan. Kesenjangan terpusat di Indonesia bagian timur. Kemiskinan merupakan penentu terkuat (β = −0,826; p < 0,001) dan memoderasi efek integrasi. Kenaikan integrasi 10% sampai 20% diperkirakan menaikkan indeks luaran dari 0,638 menjadi 0,658 sampai 0,677, dan investasi integrasi memberi efek 0,553 per unit biaya dibanding 0,029 untuk kapasitas. Kesimpulan: Peluang terbesar terletak pada perbaikan cara sistem bekerja, bukan penambahan sumber daya. Integrasi layanan perlu menjadi tuas kebijakan utama, investasi dialihkan ke penguatan integrasi, intervensi disasarkan menurut tipologi provinsi, dan HIPA dilembagakan sebagai sistem pemantauan tahunan.",
+  "abstract_en": "Background: Large health investments in Indonesia have not translated into consistent performance gains, performance varies widely across provinces, and existing monitoring focuses on inputs rather than on how the system functions. This work proposes the Health Integration and Performance Analytics (HIPA) framework for standard monitoring of health system integration, efficiency and outcomes. Methods: HIPA was applied to provincial panel data for 2017 to 2024 from the Indonesian Health Profile. Indicators were normalised and aggregated into indices of capacity, readiness, service integration (IILK), outcomes and socio-economic context. The analysis covers efficiency scores (actual versus expected output), multivariable and spatial models, policy simulation and cost-effectiveness analysis. Results: Service integration is the only strong and significant driver of performance, with about ten times the impact of capacity, which shows almost no relationship with outputs. Provinces with similar capacity achieve very different outputs, and more than a third of province-years perform below expectation. Gaps are concentrated in eastern Indonesia. Poverty is the strongest determinant (β = −0.826; p < 0.001) and moderates the effect of integration. A 10% to 20% increase in integration is expected to raise the output index from 0.638 to 0.658 and 0.677, and integration investment yields 0.553 per cost unit compared with 0.029 for capacity. Conclusions: The largest opportunity lies in improving how the system works rather than adding resources. Service integration should be a core policy lever, investment should shift toward integration, interventions should be targeted by provincial typology, and HIPA should be institutionalised as an annual monitoring system.",
+  "authors": [
+    {
+      "name": "Ngakan Putu Anom Harjana",
+      "affiliation": "Universitas Udayana, Bali, Indonesia",
+      "orcid": "0000-0002-4649-7185"
+    }
+  ],
+  "date_published": "2026-03-23",
+  "version": "1",
+  "language": "id",
+  "bilingual": true,
+  "keywords": [
+    "sistem kesehatan",
+    "integrasi layanan",
+    "kinerja",
+    "efisiensi",
+    "indeks komposit",
+    "analisis spasial",
+    "kemiskinan",
+    "Profil Kesehatan Indonesia",
+    "pemantauan"
+  ],
+  "keywords_en": [
+    "health system",
+    "service integration",
+    "performance",
+    "efficiency",
+    "composite index",
+    "spatial analysis",
+    "poverty",
+    "Indonesian Health Profile",
+    "monitoring"
+  ],
+  "project_id": "",
+  "service": "analytics",
+  "doi": "10.5281/zenodo.19177382",
+  "license": "CC BY-NC 4.0",
+  "pages": 11,
+  "cover": "",
+  "pdf_summary": "",
+  "featured": true
+}
+  </script>
+</head>
+<body>
+  <!-- CHARIS:AUTO:BODY:START -->
+  <header class="rp-bar"><div class="rp-wrap rp-bar-in">
+    <a class="rp-brand" href="../../index.html"><img src="../../assets/img/charis-mark.svg" alt="CHARIS" width="112" height="30"></a>
+    <nav class="rp-crumbs" aria-label="Breadcrumb"><a href="../../index.html#/research"><span data-l="id">Repositori</span><span data-l="en" lang="en">Repository</span></a><span aria-hidden="true">/</span><span><span data-l="id">Kertas kerja</span><span data-l="en" lang="en">Working paper</span></span></nav>
+    <div class="rp-lang" role="group" aria-label="Bahasa / Language"><button type="button" data-setlang="id" aria-pressed="true">ID</button><button type="button" data-setlang="en" aria-pressed="false">EN</button></div>
+    <a class="rp-bar-cta" href="../../index.html#/request/CHARIS-2026-006"><span class="cta-long"><span data-l="id">Minta PDF lengkap</span><span data-l="en" lang="en">Request full PDF</span></span><span class="cta-short" aria-hidden="true"><span data-l="id">Minta PDF</span><span data-l="en" lang="en">Request PDF</span></span></a>
+  </div></header>
+  <section class="rp-hero"><div class="rp-wrap rp-hero-cover"><div class="rp-hero-text">
+    <p class="rp-kind"><span><span data-l="id">Kertas kerja</span><span data-l="en" lang="en">Working paper</span></span><span><span data-l="id">Data dan analitik</span><span data-l="en" lang="en">Data and analytics</span></span></p>
+    <h1 class="rp-title"><span data-l="id">Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia</span><span data-l="en" lang="en">Proposing the Health Integration and Performance Analytics (HIPA) Framework for Monitoring Health System Performance in Indonesia</span></h1>
+    <p class="rp-subtitle"><span data-l="id">Bukti 2017 sampai 2024 dan implikasinya bagi kebijakan</span><span data-l="en" lang="en">Evidence from 2017 to 2024 and implications for future policy</span></p>
+    <p class="rp-title-en"><span data-l="id" lang="en">Proposing the Health Integration and Performance Analytics (HIPA) Framework for Monitoring Health System Performance in Indonesia</span><span data-l="en" lang="id">Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia</span></p>
+    <ul class="rp-authors"><li><span class="rp-author">Ngakan Putu Anom Harjana</span><sup>1</sup> <a class="rp-orcid" href="https://orcid.org/0000-0002-4649-7185" aria-label="ORCID Ngakan Putu Anom Harjana">iD</a></li></ul>
+    <ol class="rp-affs"><li>Universitas Udayana, Bali, Indonesia</li></ol>
+  </div><a class="rp-cover" href="auto-cover.jpg" data-flip-pages="[&quot;auto-p1.jpg&quot;,&quot;auto-p2.jpg&quot;,&quot;auto-p3.jpg&quot;,&quot;auto-p4.jpg&quot;,&quot;auto-p5.jpg&quot;]" data-flip-title="Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia" data-flip-request="../../index.html#/request/CHARIS-2026-006" aria-label="Pratinjau 5 halaman pertama"><img src="auto-thumb.jpg" srcset="auto-thumb.jpg 720w, auto-cover.jpg 1800w" sizes="(max-width: 960px) 170px, 240px" alt="Sampul Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia" width="240" height="339" decoding="async"><span class="rp-cover-tag"><span data-l="id">Pratinjau 5 halaman</span><span data-l="en" lang="en">Preview 5 pages</span></span></a></div></section>
+  <section class="rp-front"><div class="rp-wrap rp-front-in">
+    <div class="rp-abstracts">
+      <section class="rp-abstract" lang="id" data-l="id"><h2>Abstrak</h2><p>Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance Analytics (HIPA) untuk memantau integrasi, efisiensi, dan luaran sistem kesehatan secara baku. Metode: HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia. Indikator dinormalisasi dan digabungkan menjadi indeks kapasitas, kesiapan, integrasi layanan (IILK), luaran, dan konteks sosial-ekonomi. Analisis mencakup skor efisiensi (luaran aktual dibanding yang diharapkan), model multivariabel dan spasial, simulasi kebijakan, dan analisis efektivitas biaya. Hasil: Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas, yang hampir tidak berhubungan dengan luaran. Provinsi berkapasitas setara mencapai luaran yang sangat berbeda, dan lebih dari sepertiga provinsi-tahun berkinerja di bawah harapan. Kesenjangan terpusat di Indonesia bagian timur. Kemiskinan merupakan penentu terkuat (β = −0,826; p &lt; 0,001) dan memoderasi efek integrasi. Kenaikan integrasi 10% sampai 20% diperkirakan menaikkan indeks luaran dari 0,638 menjadi 0,658 sampai 0,677, dan investasi integrasi memberi efek 0,553 per unit biaya dibanding 0,029 untuk kapasitas. Kesimpulan: Peluang terbesar terletak pada perbaikan cara sistem bekerja, bukan penambahan sumber daya. Integrasi layanan perlu menjadi tuas kebijakan utama, investasi dialihkan ke penguatan integrasi, intervensi disasarkan menurut tipologi provinsi, dan HIPA dilembagakan sebagai sistem pemantauan tahunan.</p></section>
+      <section class="rp-abstract" lang="en"><h2>Abstract</h2><p>Background: Large health investments in Indonesia have not translated into consistent performance gains, performance varies widely across provinces, and existing monitoring focuses on inputs rather than on how the system functions. This work proposes the Health Integration and Performance Analytics (HIPA) framework for standard monitoring of health system integration, efficiency and outcomes. Methods: HIPA was applied to provincial panel data for 2017 to 2024 from the Indonesian Health Profile. Indicators were normalised and aggregated into indices of capacity, readiness, service integration (IILK), outcomes and socio-economic context. The analysis covers efficiency scores (actual versus expected output), multivariable and spatial models, policy simulation and cost-effectiveness analysis. Results: Service integration is the only strong and significant driver of performance, with about ten times the impact of capacity, which shows almost no relationship with outputs. Provinces with similar capacity achieve very different outputs, and more than a third of province-years perform below expectation. Gaps are concentrated in eastern Indonesia. Poverty is the strongest determinant (β = −0.826; p &lt; 0.001) and moderates the effect of integration. A 10% to 20% increase in integration is expected to raise the output index from 0.638 to 0.658 and 0.677, and integration investment yields 0.553 per cost unit compared with 0.029 for capacity. Conclusions: The largest opportunity lies in improving how the system works rather than adding resources. Service integration should be a core policy lever, investment should shift toward integration, interventions should be targeted by provincial typology, and HIPA should be institutionalised as an annual monitoring system.</p></section>
+      <p class="rp-keywords"><span data-l="id"><strong>Kata kunci:</strong> sistem kesehatan, integrasi layanan, kinerja, efisiensi, indeks komposit, analisis spasial, kemiskinan, Profil Kesehatan Indonesia, pemantauan</span><span data-l="en" lang="en"><strong>Keywords:</strong> health system, service integration, performance, efficiency, composite index, spatial analysis, poverty, Indonesian Health Profile, monitoring</span></p>
+    </div>
+    <aside class="rp-meta" aria-label="Informasi publikasi">
+      <dl>
+        <div><dt><span data-l="id">Terbit</span><span data-l="en" lang="en">Published</span></dt><dd><time datetime="2026-03-23"><span data-l="id">23 Maret 2026</span><span data-l="en" lang="en">23 March 2026</span></time><span data-l="id">, versi 1</span><span data-l="en" lang="en">, version 1</span></dd></div>
+        <div><dt>DOI</dt><dd><a href="https://doi.org/10.5281/zenodo.19177382">10.5281/zenodo.19177382</a></dd></div>
+        <div><dt><span data-l="id">Nomor</span><span data-l="en" lang="en">Number</span></dt><dd>CHARIS-2026-006</dd></div>
+        <div><dt><span data-l="id">Halaman</span><span data-l="en" lang="en">Pages</span></dt><dd>11</dd></div>
+        <div><dt><span data-l="id">Bahasa</span><span data-l="en" lang="en">Language</span></dt><dd><span data-l="id">Indonesia dan Inggris</span><span data-l="en" lang="en">Indonesian and English</span></dd></div>
+        <div><dt><span data-l="id">Lisensi</span><span data-l="en" lang="en">Licence</span></dt><dd class="rp-lic"><a class="rp-cc" href="https://creativecommons.org/licenses/by-nc/4.0/" rel="license noopener" target="_blank" title="Creative Commons Attribution-NonCommercial 4.0 International"><img src="../assets/cc/by_nc.svg" alt="CC BY-NC 4.0" width="80" height="28"></a></dd></div>
+      </dl>
+      <div class="rp-actions">
+        <a class="rp-btn" href="../../index.html#/request/CHARIS-2026-006"><span data-l="id">Minta PDF lengkap</span><span data-l="en" lang="en">Request full PDF</span></a>
+        <button type="button" class="rp-btn rp-btn-ghost" data-flip-pages="[&quot;auto-p1.jpg&quot;,&quot;auto-p2.jpg&quot;,&quot;auto-p3.jpg&quot;,&quot;auto-p4.jpg&quot;,&quot;auto-p5.jpg&quot;]" data-flip-title="Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia" data-flip-request="../../index.html#/request/CHARIS-2026-006"><span data-l="id">Pratinjau 5 halaman pertama</span><span data-l="en" lang="en">Preview first 5 pages</span></button>
+        
+        <button type="button" class="rp-btn rp-btn-ghost" data-open-cite><span data-l="id">Kutip</span><span data-l="en" lang="en">Cite</span></button>
+        <div class="rp-share" data-share-slot data-share-id="CHARIS-2026-006"></div>
+      </div>
+      <p class="rp-stats" data-stats-for="CHARIS-2026-006" aria-label="Statistik / Metrics"></p>
+      <p class="rp-note"><span data-l="id">Versi HTML terbuka untuk dibaca. PDF lengkap diberikan setelah permintaan disetujui admin CHARIS; arsip DOI memuat pratinjau dokumen.</span><span data-l="en" lang="en">The HTML version is open to read. The full PDF is shared once a CHARIS admin approves a request; the DOI archive holds a document preview.</span></p>
+    </aside>
+  </div></section>
+  <section class="rp-cite" id="cite" hidden><div class="rp-wrap">
+    <h2><span data-l="id">Cara mengutip</span><span data-l="en" lang="en">How to cite</span></h2>
+    <div class="rp-cite-tabs" role="group" aria-label="Format kutipan">
+      <button type="button" data-fmt="apa" aria-pressed="true">APA</button><button type="button" data-fmt="bib" aria-pressed="false">BibTeX</button><button type="button" data-fmt="ris" aria-pressed="false">RIS</button>
+    </div>
+    <pre class="rp-cite-box" data-fmt-box="apa">Ngakan Putu Anom Harjana (2026). Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia. CHARIS, Yayasan Peduli Insan Rentan (PINAR Foundation). https://doi.org/10.5281/zenodo.19177382</pre>
+    <pre class="rp-cite-box" data-fmt-box="bib" hidden>@techreport{harjana2026,
+  title       = {Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia},
+  author      = {Ngakan Putu Anom Harjana},
+  institution = {CHARIS, Yayasan Peduli Insan Rentan (PINAR Foundation)},
+  year        = {2026},
+  doi         = {10.5281/zenodo.19177382},
+  url         = {https://doi.org/10.5281/zenodo.19177382}
+}</pre>
+    <pre class="rp-cite-box" data-fmt-box="ris" hidden>TY  - RPRT
+AU  - Ngakan Putu Anom Harjana
+TI  - Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia
+T2  - Proposing the Health Integration and Performance Analytics (HIPA) Framework for Monitoring Health System Performance in Indonesia
+PY  - 2026
+DA  - 2026/03/23
+PB  - CHARIS, Yayasan Peduli Insan Rentan (PINAR Foundation)
+CY  - Gianyar, Bali, Indonesia
+DO  - 10.5281/zenodo.19177382
+UR  - https://doi.org/10.5281/zenodo.19177382
+AB  - Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance Analytics (HIPA) untuk memantau integrasi, efisiensi, dan luaran sistem kesehatan secara baku. Metode: HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia. Indikator dinormalisasi dan digabungkan menjadi indeks kapasitas, kesiapan, integrasi layanan (IILK), luaran, dan konteks sosial-ekonomi. Analisis mencakup skor efisiensi (luaran aktual dibanding yang diharapkan), model multivariabel dan spasial, simulasi kebijakan, dan analisis efektivitas biaya. Hasil: Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas, yang hampir tidak berhubungan dengan luaran. Provinsi berkapasitas setara mencapai luaran yang sangat berbeda, dan lebih dari sepertiga provinsi-tahun berkinerja di bawah harapan. Kesenjangan terpusat di Indonesia bagian timur. Kemiskinan merupakan penentu terkuat (β = −0,826; p &lt; 0,001) dan memoderasi efek integrasi. Kenaikan integrasi 10% sampai 20% diperkirakan menaikkan indeks luaran dari 0,638 menjadi 0,658 sampai 0,677, dan investasi integrasi memberi efek 0,553 per unit biaya dibanding 0,029 untuk kapasitas. Kesimpulan: Peluang terbesar terletak pada perbaikan cara sistem bekerja, bukan penambahan sumber daya. Integrasi layanan perlu menjadi tuas kebijakan utama, investasi dialihkan ke penguatan integrasi, intervensi disasarkan menurut tipologi provinsi, dan HIPA dilembagakan sebagai sistem pemantauan tahunan.
+KW  - sistem kesehatan
+KW  - integrasi layanan
+KW  - kinerja
+KW  - efisiensi
+KW  - indeks komposit
+KW  - analisis spasial
+KW  - kemiskinan
+KW  - Profil Kesehatan Indonesia
+KW  - pemantauan
+LA  - id
+ER  - </pre>
+    <div class="rp-cite-actions"><button type="button" class="rp-btn rp-btn-ghost" data-copy-cite><span data-l="id">Salin</span><span data-l="en" lang="en">Copy</span></button><a class="rp-btn rp-btn-ghost" href="cite.ris" download><span data-l="id">Unduh .ris</span><span data-l="en" lang="en">Download .ris</span></a><a class="rp-btn rp-btn-ghost" href="cite.bib" download><span data-l="id">Unduh .bib</span><span data-l="en" lang="en">Download .bib</span></a></div>
+  </div></section>
+  <!-- CHARIS:AUTO:BODY:END -->
+
+  <main class="rp-main">
+    <div class="rp-wrap rp-layout">
+      <nav class="rp-toc" id="toc" aria-label="Daftar isi"></nav>
+      <article class="rp-content" id="content">
+<!-- ================= ISI LAPORAN: MULAI ================= -->
+
+<div data-l="id">
+<aside class="callout">
+  <p><strong>Pesan kunci.</strong> Kerangka Health Integration and Performance Analytics (HIPA) diterapkan pada data profil kesehatan provinsi 2017 sampai 2024. Hasilnya konsisten: kinerja sistem kesehatan lebih ditentukan oleh seberapa baik layanan terintegrasi daripada oleh banyaknya sumber daya. Integrasi layanan berdampak sekitar sepuluh kali lebih besar daripada kapasitas, memberikan imbal hasil sekitar 19 kali per unit biaya, dan peningkatan integrasi 10% sampai 20% diperkirakan menaikkan kinerja 3% sampai 6% tanpa tambahan sumber daya. Kemiskinan tetap menjadi kendala terkuat, dan kesenjangan terpusat di Indonesia bagian timur.</p>
+</aside>
+
+<h2 id="latar">1. Latar belakang</h2>
+<p>Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, dan kinerja sistem kesehatan sangat bervariasi antarprovinsi. Pemantauan yang ada lebih banyak berfokus pada masukan, seperti jumlah fasilitas dan tenaga, daripada pada cara sistem berfungsi. Belum ada kerangka baku untuk melacak integrasi dan efisiensi layanan dari waktu ke waktu. Masalah utamanya bukan kekurangan data, melainkan belum adanya sistem yang mengubah data menjadi wawasan kebijakan yang dapat ditindaklanjuti.</p>
+
+<h2 id="kerangka">2. Kerangka HIPA</h2>
+<p>HIPA memadukan indikator sistem kesehatan dari berbagai dimensi ke dalam satu kerangka pemantauan. Kerangka ini mengikuti jalur lengkap dari kapasitas, kesiapan dan mutu, penyediaan layanan, sampai luaran kesehatan, dengan memperhitungkan konteks sosial-ekonomi. Dengan indikator dan cara penghitungan yang sama, kinerja provinsi dapat dilacak secara konsisten antarwilayah dan antarwaktu (Gambar 1).</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Kerangka HIPA: lima ranah indikator</strong></div>
+  <div class="ifig-plot" data-fig="fw"></div>
+  <figcaption>Gambar 1. Lima ranah indikator dalam kerangka HIPA. Pilih satu ranah untuk melihat indikatornya. Integrasi layanan menjadi penghubung antara kapasitas dan luaran kesehatan.</figcaption>
+</figure>
+
+<h2 id="metode">3. Metode</h2>
+<p>Kerangka HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia (Kementerian Kesehatan Republik Indonesia, 2018 sampai 2025) sebagai uji konsep untuk pemantauan kebijakan berkelanjutan. Analisis mencakup empat langkah:</p>
+<ul>
+  <li><strong>Penyusunan indeks komposit.</strong> Indikator mentah dibersihkan dan diselaraskan, dinormalisasi dengan metode min-maks atau skor-z, lalu digabungkan per ranah menjadi indeks kapasitas, kesiapan, integrasi, luaran, dan konteks. Indeks Integrasi Layanan Kesehatan (IILK) dibangun dari indikator penyediaan layanan yang menggambarkan koordinasi, kesinambungan, dan cakupan. Prosedur yang sama diterapkan untuk semua provinsi dan tahun.</li>
+  <li><strong>Analisis efisiensi.</strong> Luaran yang diharapkan dari tingkat kapasitas tiap provinsi dibandingkan dengan luaran aktualnya. Skor efisiensi adalah selisih keduanya: nilai di atas nol berarti berkinerja lebih baik daripada harapan.</li>
+  <li><strong>Analisis multivariabel dan spasial.</strong> Hubungan integrasi, kapasitas, dan kemiskinan dengan indeks luaran diuji bersama, termasuk interaksi antara integrasi dan kemiskinan, serta dipetakan menurut provinsi dan tipologi.</li>
+  <li><strong>Simulasi dan efektivitas biaya.</strong> Indeks luaran diprediksi untuk skenario kenaikan integrasi 10% dan 20%, dan dampak per unit biaya dibandingkan antara investasi integrasi dan investasi kapasitas.</li>
+</ul>
+
+<h2 id="integrasi">4. Integrasi, bukan kapasitas, yang menggerakkan kinerja</h2>
+<p>Kapasitas sistem, seperti fasilitas, tempat tidur, dan tenaga kesehatan, hampir tidak berhubungan dengan indeks luaran layanan. Sebaliknya, integrasi layanan menunjukkan hubungan positif yang kuat: provinsi dengan integrasi lebih tinggi secara konsisten mencapai luaran lebih baik (Gambar 2). Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas. Perbedaan luaran lebih ditentukan oleh cara sistem bekerja daripada oleh jumlah sumber daya yang dimiliki.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Kapasitas dan integrasi terhadap luaran layanan</strong></div>
+  <div class="ifig-plot" data-fig="drivers"></div>
+  <figcaption>Gambar 2. Garis tren hubungan indeks kapasitas sistem dan indeks integrasi layanan dengan indeks luaran layanan, provinsi-tahun 2017 sampai 2024. Arahkan kursor pada grafik untuk membaca nilai prediksi.</figcaption>
+</figure>
+
+<h2 id="efisiensi">5. Sistem kesehatan tidak kekurangan sumber daya, tetapi kurang efisien</h2>
+<p>Provinsi dengan kapasitas yang setara mencapai luaran yang sangat berbeda. Lebih dari sepertiga provinsi-tahun berkinerja di bawah yang diharapkan dari kapasitasnya, dan sebagian kecil berada jauh di bawahnya (Gambar 3). Skor efisiensi tidak berhubungan dengan tingkat kapasitas, sehingga inefisiensi bersifat sistemik dan tidak terbatas pada wilayah bersumber daya rendah. Peluang perbaikan terbesar ada pada pengurangan inefisiensi, bukan penambahan sumber daya.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Sebaran skor efisiensi</strong></div>
+  <div class="ifig-plot" data-fig="eff"></div>
+  <figcaption>Gambar 3. Jumlah provinsi-tahun menurut skor efisiensi (luaran aktual dikurangi luaran yang diharapkan dari kapasitasnya). Batang merah berada di bawah harapan.</figcaption>
+</figure>
+
+<h2 id="kesenjangan">6. Kesenjangan terpusat secara struktural antarprovinsi</h2>
+<p>Rata-rata nasional menutupi kesenjangan wilayah yang dalam. Rata-rata IILK berkisar dari sekitar 0,67 di Kepulauan Bangka Belitung dan 0,65 di DI Yogyakarta sampai di bawah 0,20 di Papua Tengah dan Papua Pegunungan. Provinsi tertinggal terpusat di Indonesia bagian timur, terutama Maluku dan Tanah Papua (Gambar 4). Tipologi integrasi terhadap kinerja memperlihatkan bahwa tantangan setiap kelompok provinsi berbeda, sehingga respons kebijakannya pun perlu dibedakan.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Integrasi layanan dan tipologi menurut provinsi</strong><div class="ifig-ctl" data-ctl="view"></div></div>
+  <div class="ifig-plot" data-fig="prov"></div>
+  <figcaption>Gambar 4. Rata-rata Indeks Integrasi Layanan Kesehatan (IILK) 2017 sampai 2024 dan tipologi integrasi terhadap kinerja. Klik provinsi untuk rinciannya. Peta memakai batas 33 provinsi induk; nilai provinsi hasil pemekaran ditampilkan dalam keterangan provinsi induknya.</figcaption>
+</figure>
+
+<h2 id="kemiskinan">7. Kemiskinan membatasi kinerja</h2>
+<p>Analisis multivariabel menunjukkan bahwa kemiskinan merupakan penentu kinerja terkuat (β = −0,826; p &lt; 0,001): semakin tinggi kemiskinan, semakin lemah luaran layanan (Gambar 5). Integrasi layanan tetap bermakna setelah faktor sosial-ekonomi dikendalikan, tetapi hubungannya dimoderasi oleh kemiskinan, sehingga sistem yang terintegrasi baik pun tidak mencapai potensinya di wilayah miskin. Setelah variabel lain dikendalikan, kapasitas sistem justru berhubungan negatif dengan kinerja, yang mengisyaratkan inefisiensi pemanfaatan sumber daya.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Kemiskinan terhadap luaran layanan</strong></div>
+  <div class="ifig-plot" data-fig="pov"></div>
+  <figcaption>Gambar 5. Garis tren hubungan tingkat kemiskinan dengan indeks luaran layanan. Semakin tinggi kemiskinan, semakin rendah kinerja.</figcaption>
+</figure>
+
+<h2 id="simulasi">8. Simulasi kebijakan dan efektivitas biaya</h2>
+<p>Simulasi menunjukkan bahwa kenaikan integrasi layanan 10% menaikkan indeks luaran nasional dari 0,638 menjadi 0,658, dan kenaikan 20% menjadi 0,677, atau sekitar 3% sampai 6% (Gambar 6). Kenaikan ini menggeser seluruh sebaran kinerja ke atas, sehingga sekaligus menaikkan rata-rata dan mempersempit kesenjangan antarwilayah, tanpa penambahan sumber daya.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Simulasi peningkatan integrasi layanan</strong></div>
+  <div class="ifig-plot" data-fig="scen"></div>
+  <figcaption>Gambar 6. Indeks luaran yang diprediksi pada kondisi saat ini dan bila integrasi layanan naik 10% atau 20%.</figcaption>
+</figure>
+<p>Dari sisi biaya, investasi integrasi menghasilkan efek 0,553 per unit biaya, dibanding 0,029 untuk investasi kapasitas, atau sekitar 19 kali lebih tinggi (Gambar 7). Penargetan pada wilayah miskin memperkuat efektivitas integrasi. Artinya, sistem kesehatan saat ini lebih dibatasi oleh seberapa efektif layanan dikoordinasikan dan ditargetkan daripada oleh jumlah sumber daya absolut.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Dampak per unit biaya</strong></div>
+  <div class="ifig-plot" data-fig="ce"></div>
+  <figcaption>Gambar 7. Efek pada indeks luaran per unit biaya untuk investasi kapasitas dan investasi integrasi layanan.</figcaption>
+</figure>
+
+<h2 id="coba">9. Coba sendiri: simulator kebijakan HIPA</h2>
+<p>Ubah besaran kenaikan integrasi, kapasitas, dan penurunan kemiskinan untuk melihat perkiraan indeks luaran nasional, lalu atur porsi anggaran tambahan untuk penguatan integrasi. Simulator memakai pendekatan linear dari hasil yang dilaporkan.</p>
+</div>
+<div data-l="en" lang="en">
+<aside class="callout">
+  <p><strong>Key message.</strong> The Health Integration and Performance Analytics (HIPA) framework was applied to provincial health profile data for 2017 to 2024. The results are consistent: health system performance depends more on how well services are integrated than on how many resources exist. Service integration has about ten times the impact of capacity, returns about 19 times more per cost unit, and a 10% to 20% gain in integration is expected to raise performance by 3% to 6% without additional resources. Poverty remains the strongest constraint, and gaps are concentrated in eastern Indonesia.</p>
+</aside>
+
+<h2 id="background">1. Background</h2>
+<p>Large health investments in Indonesia have not translated into consistent performance gains, and health system performance varies widely across provinces. Existing monitoring focuses on inputs, such as numbers of facilities and staff, rather than on how the system functions. There is no standard framework to track service integration and efficiency over time. The core problem is not a lack of data but the lack of a system that turns data into actionable policy insight.</p>
+
+<h2 id="framework">2. The HIPA framework</h2>
+<p>HIPA brings multi-dimensional health system indicators into one monitoring framework. It follows the full pathway from capacity, readiness and quality, and service delivery to health outcomes, while accounting for socio-economic context. With the same indicators and methods, provincial performance can be tracked consistently across regions and over time (Figure 1).</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>The HIPA framework: five indicator domains</strong></div>
+  <div class="ifig-plot" data-fig="fw"></div>
+  <figcaption>Figure 1. The five indicator domains of the HIPA framework. Select a domain to see its indicators. Service integration is the link between capacity and health outcomes.</figcaption>
+</figure>
+
+<h2 id="methods">3. Methods</h2>
+<p>HIPA was applied to provincial panel data for 2017 to 2024 from the Indonesian Health Profile (Ministry of Health of the Republic of Indonesia, 2018 to 2025) as a proof of concept for continuous policy monitoring. The analysis has four steps:</p>
+<ul>
+  <li><strong>Composite indices.</strong> Raw indicators were cleaned and harmonised, normalised with min-max or z-scores, and aggregated by domain into capacity, readiness, integration, outcome and context indices. The Health Service Integration Index (IILK) is built from service delivery indicators reflecting coordination, continuity and coverage. The same procedure is applied to all provinces and years.</li>
+  <li><strong>Efficiency analysis.</strong> The output expected from each province's capacity is compared with its actual output. The efficiency score is the difference: values above zero mean better performance than expected.</li>
+  <li><strong>Multivariable and spatial analysis.</strong> The associations of integration, capacity and poverty with the output index are tested together, including the interaction between integration and poverty, and mapped by province and typology.</li>
+  <li><strong>Simulation and cost-effectiveness.</strong> The output index is predicted for 10% and 20% increases in integration, and impact per cost unit is compared between integration and capacity investment.</li>
+</ul>
+
+<h2 id="integration">4. Integration, not capacity, drives performance</h2>
+<p>System capacity, such as facilities, beds and health workers, shows almost no relationship with the service output index. Service integration, by contrast, shows a strong positive relationship: provinces with higher integration consistently achieve better outputs (Figure 2). Service integration is the only strong and significant driver of performance, with about ten times the impact of capacity. Differences in outcomes depend on how the system works rather than on how much it has.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Capacity and integration against service output</strong></div>
+  <div class="ifig-plot" data-fig="drivers"></div>
+  <figcaption>Figure 2. Fitted lines relating the system capacity index and the service integration index to the service output index, province-years 2017 to 2024. Hover over the chart to read predicted values.</figcaption>
+</figure>
+
+<h2 id="efficiency">5. The health system is not under-resourced; it is inefficient</h2>
+<p>Provinces with similar capacity achieve very different outputs. More than a third of province-years perform below what their capacity would predict, and a few fall far below (Figure 3). Efficiency scores are unrelated to capacity, so inefficiency is systemic and not limited to low-resource areas. The main opportunity lies in reducing inefficiency, not in adding resources.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Distribution of efficiency scores</strong></div>
+  <div class="ifig-plot" data-fig="eff"></div>
+  <figcaption>Figure 3. Number of province-years by efficiency score (actual output minus the output expected from capacity). Red bars fall below expectation.</figcaption>
+</figure>
+
+<h2 id="disparities">6. Gaps are structurally concentrated across provinces</h2>
+<p>National averages mask deep regional disparities. Average IILK ranges from about 0.67 in the Bangka Belitung Islands and 0.65 in Yogyakarta to below 0.20 in Central Papua and Highland Papua. Lagging provinces are concentrated in eastern Indonesia, especially Maluku and the Papua region (Figure 4). The integration versus performance typology shows that each group of provinces faces different challenges and therefore needs a different policy response.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Service integration and typology by province</strong><div class="ifig-ctl" data-ctl="view"></div></div>
+  <div class="ifig-plot" data-fig="prov"></div>
+  <figcaption>Figure 4. Average Health Service Integration Index (IILK) 2017 to 2024 and the integration versus performance typology. Click a province for details. The map uses the boundaries of 33 parent provinces; values for newer provinces appear in the details of their parent province.</figcaption>
+</figure>
+
+<h2 id="poverty">7. Poverty constrains performance</h2>
+<p>Multivariable analysis shows that poverty is the strongest determinant of performance (β = −0.826; p &lt; 0.001): higher poverty goes with weaker service outputs (Figure 5). Service integration remains significant after socio-economic factors are controlled for, but its effect is moderated by poverty, so even a well-integrated system falls short of its potential in poor areas. After controlling for other variables, system capacity is negatively associated with performance, pointing to inefficient use of resources.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Poverty against service output</strong></div>
+  <div class="ifig-plot" data-fig="pov"></div>
+  <figcaption>Figure 5. Fitted line relating the poverty rate to the service output index. Higher poverty goes with lower performance.</figcaption>
+</figure>
+
+<h2 id="simulation">8. Policy simulation and cost-effectiveness</h2>
+<p>Simulation shows that a 10% increase in service integration raises the national output index from 0.638 to 0.658, and a 20% increase to 0.677, or about 3% to 6% (Figure 6). These gains shift the whole performance distribution upward, raising the average and narrowing regional gaps at the same time, without additional resources.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Simulated gains from service integration</strong></div>
+  <div class="ifig-plot" data-fig="scen"></div>
+  <figcaption>Figure 6. Predicted output index at current levels and if service integration rises by 10% or 20%.</figcaption>
+</figure>
+<p>In cost terms, integration investment yields an effect of 0.553 per cost unit, compared with 0.029 for capacity investment, about 19 times higher (Figure 7). Targeting poorer areas amplifies the effect of integration. The health system is currently constrained less by the absolute level of resources than by how effectively services are coordinated and targeted.</p>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Impact per cost unit</strong></div>
+  <div class="ifig-plot" data-fig="ce"></div>
+  <figcaption>Figure 7. Effect on the output index per cost unit for capacity investment and for service integration investment.</figcaption>
+</figure>
+
+<h2 id="try">9. Try it yourself: the HIPA policy simulator</h2>
+<p>Change the increase in integration, capacity and the reduction in poverty to see the expected national output index, then set the share of additional budget for strengthening integration. The simulator uses linear approximations of the reported results.</p>
+</div>
+<section class="sim-box interactive" id="hipasim" aria-label="Simulator kebijakan HIPA">
+  <div class="sim-head">
+    <h3><span data-l="id">Simulator kebijakan HIPA</span><span data-l="en" lang="en">HIPA policy simulator</span></h3>
+    <p><span data-l="id">Perkiraan indeks luaran nasional menurut perubahan integrasi, kapasitas, dan kemiskinan.</span><span data-l="en" lang="en">Expected national output index under changes in integration, capacity and poverty.</span></p>
+  </div>
+  <div class="sim-body">
+    <div class="sim-grid cols">
+      <div>
+        <div class="ctl"><span class="lab"><span data-l="id">Skenario cepat</span><span data-l="en" lang="en">Quick scenarios</span></span><div class="seg" role="group" aria-label="Skenario"><button type="button" data-preset="int20"><span data-l="id">Integrasi +20%</span><span data-l="en" lang="en">Integration +20%</span></button><button type="button" data-preset="cap20"><span data-l="id">Kapasitas +20%</span><span data-l="en" lang="en">Capacity +20%</span></button><button type="button" data-preset="both"><span data-l="id">Integrasi dan kemiskinan</span><span data-l="en" lang="en">Integration and poverty</span></button></div></div>
+        <div class="ctl-group"><p><span data-l="id">Perubahan kebijakan</span><span data-l="en" lang="en">Policy changes</span></p>
+        <div class="ctl"><label for="hs_int"><span><span data-l="id">Kenaikan integrasi layanan</span><span data-l="en" lang="en">Increase in service integration</span></span><output id="hs_int_o"></output></label><input type="range" id="hs_int" min="0" max="40" step="1"></div>
+        <div class="ctl"><label for="hs_cap"><span><span data-l="id">Kenaikan kapasitas sistem</span><span data-l="en" lang="en">Increase in system capacity</span></span><output id="hs_cap_o"></output></label><input type="range" id="hs_cap" min="0" max="40" step="1"></div>
+        <div class="ctl"><label for="hs_pov"><span><span data-l="id">Penurunan tingkat kemiskinan</span><span data-l="en" lang="en">Reduction in the poverty rate</span></span><output id="hs_pov_o"></output></label><input type="range" id="hs_pov" min="0" max="5" step="0.1"></div></div>
+        <div class="ctl-group"><p><span data-l="id">Alokasi anggaran tambahan</span><span data-l="en" lang="en">Additional budget allocation</span></p>
+        <div class="ctl"><label for="hs_share"><span><span data-l="id">Porsi untuk penguatan integrasi</span><span data-l="en" lang="en">Share for strengthening integration</span></span><output id="hs_share_o"></output></label><input type="range" id="hs_share" min="0" max="100" step="5"></div></div>
+        <button type="button" class="sim-btn ghost" id="hs_reset"><span data-l="id">Kembali ke awal</span><span data-l="en" lang="en">Start over</span></button>
+      </div>
+      <div>
+        <div class="chart"><p class="t"><span data-l="id">Dekomposisi indeks luaran</span><span data-l="en" lang="en">Output index decomposition</span></p><div class="ifig-plot" id="hs_chart"></div><div class="calc-key" id="hs_legend"></div></div>
+        <div class="kpis" id="hs_kpi" aria-live="polite"></div>
+        <p class="sim-narr" id="hs_narr" aria-live="polite"></p>
+      </div>
+    </div>
+    <p class="sim-note"><span data-l="id">Pendekatan linear dari hasil yang dilaporkan: integrasi sekitar 0,002 poin per 1%, kapasitas sekitar sepersepuluhnya, kemiskinan 0,008 poin per 1 poin persen, dan dampak per unit biaya 0,553 untuk integrasi serta 0,029 untuk kapasitas.</span><span data-l="en" lang="en">Linear approximations of the reported results: integration about 0.002 points per 1%, capacity about a tenth of that, poverty 0.008 points per percentage point, and impact per cost unit of 0.553 for integration and 0.029 for capacity.</span></p>
+  </div>
+</section>
+
+<div data-l="id">
+<h2 id="rekomendasi">10. Rekomendasi</h2>
+<p>Bukti dari kerangka HIPA menunjukkan bahwa memperbaiki cara sistem kesehatan berfungsi, terutama melalui integrasi layanan yang lebih kuat, memberikan imbal hasil kinerja tertinggi. Mengoptimalkan koordinasi, kesinambungan perawatan, dan proses penyediaan layanan menghasilkan perbaikan yang lebih besar dan konsisten daripada sekadar menambah sumber daya.</p>
+<ol>
+  <li><strong>Jadikan integrasi sebagai tuas kebijakan utama.</strong> Perkuat sistem rujukan dan koordinasi perawatan, serta posisikan layanan primer sebagai pengintegrasi sistem agar layanan selaras, fragmentasi berkurang, dan efisiensi meningkat.</li>
+  <li><strong>Alihkan investasi ke penguatan integrasi.</strong> Geser anggaran dari perluasan infrastruktur ke penguatan cara sistem bekerja, termasuk mekanisme koordinasi dan kesinambungan perawatan, serta insentif bagi penyedia yang memberikan layanan terhubung dan berpusat pada pasien.</li>
+  <li><strong>Sasarkan intervensi menurut tipologi provinsi.</strong> Provinsi berkapasitas tinggi tetapi berkinerja rendah memerlukan perbaikan tata kelola, koordinasi, dan efisiensi. Provinsi berkapasitas rendah dan berkinerja rendah memerlukan pendekatan gabungan yang memperkuat integrasi sekaligus menangani kendala struktural seperti kemiskinan dan keterbatasan akses.</li>
+  <li><strong>Lembagakan HIPA sebagai sistem pemantauan nasional.</strong> Terapkan HIPA setiap tahun pada Profil Kesehatan Indonesia untuk pelacakan kinerja, perbandingan antarprovinsi, dan evaluasi kebijakan secara baku.</li>
+</ol>
+<div class="table-wrap">
+<table>
+  <caption>Tabel 1. Arah kebijakan menurut tipologi provinsi</caption>
+  <thead><tr><th>Tipologi</th><th>Contoh provinsi</th><th>Arah kebijakan</th></tr></thead>
+  <tbody>
+    <tr><td>Integrasi tinggi, kinerja tinggi</td><td>Bali, Jawa Tengah, Sulawesi Selatan</td><td>Pertahankan capaian dan jadikan acuan pembelajaran</td></tr>
+    <tr><td>Integrasi tinggi, kinerja rendah</td><td>Aceh, Riau, Kalimantan Selatan</td><td>Tangani kendala struktural dan perbaiki efisiensi pemanfaatan sumber daya</td></tr>
+    <tr><td>Integrasi rendah, kinerja tinggi</td><td>Sumatera Utara, Jawa Barat, Sulawesi Utara</td><td>Perkuat rujukan dan koordinasi agar capaian berkelanjutan</td></tr>
+    <tr><td>Integrasi rendah, kinerja rendah</td><td>Kalimantan Barat, Nusa Tenggara Timur, Papua</td><td>Pendekatan gabungan: integrasi layanan dan dukungan struktural</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="keterbatasan">11. Catatan metodologis dan keterbatasan</h2>
+<p>Konsep dan analisis dalam karya ini bersifat awal dan akan disempurnakan melalui pengembangan metodologi dan keterlibatan pemangku kepentingan. Beberapa catatan perlu diperhatikan saat membaca hasilnya.</p>
+<ul>
+  <li><strong>Desain observasional.</strong> Hubungan yang ditemukan bersifat asosiatif. Klaim bahwa integrasi menggerakkan kinerja perlu diuji lebih lanjut dengan desain yang memperhitungkan faktor perancu dan kausalitas terbalik.</li>
+  <li><strong>Nilai pada halaman ini.</strong> Nilai IILK per provinsi, tipologi, sebaran efisiensi, dan garis tren dibaca dari grafik hasil analisis dan dibulatkan. Nilai skenario, koefisien kemiskinan, dan efektivitas biaya mengikuti label yang dilaporkan.</li>
+  <li><strong>Penamaan provinsi.</strong> Kepulauan Bangka Belitung muncul dua kali dengan nama berbeda dan nilai berbeda (sekitar 0,67 dan 0,62), yang menandakan perlunya penyelarasan nama wilayah antartahun sebelum indeks dihitung.</li>
+  <li><strong>Konsistensi tipologi.</strong> Klasifikasi tipologi tidak sepenuhnya selaras dengan peringkat IILK rata-rata; misalnya Kalimantan Utara termasuk kelompok unggul menurut IILK tetapi masuk kuadran integrasi rendah, dan Sulawesi Barat sebaliknya. Ambang dan periode penentuan kuadran perlu dijelaskan. Pada peta sumber, DKI Jakarta dan DI Yogyakarta tidak tergambar terpisah sehingga tipologinya tidak ditampilkan.</li>
+  <li><strong>Besaran efek.</strong> Rasio dampak sekitar sepuluh kali dan imbal hasil 19 kali bergantung pada spesifikasi model dan definisi unit biaya, yang perlu dijabarkan. Hubungan kapasitas yang nihil secara bivariat tetapi negatif secara multivariabel juga perlu ditafsirkan hati-hati karena kemungkinan kolinearitas dengan kemiskinan dan integrasi.</li>
+  <li><strong>Simulator.</strong> Simulator memakai pendekatan linear, menganggap efek tetap pada setiap tingkat, dan belum memasukkan interaksi integrasi dengan kemiskinan. Hasilnya adalah ilustrasi arah dan besaran, bukan proyeksi.</li>
+  <li><strong>Pemekaran wilayah.</strong> Provinsi baru di Tanah Papua hanya memiliki data untuk sebagian periode, dan peta memakai batas 33 provinsi induk.</li>
+</ul>
+</div>
+<div data-l="en" lang="en">
+<h2 id="recommendations">10. Recommendations</h2>
+<p>Evidence from the HIPA framework shows that improving how the health system functions, particularly through stronger service integration, delivers the highest returns in performance. Optimising coordination, continuity of care and service delivery processes yields larger and more consistent gains than expanding resources alone.</p>
+<ol>
+  <li><strong>Make integration a core policy lever.</strong> Strengthen referral systems and care coordination, and position primary care as the system integrator so that services align, fragmentation falls and efficiency improves.</li>
+  <li><strong>Reallocate investment toward integration.</strong> Shift budgets from infrastructure expansion to strengthening how the system works, including coordination and continuity mechanisms, and incentives that reward providers for connected, patient-centred care.</li>
+  <li><strong>Target interventions by provincial typology.</strong> Provinces with high capacity but low performance need better governance, coordination and efficiency. Provinces with both low capacity and low performance need a combined approach that strengthens integration while addressing structural constraints such as poverty and limited access.</li>
+  <li><strong>Institutionalise HIPA as a national monitoring system.</strong> Apply HIPA annually to the Indonesian Health Profile for standard performance tracking, provincial benchmarking and policy evaluation.</li>
+</ol>
+<div class="table-wrap">
+<table>
+  <caption>Table 1. Policy direction by provincial typology</caption>
+  <thead><tr><th>Typology</th><th>Example provinces</th><th>Policy direction</th></tr></thead>
+  <tbody>
+    <tr><td>High integration, high performance</td><td>Bali, Central Java, South Sulawesi</td><td>Sustain results and use as a learning benchmark</td></tr>
+    <tr><td>High integration, low performance</td><td>Aceh, Riau, South Kalimantan</td><td>Address structural constraints and improve efficiency of resource use</td></tr>
+    <tr><td>Low integration, high performance</td><td>North Sumatra, West Java, North Sulawesi</td><td>Strengthen referral and coordination to sustain gains</td></tr>
+    <tr><td>Low integration, low performance</td><td>West Kalimantan, East Nusa Tenggara, Papua</td><td>A combined approach: service integration and structural support</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="limitations">11. Methodological notes and limitations</h2>
+<p>The concepts and analyses in this work are preliminary and will be refined through methodological development and stakeholder engagement. Several points matter when reading the results.</p>
+<ul>
+  <li><strong>Observational design.</strong> The associations found are not causal. The claim that integration drives performance needs further testing with designs that account for confounding and reverse causality.</li>
+  <li><strong>Values on this page.</strong> Provincial IILK values, typology, the efficiency distribution and fitted lines are read from the analysis figures and rounded. Scenario values, the poverty coefficient and cost-effectiveness follow the reported labels.</li>
+  <li><strong>Province naming.</strong> The Bangka Belitung Islands appear twice under different names with different values (about 0.67 and 0.62), indicating a need to harmonise province names across years before indices are computed.</li>
+  <li><strong>Typology consistency.</strong> The typology does not fully match the average IILK ranking; for example, North Kalimantan is in the leading group by IILK but in the low-integration quadrant, and West Sulawesi the reverse. The thresholds and period used to assign quadrants should be stated. In the source map, Jakarta and Yogyakarta are not drawn separately, so their typology is not shown.</li>
+  <li><strong>Effect sizes.</strong> The roughly tenfold impact ratio and the 19-fold return depend on model specification and the definition of a cost unit, which should be described. A capacity association that is null in bivariate analysis but negative in multivariable analysis should be read with care given likely collinearity with poverty and integration.</li>
+  <li><strong>Simulator.</strong> The simulator uses linear approximations, assumes constant effects at every level and does not yet include the interaction between integration and poverty. Its results illustrate direction and scale; they are not projections.</li>
+  <li><strong>New provinces.</strong> The newer provinces in the Papua region have data for only part of the period, and the map uses the boundaries of 33 parent provinces.</li>
+</ul>
+</div>
+
+<div data-l="id">
+<h2 id="deklarasi">Deklarasi</h2>
+<p><strong>Ucapan terima kasih.</strong> Penulis berterima kasih kepada Pusat Data dan Teknologi Informasi, Kementerian Kesehatan Republik Indonesia, atas penyediaan data dan laporan profil kesehatan Indonesia yang menjadi dasar perancangan dan diseminasi kajian ini.</p>
+<p><strong>Lisensi dan arsip.</strong> Karya ini dilisensikan di bawah Creative Commons Atribusi-NonKomersial 4.0 Internasional dan diarsipkan di Zenodo: <a href="https://doi.org/10.5281/zenodo.19177382">https://doi.org/10.5281/zenodo.19177382</a>.</p>
+
+<h2 id="pustaka">Daftar Pustaka</h2>
+<ol class="refs">
+  <li>Harjana, N. P. A. (2026). <em>Proposing the Health Integration and Performance Analytics (HIPA) framework for monitoring health system performance in Indonesia: Evidence from 2017 to 2024 and implications for future policy</em> (Versi 1) [Kertas kerja]. Zenodo. https://doi.org/10.5281/zenodo.19177382</li>
+  <li>Kementerian Kesehatan Republik Indonesia. (2018 sampai 2025). <em>Profil kesehatan Indonesia tahun 2017 sampai 2024</em>. Kementerian Kesehatan Republik Indonesia. https://www.kemkes.go.id/id/category/profil-kesehatan</li>
+</ol>
+</div>
+<div data-l="en" lang="en">
+<h2 id="declarations">Declarations</h2>
+<p><strong>Acknowledgement.</strong> The author thanks the Center for Data and Information Technology, Ministry of Health of the Republic of Indonesia, for providing the data and reports on Indonesia's health profile that underpin the design and dissemination of this study.</p>
+<p><strong>Licence and archive.</strong> This work is licensed under Creative Commons Attribution-NonCommercial 4.0 International and archived on Zenodo: <a href="https://doi.org/10.5281/zenodo.19177382">https://doi.org/10.5281/zenodo.19177382</a>.</p>
+
+<h2 id="references">References</h2>
+<ol class="refs">
+  <li>Harjana, N. P. A. (2026). <em>Proposing the Health Integration and Performance Analytics (HIPA) framework for monitoring health system performance in Indonesia: Evidence from 2017 to 2024 and implications for future policy</em> (Version 1) [Working paper]. Zenodo. https://doi.org/10.5281/zenodo.19177382</li>
+  <li>Ministry of Health of the Republic of Indonesia. (2018 to 2025). <em>Indonesia health profile 2017 to 2024</em>. Ministry of Health of the Republic of Indonesia. https://www.kemkes.go.id/id/category/profil-kesehatan</li>
+</ol>
+</div>
+
+<!-- ================= ISI LAPORAN: SELESAI ================ -->
+      </article>
+    </div>
+  </main>
+
+  <!-- CHARIS:AUTO:FOOT:START -->
+  <footer class="rp-foot"><div class="rp-wrap rp-foot-in">
+    <p><strong>CHARIS</strong>, Yayasan Peduli Insan Rentan (PINAR Foundation), Gianyar, Bali, Indonesia</p>
+    <p class="rp-foot-lic"><a class="rp-cc" href="https://creativecommons.org/licenses/by-nc/4.0/" rel="license noopener" target="_blank" title="Creative Commons Attribution-NonCommercial 4.0 International"><img src="../assets/cc/by_nc.svg" alt="CC BY-NC 4.0" width="89" height="31"></a><span><span data-l="id">Karya ini dilisensikan di bawah <a href="https://creativecommons.org/licenses/by-nc/4.0/" rel="license noopener" target="_blank">Creative Commons Atribusi-NonKomersial 4.0 Internasional</a>.</span><span data-l="en" lang="en">This work is licensed under a <a href="https://creativecommons.org/licenses/by-nc/4.0/" rel="license noopener" target="_blank">Creative Commons Attribution-NonCommercial 4.0 International</a> licence.</span></span></p>
+    <p><span class="rp-foot-links"><a href="../../index.html#/research"><span data-l="id">Kembali ke Repositori</span><span data-l="en" lang="en">Back to the Repository</span></a><a href="../../index.html#/privacy"><span data-l="id">Kebijakan Privasi</span><span data-l="en" lang="en">Privacy Policy</span></a></span></p>
+  </div></footer>
+  <script>document.write('<script src="../../assets/js/config.js?t=' + Date.now() + '"><\/script>');</script>
+  <script src="../../assets/js/share.js"></script>
+  <script src="../assets/flipbook.js" defer></script>
+  <!-- CHARIS:AUTO:FOOT:END -->
+  <script src="../assets/report.js"></script>
+  <script src="../../assets/vendor/leaflet/leaflet.js"></script>
+  <script src="../assets/charts.js"></script>
+  <script src="figs.js"></script>
+  <script src="hipa-sim.js"></script>
+</body>
+</html>

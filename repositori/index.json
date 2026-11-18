@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-18",
-  "count": 5,
+  "count": 6,
   "items": [
     {
       "id": "CHARIS-2026-001",
@@ -267,6 +267,59 @@
         "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p3.jpg",
         "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p4.jpg",
         "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "request",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-006",
+      "slug": "2026-03-hipa-kinerja-sistem-kesehatan",
+      "url": "repositori/2026-03-hipa-kinerja-sistem-kesehatan/",
+      "type": "Kertas kerja",
+      "type_en": "Working paper",
+      "series": "",
+      "subtitle_id": "Bukti 2017 sampai 2024 dan implikasinya bagi kebijakan",
+      "subtitle_en": "Evidence from 2017 to 2024 and implications for future policy",
+      "title_id": "Kerangka Health Integration and Performance Analytics (HIPA) untuk Memantau Kinerja Sistem Kesehatan Indonesia",
+      "title_en": "Proposing the Health Integration and Performance Analytics (HIPA) Framework for Monitoring Health System Performance in Indonesia",
+      "abstract_id": "Latar belakang: Investasi kesehatan yang besar di Indonesia belum menghasilkan perbaikan kinerja yang konsisten, kinerja sangat bervariasi antarprovinsi, dan pemantauan yang ada berfokus pada masukan, bukan pada cara sistem berfungsi. Karya ini mengusulkan kerangka Health Integration and Performance Analytics (HIPA) untuk memantau integrasi, efisiensi, dan luaran sistem kesehatan secara baku. Metode: HIPA diterapkan pada data panel provinsi 2017 sampai 2024 dari Profil Kesehatan Indonesia. Indikator dinormalisasi dan digabungkan menjadi indeks kapasitas, kesiapan, integrasi layanan (IILK), luaran, dan konteks sosial-ekonomi. Analisis mencakup skor efisiensi (luaran aktual dibanding yang diharapkan), model multivariabel dan spasial, simulasi kebijakan, dan analisis efektivitas biaya. Hasil: Integrasi layanan merupakan satu-satunya pendorong kinerja yang kuat dan bermakna, dengan dampak sekitar sepuluh kali lebih besar daripada kapasitas, yang hampir tidak berhubungan dengan luaran. Provinsi berkapasitas setara mencapai luaran yang sangat berbeda, dan lebih dari sepertiga provinsi-tahun berkinerja di bawah harapan. Kesenjangan terpusat di Indonesia bagian timur. Kemiskinan merupakan penentu terkuat (β = −0,826; p < 0,001) dan memoderasi efek integrasi. Kenaikan integrasi 10% sampai 20% diperkirakan menaikkan indeks luaran dari 0,638 menjadi 0,658 sampai 0,677, dan investasi integrasi memberi efek 0,553 per unit biaya dibanding 0,029 untuk kapasitas. Kesimpulan: Peluang terbesar terletak pada perbaikan cara sistem bekerja, bukan penambahan sumber daya. Integrasi layanan perlu menjadi tuas kebijakan utama, investasi dialihkan ke penguatan integrasi, intervensi disasarkan menurut tipologi provinsi, dan HIPA dilembagakan sebagai sistem pemantauan tahunan.",
+      "abstract_en": "Background: Large health investments in Indonesia have not translated into consistent performance gains, performance varies widely across provinces, and existing monitoring focuses on inputs rather than on how the system functions. This work proposes the Health Integration and Performance Analytics (HIPA) framework for standard monitoring of health system integration, efficiency and outcomes. Methods: HIPA was applied to provincial panel data for 2017 to 2024 from the Indonesian Health Profile. Indicators were normalised and aggregated into indices of capacity, readiness, service integration (IILK), outcomes and socio-economic context. The analysis covers efficiency scores (actual versus expected output), multivariable and spatial models, policy simulation and cost-effectiveness analysis. Results: Service integration is the only strong and significant driver of performance, with about ten times the impact of capacity, which shows almost no relationship with outputs. Provinces with similar capacity achieve very different outputs, and more than a third of province-years perform below expectation. Gaps are concentrated in eastern Indonesia. Poverty is the strongest determinant (β = −0.826; p < 0.001) and moderates the effect of integration. A 10% to 20% increase in integration is expected to raise the output index from 0.638 to 0.658 and 0.677, and integration investment yields 0.553 per cost unit compared with 0.029 for capacity. Conclusions: The largest opportunity lies in improving how the system works rather than adding resources. Service integration should be a core policy lever, investment should shift toward integration, interventions should be targeted by provincial typology, and HIPA should be institutionalised as an annual monitoring system.",
+      "authors": [
+        {
+          "name": "Ngakan Putu Anom Harjana",
+          "affiliation": "Universitas Udayana, Bali, Indonesia"
+        }
+      ],
+      "date_published": "2026-03-23",
+      "uploaded": "2026-11-18",
+      "sort_date": "2026-03-23",
+      "language": "id",
+      "keywords": [
+        "sistem kesehatan",
+        "integrasi layanan",
+        "kinerja",
+        "efisiensi",
+        "indeks komposit",
+        "analisis spasial",
+        "kemiskinan",
+        "Profil Kesehatan Indonesia",
+        "pemantauan"
+      ],
+      "service": "analytics",
+      "project_id": "",
+      "doi": "10.5281/zenodo.19177382",
+      "license": "CC BY-NC 4.0",
+      "pages": 11,
+      "version": "1",
+      "cover": "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-cover.jpg",
+      "thumb": "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-thumb.jpg",
+      "preview": [
+        "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p1.jpg",
+        "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p2.jpg",
+        "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p3.jpg",
+        "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p4.jpg",
+        "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p5.jpg"
       ],
       "pdf_summary": "",
       "full_pdf": "request",
