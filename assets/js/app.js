@@ -33,7 +33,10 @@
     const dt = new Date(d);
     return isNaN(dt) ? esc(d) : dt.toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
   };
-  const byDate = (a, b) => String(b.date || "").localeCompare(String(a.date || ""));
+  /* newest first by the moment an item was added to the website (repository: first commit; news and projects: their date) */
+  const addedKey = it => String(it.added || it.date || "");
+  const byDate = (a, b) => addedKey(b).localeCompare(addedKey(a)) || String(b.date || "").localeCompare(String(a.date || ""));
+  const isNew = it => { const d = new Date(addedKey(it)); return !isNaN(d) && Date.now() - d.getTime() < 30 * 864e5; };
   const isTrue = v => v === true || String(v).toUpperCase() === "TRUE";
   const svc = key => SV.find(x => x.key === key);
   const serviceName = key => { const s = svc(key); return s ? s[lang].t : (key || ""); };
@@ -85,12 +88,12 @@
 
   /* unified feed item for news / publications / projects */
   function toItem(type, r) {
-    if (type === "news") return { type, id: r.id, cat: r.category || t("type.news"), title: f(r, "title"), text: brief(f(r, "excerpt")), img: r.image_url, date: r.date, href: "#/latest/" + encodeURIComponent(r.id), featured: isTrue(r.featured) };
-    if (type === "publications") return { type, id: r.id, cat: typeLabel(r) || t("type.publications"), title: f(r, "title"), text: brief((lang === "en" ? r.subtitle_en : r.subtitle_id) || f(r, "summary")), img: r.cover_url, isCover: !!r.cover_url, date: r.date, href: r.url || "#/research", featured: isTrue(r.featured) };
-    return { type, id: r.id, cat: serviceName(r.service) || t("type.projects"), title: f(r, "title"), text: brief(f(r, "summary")), img: r.image_url, date: r.date || (r.year_start ? r.year_start + "-01-01" : ""), href: "#/projects/" + encodeURIComponent(r.id), featured: false };
+    if (type === "news") return { type, id: r.id, cat: r.category || t("type.news"), title: f(r, "title"), text: brief(f(r, "excerpt")), img: r.image_url, date: r.date, added: r.date, href: "#/latest/" + encodeURIComponent(r.id), featured: isTrue(r.featured) };
+    if (type === "publications") return { type, id: r.id, cat: typeLabel(r) || t("type.publications"), title: f(r, "title"), text: brief((lang === "en" ? r.subtitle_en : r.subtitle_id) || f(r, "summary")), img: r.cover_url, isCover: !!r.cover_url, date: r.date, added: r.added || r.uploaded || r.date, href: r.url || "#/research", featured: isTrue(r.featured) };
+    return { type, id: r.id, cat: serviceName(r.service) || t("type.projects"), title: f(r, "title"), text: brief(f(r, "summary")), img: r.image_url, date: r.date || (r.year_start ? r.year_start + "-01-01" : ""), added: r.date || (r.year_start ? r.year_start + "-01-01" : ""), href: "#/projects/" + encodeURIComponent(r.id), featured: false };
   }
   const card = it => '<li class="card"><a href="' + esc(it.href) + '"><div class="card-media' + (it.isCover ? " is-cover" : "") + '">' + media(it.img, it.title, it.id, 800) + '</div><div class="card-body">' +
-    '<p class="card-meta"><span class="card-cat">' + esc(it.cat) + "</span>" + (it.date && it.type !== "projects" ? "<time>" + fmtDate(it.date) + "</time>" : "") + "</p><h3>" + esc(it.title) + "</h3></div></a></li>";
+    '<p class="card-meta">' + (isNew(it) ? '<span class="card-new">' + esc(t("badge.new")) + "</span>" : "") + '<span class="card-cat">' + esc(it.cat) + "</span>" + (it.date && it.type !== "projects" ? "<time>" + fmtDate(it.date) + "</time>" : "") + "</p><h3>" + esc(it.title) + "</h3></div></a></li>";
 
   /* ---------- home: slider ---------- */
   async function buildSlider() {
@@ -335,14 +338,14 @@
         '<form class="repo-search" id="repoSearch" role="search"><label for="repoQ" class="sr-only">' + esc(t("repo.search")) + '</label><input id="repoQ" type="search" placeholder="' + esc(t("repo.search")) + '" autocomplete="off"><button class="btn btn-light" type="submit">' + esc(t("repo.searchBtn")) + "</button></form>" +
         '<p class="repo-stats" id="repoStats"></p></div></header>' +
         '<section class="sec repo"><div class="wrap repo-in"><details class="facet-wrap" id="facetWrap" open><summary>' + esc(t("repo.filter")) + '</summary><aside class="facets" id="facets" aria-label="' + esc(t("repo.filter")) + '"></aside></details><div class="repo-main">' +
-        '<div class="repo-bar"><p id="repoCount" role="status"></p><label class="sort">' + esc(t("repo.sort")) + ' <select id="repoSort"><option value="new">' + esc(t("repo.sort.new")) + '</option><option value="old">' + esc(t("repo.sort.old")) + '</option><option value="title">' + esc(t("repo.sort.title")) + "</option></select></label></div>" +
+        '<div class="repo-bar"><p id="repoCount" role="status"></p><label class="sort">' + esc(t("repo.sort")) + ' <select id="repoSort"><option value="added">' + esc(t("repo.sort.added")) + '</option><option value="new">' + esc(t("repo.sort.new")) + '</option><option value="old">' + esc(t("repo.sort.old")) + '</option><option value="title">' + esc(t("repo.sort.title")) + "</option></select></label></div>" +
         '<div class="chips" id="repoChips"></div><ol class="repo-list" id="repoList">' + msg("loading") + "</ol>" +
         '<p class="repo-browse"><a href="repositori/">' + esc(t("repo.browse")) + "</a></p></div></div></section>" + newsletter();
       bindNewsletter();
       if (window.matchMedia("(max-width: 900px)").matches) document.getElementById("facetWrap").open = false;
       let rows;
       try { rows = await API.repo(); } catch (e) { document.getElementById("repoList").innerHTML = errMsg(); return; }
-      const st = { q: "", type: new Set(), service: new Set(focus && rows.some(r => r.service === focus) ? [focus] : []), year: new Set(), sort: "new" };
+      const st = { q: "", type: new Set(), service: new Set(focus && rows.some(r => r.service === focus) ? [focus] : []), year: new Set(), sort: "added" };
       const yr = r => (r.date_published || "").slice(0, 4);
       const typeEn = {}; rows.forEach(r => { typeEn[r.type] = r.type_en || r.type; });
       const facetDefs = [["type", t("repo.f.type"), r => r.type, v => (lang === "en" ? typeEn[v] || v : v)], ["service", t("repo.f.topic"), r => r.service, v => serviceName(v)], ["year", t("repo.f.year"), yr, v => v]];
@@ -366,7 +369,8 @@
       const authorsStr = a => a.length > 3 ? a.slice(0, 3).map(x => x.name).join(", ") + " et al." : a.map(x => x.name).join(", ");
       function draw() {
         let sel = rows.filter(r => match(r));
-        sel = sel.slice().sort(st.sort === "old" ? (a, b) => a.sort_date.localeCompare(b.sort_date) : st.sort === "title" ? (a, b) => f(a, "title").localeCompare(f(b, "title")) : (a, b) => b.sort_date.localeCompare(a.sort_date));
+        sel = sel.slice().sort(st.sort === "old" ? (a, b) => a.sort_date.localeCompare(b.sort_date) : st.sort === "title" ? (a, b) => f(a, "title").localeCompare(f(b, "title"))
+          : st.sort === "added" ? (a, b) => String(b.added || b.uploaded || "").localeCompare(String(a.added || a.uploaded || "")) || b.sort_date.localeCompare(a.sort_date) : (a, b) => b.sort_date.localeCompare(a.sort_date));
         document.getElementById("repoCount").textContent = sel.length + " " + t("repo.results");
         const chips = []; facetDefs.forEach(([k, , , show]) => st[k].forEach(v => chips.push('<button type="button" data-chip="' + k + '" data-v="' + esc(v) + '">' + esc(show(v)) + ' <span aria-hidden="true">×</span><span class="sr-only">' + esc(t("repo.remove")) + "</span></button>")));
         if (st.q) chips.unshift('<button type="button" data-chip="q"><em>' + esc(st.q) + '</em> <span aria-hidden="true">×</span></button>');
@@ -610,22 +614,9 @@
     },
 
     async latest() {
-      app.innerHTML = pageTop(t("nav.latest"), t("latest.lead")) + '<section class="sec"><div class="wrap"><div class="filters" id="newsFilters" role="group"></div><ul class="cards" id="newsList"></ul></div></section>' + newsletter();
+      app.innerHTML = pageTop(t("nav.latest"), t("latest.lead")) + '<section class="sec"><div class="wrap"><div id="latestFeed"></div></div></section>' + newsletter();
       bindNewsletter();
-      const rows0 = await safeList("news");
-      const list = document.getElementById("newsList");
-      if (!rows0) { list.innerHTML = errMsg(); return; }
-      const rows = rows0.slice().sort(byDate);
-      const cats = ["all"].concat([...new Set(rows.map(r => r.category).filter(Boolean))]);
-      const filt = document.getElementById("newsFilters");
-      const draw = k => {
-        filt.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
-        const sel = k === "all" ? rows : rows.filter(r => r.category === k);
-        list.innerHTML = sel.length ? sel.map(r => card(toItem("news", r))).join("") : msg("empty");
-      };
-      filt.innerHTML = cats.map(k => '<button type="button" data-k="' + esc(k) + '">' + esc(k === "all" ? t("filter.all") : k) + "</button>").join("");
-      filt.addEventListener("click", e => { const b = e.target.closest("button"); if (b) draw(b.dataset.k); });
-      draw("all");
+      await buildLatest("latestFeed", 200);
     },
 
     async article(id) {

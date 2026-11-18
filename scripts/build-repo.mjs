@@ -43,9 +43,9 @@ const cleanDoi = doi => (doi || "").replace(/^https?:\/\/(dx\.)?doi\.org\//, "")
 function firstCommitDate(file) {
   try {
     const out = execSync(`git log --diff-filter=A --follow --format=%aI -- "${file}"`, { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] }).toString().trim().split("\n").filter(Boolean);
-    if (out.length) return out[out.length - 1].slice(0, 10);
+    if (out.length) return out[out.length - 1];          /* full timestamp, so items added on the same day keep their order */
   } catch (e) { /* not a git checkout */ }
-  return fs.statSync(file).mtime.toISOString().slice(0, 10);
+  return fs.statSync(file).mtime.toISOString();
 }
 
 /* ---------- covers: image file, or first page of a PDF, plus a thumbnail ---------- */
@@ -369,11 +369,13 @@ for (const slug of folders) {
   write(file, html);
   write(path.join(REPO, slug, "cite.ris"), citeRIS(m, url) + "\n");
   write(path.join(REPO, slug, "cite.bib"), citeBib(m, url) + "\n");
-  const uploaded = firstCommitDate(file);
+  /* when the product was added to the website: optional "date_added" in DATA PRODUK, otherwise the first git commit */
+  const added = /^\d{4}-\d{2}-\d{2}/.test(m.date_added || "") ? (m.date_added.length === 10 ? m.date_added + "T00:00:00Z" : m.date_added) : firstCommitDate(file);
+  const uploaded = added.slice(0, 10);
   items.push({
     id: m.id, slug, url: `repositori/${slug}/`, type: m.type, type_en: m.type_en || TYPE_EN[m.type], series: m.series || "", subtitle_id: m.subtitle || "", subtitle_en: m.subtitle_en !== undefined ? m.subtitle_en : (m.subtitle || ""), title_id: m.title_id, title_en: m.title_en || "",
     abstract_id: m.abstract_id, abstract_en: m.abstract_en || "", authors: m.authors.map(a => ({ name: a.name, affiliation: a.affiliation || "" })),
-    date_published: m.date_published, uploaded, sort_date: m.date_published || uploaded, language: m.language || "id", keywords: m.keywords || [],
+    date_published: m.date_published, uploaded, added, sort_date: m.date_published || uploaded, language: m.language || "id", keywords: m.keywords || [],
     service: m.service || "", project_id: m.project_id || "", doi: cleanDoi(m.doi), license: m.license || "", pages: m.pages || 0, version: m.version || "",
     cover: m.cover ? `repositori/${slug}/${m.cover}` : "", thumb: m.thumb ? `repositori/${slug}/${m.thumb}` : "", preview: m.preview.map(f => `repositori/${slug}/${f}`), pdf_summary: m.pdf_summary ? `repositori/${slug}/${m.pdf_summary}` : "",
     full_pdf: "request", featured: !!m.featured

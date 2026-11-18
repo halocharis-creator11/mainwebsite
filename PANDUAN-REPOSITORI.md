@@ -177,3 +177,9 @@ Yang perlu Anda lakukan:
 - **Statistik dibaca, diunduh, dan dibagikan** dihitung otomatis dan tersimpan di tab `stats` (menu admin *Statistik*). *Dibaca* dihitung sekali per peramban per hari, *diunduh* dihitung setiap kali member mengunduh PDF lengkap, dan *dibagikan* dihitung setiap kali tombol bagikan dipakai.
 - **Simulator interaktif** (`<section class="sim-box interactive" id="...">`) otomatis diberi penanda berpendar, pemberitahuan di awal laporan, dan tombol *Mulai tur singkat*. Tidak perlu pengaturan tambahan.
 - **Daftar pustaka** (`<ol class="refs">` atau `<ol class="references">`) otomatis diberi tautan DOI/URL yang bisa diklik, serta tautan *Artikel* dan *Google Scholar* di akhir setiap rujukan.
+
+## Urutan "Terbaru"
+
+- Beranda (slider dan bagian Terbaru), halaman **Terbaru**, dan urutan bawaan **Repositori** menampilkan konten dari yang **paling baru ditambahkan ke website**, bukan menurut tanggal terbit dokumen. Tanggal terbit tetap tampil di setiap kartu.
+- Waktu ditambahkan diambil otomatis dari commit pertama folder produk di GitHub. Jika perlu mengaturnya manual, isi `"date_added": "2026-11-18"` (atau lengkap dengan jam, `"2026-11-18T21:00:00+08:00"`) di DATA PRODUK.
+- Berita dan proyek diurutkan menurut kolom tanggal di panel admin. Konten yang ditambahkan dalam 30 hari terakhir diberi label **Baru**.
