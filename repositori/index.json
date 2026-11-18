@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-18",
-  "count": 4,
+  "count": 5,
   "items": [
     {
       "id": "CHARIS-2026-001",
@@ -204,6 +204,57 @@
       ],
       "pdf_summary": "",
       "full_pdf": "https://zenodo.org/records/19928903/files/Draft%20CN%20LEN%2030%20April%202026.pdf",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-005",
+      "slug": "2026-04-ppcp-evaluasi-integrasi-layanan-hiv",
+      "url": "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/",
+      "type": "Laporan evaluasi",
+      "series": "",
+      "title_id": "Mengevaluasi Efektivitas Kemitraan Pemerintah, Swasta, dan Komunitas (PPCP) dalam Memperkuat Integrasi Layanan HIV di Indonesia",
+      "title_en": "Evaluating the Effectiveness of Public-Private-Community Partnership (PPCP) in Strengthening HIV Service Integration in Indonesia",
+      "abstract_id": "Latar belakang: Kemitraan pemerintah, swasta, dan komunitas (PPCP) dilaksanakan dalam Global Fund Siklus 7 (2024 sampai 2026) untuk memperkuat integrasi layanan HIV dan IMS di kabupaten/kota berbeban tinggi. Evaluasi ini menilai apakah PPCP meningkatkan kapasitas layanan, mempercepat kaskade HIV, memperbaiki efisiensi, dan memberi nilai investasi yang baik, sebagai dasar permohonan pendanaan Global Fund Siklus 8. Metode: Desain kuasi-eksperimental dengan unit analisis kabupaten/kota (238 PPCP dan 167 pembanding), periode sebelum 2022 sampai 2024 dan sesudah 2025 sampai 2026, memakai basis data program HIV kabupaten/kota. Efek diestimasi dengan model selisih dalam selisih dengan galat baku robust, mekanisme dengan analisis mediasi dua langkah, efisiensi dengan skor hasil aktual dibanding hasil yang diharapkan dari model batas stokastik, dan efektivitas biaya dengan biaya per tambahan hasil. Hasil: PPCP berkaitan dengan tambahan 1.238 layanan HIV per kabupaten/kota (p < 0,001) dan kenaikan persentase ODHIV yang mengetahui status sebesar 7,8 poin persen, yang menjalani ARV 5,4 poin persen, dan yang tersupresi 5,3 poin persen (semua p < 0,001). Sekitar 62% efek pada kaskade dimediasi oleh peningkatan layanan dan sisanya merupakan efek langsung yang ditafsirkan sebagai integrasi sistem. Skor efisiensi rata-rata 1,28 di kabupaten/kota PPCP dibanding 0,98 di pembanding. Biaya per tambahan ODHIV dalam ARV USD 278 dibanding USD 421, dan per tambahan ODHIV tersupresi USD 521 dibanding USD 842. Kesimpulan: PPCP memperluas kapasitas layanan, mempercepat kaskade HIV, meningkatkan efisiensi, dan memberi nilai investasi yang baik, sehingga layak diprioritaskan dalam Global Fund Siklus 8. Uji tren pra-intervensi dan evaluasi dampak jangka panjang diperlukan untuk memperkuat kesimpulan tersebut.",
+      "abstract_en": "Background: The Public-Private-Community Partnership (PPCP) was implemented under Global Fund Grant Cycle 7 (2024 to 2026) to strengthen integrated HIV and STI services in high-burden districts and cities. This evaluation assesses whether PPCP increased service capacity, accelerated the HIV cascade, improved efficiency and offered good value for money, to inform the Global Fund Grant Cycle 8 funding request. Methods: A quasi-experimental design with districts and cities as the unit of analysis (238 PPCP and 167 comparison), a pre-intervention period of 2022 to 2024 and a post-intervention period of 2025 to 2026, using the district/city HIV programme database. Effects were estimated with difference-in-differences models with robust standard errors, mechanisms with two-step mediation analysis, efficiency with a score of actual over expected outcomes from a stochastic frontier model, and cost-effectiveness with cost per additional outcome. Results: PPCP was associated with 1,238 additional HIV services per district or city (p < 0.001) and increases of 7.8 percentage points in people living with HIV who know their status, 5.4 percentage points in those on ART and 5.3 percentage points in those virally suppressed (all p < 0.001). About 62% of the cascade effect was mediated by increased services, with the remainder a direct effect interpreted as system integration. The mean efficiency score was 1.28 in PPCP districts and cities compared with 0.98 in the comparison group. Cost per additional person on ART was USD 278 compared with USD 421, and per additional person virally suppressed USD 521 compared with USD 842. Conclusions: PPCP expands service capacity, accelerates the HIV cascade, improves efficiency and offers good value for money, and merits priority in Global Fund Grant Cycle 8. Pre-trend testing and evaluation of long-term impact are needed to strengthen these conclusions.",
+      "authors": [
+        {
+          "name": "Ngakan Putu Anom Harjana",
+          "affiliation": "Universitas Udayana, Bali, Indonesia"
+        }
+      ],
+      "date_published": "2026-04-28",
+      "uploaded": "2026-11-18",
+      "sort_date": "2026-04-28",
+      "language": "id",
+      "keywords": [
+        "HIV",
+        "PPCP",
+        "kemitraan pemerintah swasta komunitas",
+        "integrasi layanan",
+        "selisih dalam selisih",
+        "analisis mediasi",
+        "efisiensi",
+        "efektivitas biaya",
+        "Global Fund",
+        "Indonesia"
+      ],
+      "service": "evaluation",
+      "project_id": "",
+      "doi": "10.5281/zenodo.19849113",
+      "license": "CC BY-NC 4.0",
+      "pages": 9,
+      "version": "1",
+      "cover": "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-cover.jpg",
+      "thumb": "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-thumb.jpg",
+      "preview": [
+        "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p1.jpg",
+        "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p2.jpg",
+        "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p3.jpg",
+        "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p4.jpg",
+        "repositori/2026-04-ppcp-evaluasi-integrasi-layanan-hiv/auto-p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "https://zenodo.org/records/19849113/files/PPCP%20Analysis%20-%20English.pdf",
       "featured": true
     }
   ]
