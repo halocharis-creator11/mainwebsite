@@ -216,13 +216,15 @@ ER  - </pre>
 <p>Model ini adalah mikrosimulasi dengan lapisan jaringan berbasis agen. Setiap agen adalah orang sintetis dengan usia, identitas, pendapatan, jumlah pasangan, peran seksual, penggunaan kondom, kebiasaan mencari pasangan secara daring, riwayat PrEP, preferensi terhadap lenacapavir, dan kesediaan membayar. Semua karakteristik diambil dari distribusi agregat survei jaringan Jakarta 2026 dan Bali 2025. Tidak ada satu pun catatan responden yang dimuat dalam model.</p>
 <p>Agen membentuk dan mengakhiri kemitraan tetap, kasual, dan sekali, dan sebagian memiliki pasangan di luar kota. HIV menular per tindakan di dalam kemitraan tersebut, dengan risiko per tindakan reseptif 1,38% dan insertif 0,11% sesuai tinjauan sistematis Patel dkk. (2014). Petugas lapangan menghubungkan agen dengan layanan tes dan PrEP, dan agen yang terdiagnosis merujuk pasangannya untuk tes. Pendekatan jaringan ini menyederhanakan kerangka yang dipakai EpiModel (Jenness dkk., 2018). Perlindungan lenacapavir diasumsikan 96%, sejalan dengan hasil uji PURPOSE 2 (Kelley dkk., 2025).</p>
 <p>Setiap kota dikalibrasi sehingga insidens 2026 sekitar 3,5 per 100 orang-tahun dan cakupan status sekitar 67% di bawah dukungan saat ini. Setiap skenario dijalankan beberapa kali dengan bibit acak berbeda, dan hasil disajikan sebagai median beserta persentil ke-5 dan ke-95. Seluruh skenario juga dijalankan pada model kompartemen deterministik sebagai pemeriksa silang.</p>
-<figure>
-  <img src="slide-05.jpg" width="1600" height="900" loading="lazy" alt="Grafik insidens HIV per 100 orang-tahun di Jakarta, 2026 sampai 2032, untuk tiga skenario. Garis rencana 2027 sampai 2029 turun dari sekitar 3,5 menjadi sekitar 1,3, sementara skenario pemotongan tetap di sekitar 3 dan melonjak pada 2029.">
-  <figcaption>Gambar 1. Tiga masa depan dari populasi sintetis yang sama di Jakarta: dukungan saat ini berlanjut, pemotongan tanpa redesain, dan rencana 2027 sampai 2029 sesuai desain. Pita menunjukkan persentil ke-5 sampai ke-95 dari enam jalan simulasi.</figcaption>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Insidens HIV per 100 orang-tahun</strong><div class="ifig-ctl-wrap" style="display:flex;flex-wrap:wrap;gap:8px"><div class="ifig-ctl" data-ctl="city"></div><div class="ifig-ctl" data-ctl="band"></div></div></div>
+  <div class="ifig-plot" data-fig="inc"></div>
+  <div class="ifig-legend"><span><i style="background:#7D8A87"></i>Dukungan saat ini berlanjut</span><span><i style="background:#B4364A"></i>Pemotongan tanpa redesain</span><span><i style="background:#2F7D5B"></i>Rencana sesuai desain</span></div>
+  <figcaption>Gambar 1. Tiga masa depan dari populasi sintetis yang sama: dukungan saat ini berlanjut, pemotongan tanpa redesain, dan rencana 2027 sampai 2029 sesuai desain. Pita menunjukkan persentil ke-5 sampai ke-95 dari enam jalan simulasi. Pilih kota dan arahkan kursor untuk melihat angka per tahun.</figcaption>
 </figure>
 
 <h2 id="temuan">4. Temuan pada pengaturan bawaan</h2>
-<p>Tabel 1 merangkum hasil presentasi lengkap yang dijalankan dengan presisi standar. Angka disajikan per 10.000 LSL dan transpuan untuk periode 2027 sampai 2032.</p>
+<p>Tabel 1 merangkum hasil model berbasis agen pada presisi standar. Angka disajikan per 10.000 LSL dan transpuan untuk periode 2027 sampai 2032.</p>
 <div class="table-wrap">
 <table>
   <caption>Tabel 1. Hasil utama model berbasis agen per 10.000 LSL dan transpuan</caption>
@@ -244,13 +246,20 @@ ER  - </pre>
 <p class="table-note">Median dari jalan simulasi berbasis agen, 5.000 agen per jalan. Rentang adalah persentil ke-5 sampai ke-95 dari selisih berpasangan. Perbedaan di bawah sekitar 20 infeksi berada dalam derau simulasi.</p>
 </div>
 <p>Tiga pola menonjol. Pertama, tes, tes berbasis jaringan, dan pengobatan menyumbang lebih dari separuh infeksi yang dicegah; mempertahankan rantai layanan ini lebih menentukan daripada komponen mana pun yang lain. Kedua, di Jakarta sekitar separuh infeksi (52%) terjadi dalam kemitraan tetap, yaitu jenis kemitraan yang paling sulit dijangkau petugas lapangan. Ketiga, tebing biaya 2029 tidak menaikkan insidens populasi secara dramatis, tetapi memindahkan beban kepada mereka yang paling miskin: di Jakarta insidens pada kelompok ini naik dari 1,5 menjadi 2,6 per 100 orang-tahun tanpa jaring pengaman.</p>
-<figure>
-  <img src="slide-13.jpg" width="1600" height="900" loading="lazy" alt="Diagram batang horizontal infeksi baru 2027 sampai 2032 per 10.000 di Jakarta. Dimulai dari 1.438 pada skenario pemotongan, turun menjadi 728 setelah semua pengungkit rencana ditambahkan, lalu naik menjadi 814 dan 840 pada dua skenario risiko transisi.">
-  <figcaption>Gambar 2. Kontribusi setiap pengungkit rencana di Jakarta, ditambahkan satu per satu mulai dari skenario pemotongan, serta dampak dua risiko transisi terhadap rencana penuh.</figcaption>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Infeksi baru 2027 sampai 2032 per 10.000</strong><div class="ifig-ctl-wrap" style="display:flex;flex-wrap:wrap;gap:8px"><div class="ifig-ctl" data-ctl="city"></div></div></div>
+  <div class="ifig-plot" data-fig="levers"></div>
+  <figcaption>Gambar 2. Kontribusi setiap pengungkit rencana, ditambahkan satu per satu mulai dari skenario pemotongan, serta dampak dua risiko transisi terhadap rencana penuh. Angka dalam kurung adalah perubahan dibanding batang sebelumnya; untuk dua batang risiko, dibanding rencana penuh.</figcaption>
+</figure>
+<figure class="ifig">
+  <div class="ifig-head"><strong>Pengguna PrEP per 10.000 dalam rencana</strong><div class="ifig-ctl-wrap" style="display:flex;flex-wrap:wrap;gap:8px"><div class="ifig-ctl" data-ctl="city"></div></div></div>
+  <div class="ifig-plot" data-fig="prep"></div>
+  <div class="ifig-legend"><span><i style="background:#2D6A8E"></i>PrEP oral</span><span><i style="background:#6B4E9B"></i>Lenacapavir</span></div>
+  <figcaption>Gambar 3. Pengguna PrEP oral dan lenacapavir per 10.000 LSL dan transpuan dalam rencana sesuai desain, median jalan simulasi. Penurunan pada Januari 2029 menunjukkan pengguna yang berhenti ketika PrEP oral menjadi berbayar.</figcaption>
 </figure>
 
 <h2 id="laboratorium">5. Coba sendiri: laboratorium skenario</h2>
-<p>Ubah pengaturan di bawah ini dan lihat bagaimana insidens dan jumlah pengguna PrEP berubah. Laboratorium ini memakai model kompartemen dari presentasi yang sama, sehingga hasilnya muncul seketika. Angkanya dapat berbeda dari model berbasis agen pada Tabel 1, karena model kompartemen tidak mengikuti kemitraan individu.</p>
+<p>Ubah pengaturan di bawah ini dan lihat bagaimana insidens dan jumlah pengguna PrEP berubah. Laboratorium ini memakai model kompartemen yang juga dipakai sebagai pemeriksa silang model utama, sehingga hasilnya muncul seketika. Angkanya dapat berbeda dari model berbasis agen pada Tabel 1, karena model kompartemen tidak mengikuti kemitraan individu.</p>
 </div>
 <div data-l="en" lang="en">
 <aside class="callout">
@@ -275,13 +284,15 @@ ER  - </pre>
 <p>The model is a microsimulation with an agent-based network layer. Each agent is a synthetic person with an age, identity, income, number of partners, sexual role, condom use, online partner seeking, PrEP history, preference for lenacapavir and willingness to pay. All traits are drawn from aggregate distributions of the Jakarta 2026 and Bali 2025 network surveys. No respondent record is included in the model.</p>
 <p>Agents form and end main, casual and one-off partnerships, and some have partners outside the city. HIV is transmitted act by act within these partnerships, with a per-act risk of 1.38% for receptive and 0.11% for insertive acts, following the systematic review by Patel et al. (2014). Outreach workers link agents to testing and PrEP, and diagnosed agents refer their partners for testing. This network approach simplifies the framework used in EpiModel (Jenness et al., 2018). Protection from lenacapavir is assumed to be 96%, in line with the PURPOSE 2 trial (Kelley et al., 2025).</p>
 <p>Each city is calibrated so that 2026 incidence is about 3.5 per 100 person-years and status awareness about 67% under current support. Each scenario is run several times with different random seeds, and results are reported as medians with 5th and 95th percentiles. All scenarios are also run in a deterministic compartmental model as a cross-check.</p>
-<figure>
-  <img src="slide-05.jpg" width="1600" height="900" loading="lazy" alt="Chart of HIV incidence per 100 person-years in Jakarta, 2026 to 2032, under three scenarios. The 2027 to 2029 plan falls from about 3.5 to about 1.3, while the cut scenario stays around 3 and spikes in 2029.">
-  <figcaption>Figure 1. Three futures from the same synthetic population in Jakarta: current support continues, cut without redesign, and the 2027 to 2029 plan as designed. Bands show the 5th to 95th percentiles of six simulation runs.</figcaption>
+<figure class="ifig">
+  <div class="ifig-head"><strong>HIV incidence per 100 person-years</strong><div class="ifig-ctl-wrap" style="display:flex;flex-wrap:wrap;gap:8px"><div class="ifig-ctl" data-ctl="city"></div><div class="ifig-ctl" data-ctl="band"></div></div></div>
+  <div class="ifig-plot" data-fig="inc"></div>
+  <div class="ifig-legend"><span><i style="background:#7D8A87"></i>Current support continues</span><span><i style="background:#B4364A"></i>Cut without redesign</span><span><i style="background:#2F7D5B"></i>Plan as designed</span></div>
+  <figcaption>Figure 1. Three futures from the same synthetic population: current support continues, cut without redesign, and the 2027 to 2029 plan as designed. Bands show the 5th to 95th percentiles of six simulation runs. Choose a city and hover to see yearly values.</figcaption>
 </figure>
 
 <h2 id="findings">4. Findings under default settings</h2>
-<p>Table 1 summarises the results of the full presentation run at standard precision. Figures are per 10,000 MSM and transgender women for 2027 to 2032.</p>
+<p>Table 1 summarises the results of the agent-based model at standard precision. Figures are per 10,000 MSM and transgender women for 2027 to 2032.</p>
 <div class="table-wrap">
 <table>
   <caption>Table 1. Main results of the agent-based model per 10,000 MSM and transgender women</caption>
@@ -303,13 +314,20 @@ ER  - </pre>
 <p class="table-note">Medians of agent-based simulation runs, 5,000 agents per run. Ranges are the 5th to 95th percentiles of paired differences. Differences below about 20 infections are within simulation noise.</p>
 </div>
 <p>Three patterns stand out. First, testing, network testing and treatment account for more than half of the infections averted; keeping this chain of services intact matters more than any other component. Second, in Jakarta about half of infections (52%) occur within main partnerships, the type of partnership that outreach workers find hardest to reach. Third, the 2029 cost cliff does not raise population incidence dramatically, but it shifts the burden onto the poorest: in Jakarta, incidence in this group rises from 1.5 to 2.6 per 100 person-years without a safety net.</p>
-<figure>
-  <img src="slide-13.jpg" width="1600" height="900" loading="lazy" alt="Horizontal bar chart of new infections in 2027 to 2032 per 10,000 in Jakarta. It starts at 1,438 under the cut scenario, falls to 728 once all plan levers are added, and rises to 814 and 840 under two transition risk scenarios.">
-  <figcaption>Figure 2. Contribution of each plan lever in Jakarta, added one at a time starting from the cut scenario, and the effect of two transition risks on the full plan.</figcaption>
+<figure class="ifig">
+  <div class="ifig-head"><strong>New infections 2027 to 2032 per 10,000</strong><div class="ifig-ctl-wrap" style="display:flex;flex-wrap:wrap;gap:8px"><div class="ifig-ctl" data-ctl="city"></div></div></div>
+  <div class="ifig-plot" data-fig="levers"></div>
+  <figcaption>Figure 2. Contribution of each plan lever, added one at a time starting from the cut scenario, and the effect of two transition risks on the full plan. Figures in brackets are the change from the previous bar; for the two risk bars, the change from the full plan.</figcaption>
+</figure>
+<figure class="ifig">
+  <div class="ifig-head"><strong>PrEP users per 10,000 under the plan</strong><div class="ifig-ctl-wrap" style="display:flex;flex-wrap:wrap;gap:8px"><div class="ifig-ctl" data-ctl="city"></div></div></div>
+  <div class="ifig-plot" data-fig="prep"></div>
+  <div class="ifig-legend"><span><i style="background:#2D6A8E"></i>Oral PrEP</span><span><i style="background:#6B4E9B"></i>Lenacapavir</span></div>
+  <figcaption>Figure 3. Oral PrEP and lenacapavir users per 10,000 MSM and transgender women under the plan as designed, median of simulation runs. The drop in January 2029 shows users who stop when oral PrEP has to be paid for.</figcaption>
 </figure>
 
 <h2 id="lab-en">5. Try it yourself: the scenario lab</h2>
-<p>Change the settings below and see how incidence and the number of PrEP users respond. The lab uses the compartmental model from the same presentation, so results appear instantly. Figures can differ from the agent-based model in Table 1, because the compartmental model does not follow individual partnerships.</p>
+<p>Change the settings below and see how incidence and the number of PrEP users respond. The lab uses the compartmental model that also cross-checks the main model, so results appear instantly. Figures can differ from the agent-based model in Table 1, because the compartmental model does not follow individual partnerships.</p>
 </div>
 <section class="sim-box interactive" id="lab" aria-label="Laboratorium skenario">
   <div class="sim-head">
@@ -393,29 +411,15 @@ ER  - </pre>
       <label style="font-size:14px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="w_len" checked> <span data-l="id">Lenacapavir tersedia sejak 2028</span><span data-l="en" lang="en">Lenacapavir available from 2028</span></label>
     </div>
     <p class="sim-narr" id="w_sum" aria-live="polite"></p>
-    <p class="sim-note"><span data-l="id">Animasi ilustratif dengan aturan yang disederhanakan dan populasi kecil, sehingga hasil satu jalan sangat dipengaruhi peluang. Gunakan Tabel 1, laboratorium skenario, atau presentasi lengkap untuk angka perencanaan.</span><span data-l="en" lang="en">Illustrative animation with simplified rules and a small population, so a single run depends heavily on chance. Use Table 1, the scenario lab or the full presentation for planning figures.</span></p>
+    <p class="sim-note"><span data-l="id">Animasi ilustratif dengan aturan yang disederhanakan dan populasi kecil, sehingga hasil satu jalan sangat dipengaruhi peluang. Gunakan Tabel 1 atau laboratorium skenario untuk angka perencanaan.</span><span data-l="en" lang="en">Illustrative animation with simplified rules and a small population, so a single run depends heavily on chance. Use Table 1 or the scenario lab for planning figures.</span></p>
   </div>
 </section>
 <div data-l="id">
-<h2 id="presentasi">7. Presentasi interaktif lengkap</h2>
-<p>Presentasi asli berisi 17 slide dan menjalankan model berbasis agen di peramban Anda. Setiap grafik dihitung ulang ketika Anda mengganti kota atau asumsi, sehingga satu slide dapat memerlukan beberapa detik untuk selesai. Untuk pengalaman terbaik, buka di layar lebar dan gunakan tombol panah untuk berpindah slide.</p>
 </div>
 <div data-l="en" lang="en">
-<h2 id="presentation-en">7. The full interactive presentation</h2>
-<p>The original presentation has 17 slides and runs the agent-based model in your browser. Every chart is recomputed when you change the city or an assumption, so a slide can take a few seconds to finish. For the best experience, open it on a wide screen and use the arrow keys to move between slides.</p>
 </div>
-<section class="sim-box" aria-label="Presentasi interaktif lengkap">
-  <div class="deck-frame" id="deckFrame">
-    <img src="slide-01.jpg" width="1600" height="900" alt="Slide judul presentasi When the Donor Steps Back, dengan grafik insidens HIV di Jakarta untuk tiga skenario.">
-    <button type="button" class="play" id="deckPlay"><span><span data-l="id">Jalankan presentasi di halaman ini</span><span data-l="en" lang="en">Run the presentation on this page</span></span></button>
-  </div>
-  <div class="deck-actions">
-    <a href="simulasi.html" target="_blank" rel="noopener"><span data-l="id">Buka di tab baru (layar penuh)</span><span data-l="en" lang="en">Open in a new tab (full screen)</span></a>
-    <a href="https://doi.org/10.5281/zenodo.23140900"><span data-l="id">Arsip Zenodo, DOI 10.5281/zenodo.23140900</span><span data-l="en" lang="en">Zenodo archive, DOI 10.5281/zenodo.23140900</span></a>
-  </div>
-</section>
 <div data-l="id">
-<h2 id="implikasi">8. Implikasi bagi perencanaan</h2>
+<h2 id="implikasi">7. Implikasi bagi perencanaan</h2>
 <ul>
   <li><strong>Danai saluran PrEP terlindungi sebelum 2029.</strong> Ukur kebutuhannya dari jumlah pengguna PrEP oral yang tidak mampu membayar pada akhir 2028, sekitar 3% dari populasi LSL dan transpuan pada pengaturan bawaan, lalu sepakati sumber pembiayaannya melalui JKN, APBD, atau voucer elektronik.</li>
   <li><strong>Jadikan retensi sebagai target kinerja.</strong> Target jangkauan dapat dipenuhi pada hampir semua tingkat retensi karena orang yang berhenti lalu memulai lagi terhitung ulang. Pantau keberlanjutan pada bulan ke-3, ke-6, dan ke-12 bersama target jangkauan.</li>
@@ -424,11 +428,11 @@ ER  - </pre>
   <li><strong>Lindungi penjangkauan dari guncangan hukum dan anggaran.</strong> Anggarkan dukungan paralegal dan keamanan digital bagi petugas lapangan, dan gunakan kontrak sosial untuk mengunci pembiayaan domestik sebelum 2030.</li>
 </ul>
 
-<h2 id="keterbatasan">9. Keterbatasan</h2>
+<h2 id="keterbatasan">8. Keterbatasan</h2>
 <p>Kemitraan dibentuk dengan pencocokan acak dan pencampuran usia sederhana, bentuk yang lebih sederhana daripada model jaringan statistik. Responden survei direkrut melalui jalur bola salju dan layanan, sehingga tingkat penggunaan PrEP dan prevalensi HIV dalam survei tidak dipakai langsung. Serapan lenacapavir memakai preferensi yang dinyatakan, yang biasanya melebihi penggunaan nyata. Efek beban kerja petugas, guncangan hukum, dan serapan anggaran ditentukan oleh asumsi dan perlu dibaca sebagai analisis sensitivitas. Rentang hasil mencerminkan variasi stokastik antar jalan, bukan ketidakpastian parameter atau struktur. Model belum memuat biaya, sehingga biaya per infeksi yang dicegah memerlukan biaya satuan dari rencana program dan rencana transisi yang sudah dihitung. Hasil melengkapi, bukan menggantikan, Spectrum/AEM dan perencanaan berbasis biaya.</p>
 
-<h2 id="data">10. Ketersediaan data dan kode</h2>
-<p>Presentasi dan seluruh kode model tersedia terbuka di halaman ini dan diarsipkan di Zenodo dengan lisensi CC BY 4.0 (Harjana, 2026). Model hanya memuat distribusi agregat survei; data tingkat responden tidak disertakan. Laboratorium skenario pada bagian 5 memakai model kompartemen yang sama tanpa perubahan logika, dan dapat diperiksa pada berkas <a href="model.js">model.js</a>.</p>
+<h2 id="data">9. Ketersediaan data dan kode</h2>
+<p>Seluruh kode model diarsipkan di Zenodo dengan lisensi CC BY 4.0 (Harjana, 2026). Model hanya memuat distribusi agregat survei; data tingkat responden tidak disertakan. Laboratorium skenario pada bagian 5 memakai model kompartemen yang sama tanpa perubahan logika, dan dapat diperiksa pada berkas <a href="model.js">model.js</a>.</p>
 
 <h2 id="pustaka">Daftar Pustaka</h2>
 <ol class="refs">
@@ -439,7 +443,7 @@ ER  - </pre>
 </ol>
 </div>
 <div data-l="en" lang="en">
-<h2 id="implications">8. Implications for planning</h2>
+<h2 id="implications">7. Implications for planning</h2>
 <ul>
   <li><strong>Fund a protected PrEP channel before 2029.</strong> Size it from the number of oral PrEP users unable to pay at the end of 2028, about 3% of MSM and transgender women under default settings, and agree its financing through JKN, local budgets or electronic vouchers.</li>
   <li><strong>Make retention a performance target.</strong> The reach target can be met at almost any retention level, because people who stop and restart are counted again. Track continuation at months 3, 6 and 12 alongside reach.</li>
@@ -448,11 +452,11 @@ ER  - </pre>
   <li><strong>Protect outreach from legal and budget shocks.</strong> Budget for paralegal and digital safety support for outreach workers, and use social contracting to secure domestic financing before 2030.</li>
 </ul>
 
-<h2 id="limitations">9. Limitations</h2>
+<h2 id="limitations">8. Limitations</h2>
 <p>Partnerships are formed by random matching with simple age mixing, a simpler form than statistical network models. Survey respondents were recruited through snowball and service channels, so survey levels of PrEP use and HIV prevalence are not used directly. Lenacapavir uptake uses stated preferences, which usually exceed actual use. The effects of outreach caseload, legal shocks and budget absorption are driven by assumptions and should be read as sensitivity analyses. Ranges reflect stochastic variation between runs, not parameter or structural uncertainty. The model does not yet include costs, so cost per infection averted requires unit costs from costed programme and transition plans. Results complement, and do not replace, Spectrum/AEM and costed planning.</p>
 
-<h2 id="data">10. Data and code availability</h2>
-<p>The presentation and all model code are openly available on this page and archived on Zenodo under a CC BY 4.0 licence (Harjana, 2026). The model contains only aggregate survey distributions; respondent-level data are not included. The scenario lab in section 5 uses the same compartmental model without changes to its logic, and can be inspected in the file <a href="model.js">model.js</a>.</p>
+<h2 id="data">9. Data and code availability</h2>
+<p>All model code is archived on Zenodo under a CC BY 4.0 licence (Harjana, 2026). The model contains only aggregate survey distributions; respondent-level data are not included. The scenario lab in section 5 uses the same compartmental model without changes to its logic, and can be inspected in the file <a href="model.js">model.js</a>.</p>
 
 <h2 id="references">References</h2>
 <ol class="refs">
@@ -478,16 +482,7 @@ ER  - </pre>
   <script src="model.js"></script>
   <script src="lab.js"></script>
   <script src="agen.js"></script>
-  <script>
-  /* presentasi tertanam: dimuat hanya setelah diminta karena simulasinya berat */
-  (function () {
-    var b = document.getElementById("deckPlay"); if (!b) return;
-    b.addEventListener("click", function () {
-      var f = document.createElement("iframe");
-      f.src = "simulasi.html"; f.title = "Presentasi interaktif When the Donor Steps Back"; f.setAttribute("allow", "fullscreen");
-      var box = document.getElementById("deckFrame"); box.innerHTML = ""; box.appendChild(f); f.focus();
-    });
-  })();
-  </script>
+  <script src="../assets/charts.js"></script>
+  <script src="figs.js"></script>
 </body>
 </html>
