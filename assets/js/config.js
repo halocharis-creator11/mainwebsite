@@ -17,12 +17,12 @@ window.CHARIS_CONFIG = {
      Leave src "" to show the CHARIS block motif instead. */
   PHOTOS: {
     hero:      { src: "", alt: "", credit: "", credit_url: "" },   // first slide on the home page
-    highlight: { src: "", alt: "", credit: "", credit_url: "" },   // "Pembiayaan kesehatan" highlight on the home page
+    highlight: { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg", alt: "", credit: "", credit_url: "" },   // "Pembiayaan kesehatan" highlight on the home page
     about:     { src: "", alt: "", credit: "", credit_url: "" },   // banner on Tentang Kami
     services:  { src: "", alt: "", credit: "", credit_url: "" }    // banner on Layanan Kami
   },
   /* Older setting, still honoured for the highlight photo. */
-  HIGHLIGHT_IMAGE: "",
+  HIGHLIGHT_IMAGE: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg",
   /* Social media links. Leave "" to hide an icon. */
   SOCIAL: {
     instagram: "",
