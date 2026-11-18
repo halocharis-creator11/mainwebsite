@@ -16,13 +16,13 @@ window.CHARIS_CONFIG = {
      then fill src, a short description (alt), and the credit the licence asks for.
      Leave src "" to show the CHARIS block motif instead. */
   PHOTOS: {
-    hero:      { src: "", alt: "", credit: "", credit_url: "" },   // first slide on the home page
+    hero:      { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.51.20.jpeg", alt: "", credit: "", credit_url: "" },   // first slide on the home page
     highlight: { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg", alt: "", credit: "", credit_url: "" },   // "Pembiayaan kesehatan" highlight on the home page
     about:     { src: "", alt: "", credit: "", credit_url: "" },   // banner on Tentang Kami
     services:  { src: "", alt: "", credit: "", credit_url: "" }    // banner on Layanan Kami
   },
   /* Older setting, still honoured for the highlight photo. */
-  HIGHLIGHT_IMAGE: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg",
+  HIGHLIGHT_IMAGE: "",
   /* Social media links. Leave "" to hide an icon. */
   SOCIAL: {
     instagram: "",
