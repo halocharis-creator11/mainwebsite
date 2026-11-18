@@ -737,3 +737,5 @@ body:has(#demoBar:not([hidden])) .to-top { bottom: 66px; }
 .slide.has-img .slide-in { position: relative; z-index: 2; }
 .slide-credit { position: absolute; right: 16px; bottom: 12px; z-index: 2; margin: 0; font-size: 12px; color: rgba(255,255,255,.75); }
 @media (max-width: 760px) { .pp-frame { aspect-ratio: 16 / 9; border-radius: 12px; } }
+
+.pj-prior { display: inline-block; padding: 2px 9px; border-radius: 20px; background: #FBF0E7; color: #8A4A17; font-size: 12px; font-weight: 700; cursor: help; }

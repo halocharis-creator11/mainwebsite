@@ -67,6 +67,9 @@ Beranda berisi: slider sorotan, sorotan layanan, Terbaru (tab Berita, Publikasi,
 ### 3b. Isi daftar pengalaman tim (sekali saja)
 Pilih fungsi **`seedTeamExperience`**, lalu klik **Jalankan**. Tab `partners` akan terisi 38 lembaga dari CV pendiri. Daftar ini tampil di beranda dan halaman Tentang Kami sebagai **"Pengalaman tim kami bersama"**. Setelah itu, daftar bisa diubah lewat panel admin › *Mitra & pengalaman tim*.
 
+### 3c. Isi portofolio pertama (sekali saja)
+Pilih fungsi **`seedFirstPortfolio`**, lalu klik **Jalankan**. Fungsi ini menambahkan proyek **PRJ-2026-001** (kajian kerangka strategi keberlanjutan klinik berbasis komunitas) ke tab `projects` dengan tingkat **C (anonim)**, serta catatan privatnya ke tab `project_internal`. Isi teksnya bisa diubah kapan saja lewat panel admin › *Portofolio proyek*. Lembar pengalaman proyek versi Word ada di `docs/Lembar_Pengalaman_PRJ-2026-001_Keberlanjutan_CBC.docx`.
+
 ### 4. Email notifikasi (opsional)
 Email penerima notifikasi formulir kontak bawaannya adalah email akun pemilik skrip. Untuk menggantinya, gunakan fungsi `setNotifyEmail`.
 

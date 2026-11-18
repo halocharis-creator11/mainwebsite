@@ -131,7 +131,12 @@ a { color: var(--teal); text-underline-offset: 3px; }
   .rp-front { background: none; padding: 12px 0; }
   .rp-front-in, .rp-layout { display: block; }
   .rp-meta { position: static; border: 1px solid #ccc; }
-  body { font-size: 11pt; }
+  body { font-size: 10pt; }
+  .rp-wrap { width: 100% !important; max-width: none !important; }
+  .rp-content { font-size: 10pt; line-height: 1.5; max-width: none; }
+  .rp-content h2 { margin-top: 18pt; }
+  .rp-content figure { margin: 12pt 0; }
+  .rp-front { break-after: page; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 .rp-cover { position: relative; }
@@ -139,3 +144,11 @@ a { color: var(--teal); text-underline-offset: 3px; }
 .rp-cover:hover .rp-cover-tag { transform: translateX(-50%) scale(1.06); }
 .rp-btn { transition: transform .2s, box-shadow .2s, background .2s; }
 .rp-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(14,90,85,.18); }
+.table-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.rp-content figure img[src$=".svg"] { background: #fff; padding: 12px; width: 100%; }
+@media print {
+  .rp-content figure, .table-wrap, .callout { break-inside: avoid; }
+  .rp-content h2, .rp-content h3 { break-after: avoid; }
+  .rp-cover { display: none !important; }
+  .rp-hero-cover { display: block !important; }
+}

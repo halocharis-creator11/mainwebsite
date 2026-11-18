@@ -489,6 +489,7 @@
       const filt = document.getElementById("projFilters");
       let svcK = focus && keys.includes(focus) ? focus : "all";
       const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + "–" + r.year_end : (r.year_start || r.year_end || "");
+      const roleLabel = v => { const k = "role." + v, x = t(k); return x === k ? v : x; };
       const row = (label, val) => val ? "<div><dt>" + esc(label) + "</dt><dd>" + esc(val) + "</dd></div>" : "";
       const item = r => {
         const named = r.disclosure === "A" || r.disclosure === "B";
@@ -498,11 +499,12 @@
         return '<li class="pj">' + (cv ? '<div class="pj-media pj-cover">' + coverBox(cv.thumb, cv.cover, f(r, "title"), r.id) + "</div>"
           : named && r.image_url ? '<div class="pj-media">' + media(r.image_url, f(r, "title"), r.id, 800) + "</div>" : "") +
           '<div class="pj-body"><p class="card-meta"><span class="card-cat">' + esc(serviceName(r.service)) + "</span>" + (r.component ? "<span>" + esc(comp) + "</span>" : "") +
-          '<span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span></p>" +
+          '<span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span>" +
+          (/sebelum CHARIS/i.test(r.role || "") ? '<span class="pj-prior" title="' + esc(t("proj.prior.d")) + '">' + esc(t("proj.prior")) + "</span>" : "") + "</p>" +
           "<h3>" + esc(f(r, "title")) + "</h3>" +
           '<p class="pj-client">' + esc(named && r.client ? r.client : r.client_type || "") + (named && r.location_detail ? ", " + esc(r.location_detail) : "") + (r.region ? " · " + esc(r.region) : "") + (years(r) ? " · " + esc(years(r)) : "") + "</p>" +
           "<p>" + esc(f(r, "summary")) + "</p>" +
-          '<dl class="pj-facts">' + row(t("proj.role"), r.role) + row(t("proj.duration"), r.duration_months ? r.duration_months + " " + t("proj.months") : "") +
+          '<dl class="pj-facts">' + row(t("proj.role"), roleLabel(r.role)) + row(t("proj.duration"), r.duration_months ? r.duration_months + " " + t("proj.months") : "") +
           row(t("proj.methods"), f(r, "methods")) + row(t("proj.outputs"), f(r, "outputs")) + row(t("proj.capacity"), f(r, "capacity")) +
           (named ? row(t("proj.funder"), r.funder) + row(t("proj.partners"), r.partners) : "") + row("SDG", r.sdg) + "</dl>" +
           (named && f(r, "testimonial") ? '<blockquote class="pj-quote"><p>' + esc(f(r, "testimonial")) + "</p>" + (r.testimonial_by ? "<cite>" + esc(r.testimonial_by) + "</cite>" : "") + "</blockquote>" : "") +

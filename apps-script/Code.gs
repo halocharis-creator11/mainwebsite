@@ -139,6 +139,65 @@ function setup() {
   else Logger.log('Akun superuser sudah ada (' + PROPS.getProperty('ADMIN_EMAIL') + '). Lupa password? Jalankan resetAdmin().');
 }
 
+/* First portfolio entry (anonymised, level C) plus its private record. Run from the editor.
+   Safe to run again: it updates the texts of PRJ-2026-001 and keeps the private record as it is. */
+function seedFirstPortfolio() {
+  const pub = {
+    "id": "PRJ-2026-001",
+    "disclosure": "C",
+    "title_id": "Kajian kerangka strategi keberlanjutan klinik berbasis komunitas menjelang berakhirnya pendanaan donor",
+    "title_en": "Sustainability strategy framework for community-based clinics preparing for the end of donor funding",
+    "client_type": "Kemitraan pemerintah dan LSM",
+    "service": "planning",
+    "component": "financing",
+    "region": "Nasional · 7 provinsi",
+    "year_start": "2026",
+    "year_end": "",
+    "duration_months": "",
+    "status": "berjalan",
+    "role": "Pengalaman tim (sebelum CHARIS)",
+    "summary_id": "Sebelum CHARIS berdiri, anggota tim kami sebagai konsultan individu merancang dan melaksanakan kajian kesiapan keberlanjutan di tujuh klinik berbasis komunitas yang selama ini didukung donor kesehatan global. Kajian menilai seberapa siap setiap klinik tetap melayani, termasuk bagi populasi kunci, ketika dukungan donor berkurang. Pada lokakarya keberlanjutan, setiap klinik menyusun rencana tindak lanjut tiga bulan dan peta jalan menuju 2030; hasilnya dianalisis untuk memetakan kesenjangan antara target dan tindakan, lalu diterjemahkan menjadi kerangka strategi, perangkat kerja, dan pendampingan bagi pengelola klinik.",
+    "summary_en": "Before CHARIS was established, a member of our team, working as an individual consultant, designed and led a sustainability readiness study across seven community-based clinics supported by a global health donor. The study assessed how ready each clinic is to keep serving its clients, including key populations, as donor support declines. At a sustainability workshop, each clinic drafted a three-month action plan and a roadmap to 2030; these were analysed to map the gap between targets and actions, and turned into a strategy framework, practical tools, and ongoing support for clinic managers.",
+    "methods_id": "Penilaian mandiri kapasitas klinik (35 butir, 9 domain) oleh pimpinan, staf keuangan, dan perwakilan komunitas; dashboard pemantauan langsung dwibahasa; tipologi kesiapan transisi (kelembagaan dan finansial); wawancara mendalam pengelola klinik untuk mengklarifikasi perbedaan persepsi; pemetaan ke enam komponen kerangka keberlanjutan; lokakarya keberlanjutan tiga hari dengan penyusunan rencana tindak lanjut dan peta jalan 2030 per klinik; analisis dokumen dan penilaian mutu rencana tindak lanjut",
+    "methods_en": "Clinic capacity self-assessment (35 items, 9 domains) by clinic heads, finance staff, and community representatives; bilingual live monitoring dashboard; transition readiness typology (institutional and financial); in-depth interviews with clinic managers to clarify diverging views; mapping to six sustainability framework components; three-day sustainability workshop in which each clinic drafted an action plan and a 2030 roadmap; document analysis and quality appraisal of the action plans",
+    "outputs_id": "Instrumen penilaian dan panduan skoring, dashboard interaktif, perangkat Excel (cek kesiapan, biaya per kunjungan, proyeksi arus kas), modul pelatihan lima sesi, laporan kerangka strategi dan profil kesiapan per klinik, rangkuman rencana tindak lanjut dan peta jalan 2030 lintas klinik, kertas kerja akademis",
+    "outputs_en": "Assessment instrument and scoring guide, interactive dashboard, Excel toolkit (readiness checks, cost per visit, cash-flow projection), five-session training module, strategy framework report and clinic readiness profiles, cross-clinic summary of action plans and 2030 roadmaps, academic working paper",
+    "capacity_id": "Pelatihan lima sesi bagi pimpinan dan staf keuangan klinik: menilai kesiapan, menghitung biaya per kunjungan, kredensialing JKN dan kerja sama dengan pemerintah daerah, proyeksi arus kas, serta rencana transisi yang tetap menjaga akses layanan; lokakarya tiga hari dan pendampingan revisi rencana tindak lanjut",
+    "capacity_en": "Five-session training for clinic heads and finance staff: assessing readiness, costing a visit, JKN credentialing and local government contracting, cash-flow projection, and transition plans that protect access to services; three-day workshop and coaching to revise the action plans",
+    "keywords": "keberlanjutan program, transisi pendanaan donor, klinik berbasis komunitas, populasi kunci, JKN, biaya per kunjungan, penilaian mandiri, dashboard, rencana tindak lanjut, peta jalan 2030, swakelola tipe III",
+    "sdg": "SDG 3.8 · SDG 17.17",
+    "client": "",
+    "funder": "",
+    "partners": "",
+    "official_title": "",
+    "location_detail": "",
+    "image_url": "",
+    "related_publications": "CHARIS-2026-001",
+    "testimonial_id": "",
+    "testimonial_en": "",
+    "testimonial_by": "",
+    "date": "2026-11-11",
+    "published": true
+  };
+  const internal = {
+    "id": "PRJ-2026-001",
+    "contract_no": "",
+    "contract_date": "",
+    "contract_value": "",
+    "employer_contact": "[Isi nama, jabatan, dan kontak pemberi kerja]",
+    "team": "Ngakan Putu Anom Harjana – konsultan utama (kontrak individu, sebelum CHARIS berdiri)",
+    "disclosure_basis": "Tingkat C ditetapkan pemilik: semua nama lembaga dan klinik disamarkan. Naikkan ke A/B hanya setelah ada persetujuan tertulis pemberi kerja.",
+    "consent_link": "",
+    "last_review": "2026-11-18",
+    "notes": "Kajian Kerangka Strategi Keberlanjutan CBC. Kolaborasi Kementerian Kesehatan dan Yayasan Spiritia; tujuh klinik CBC yang didukung Global Fund. Penilaian mandiri INS-01 15–28 Oktober 2026, dilanjutkan KII pengelola (INS-02E), perangkat Excel, modul pelatihan MP1–MP5, dan Workshop Keberlanjutan CBC 9–11 November 2026 (RTL dan Peta Jalan 2030). Temuan agregat anonim terbit sebagai Kertas Kerja CHARIS No. 1/2026 (CHARIS-2026-001) dengan izin pemberi kerja; simpan bukti izin di consent_link."
+  };
+  const existed = findBy_('projects', 'id', pub.id).length > 0;
+  save_('projects', pub);                                  /* insert, or update the texts if the row already exists */
+  if (!findBy_('project_internal', 'id', internal.id).length) save_('project_internal', internal);
+  CacheService.getScriptCache().remove('pub_projects');
+  Logger.log(pub.id + (existed ? ' diperbarui' : ' ditambahkan') + ' di Portofolio (tingkat C). Kertas kerja terkait: ' + pub.related_publications + '.');
+}
+
 /** Diagnostic: run from the editor and read the log when something does not appear in the admin panel. */
 function cekSistem() {
   const ss = SpreadsheetApp.getActive();

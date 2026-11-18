@@ -66,7 +66,7 @@ window.CharisAPI = (function () {
       await new Promise(r => setTimeout(r, 500));
       if (payload.action === "memberLogin") return String(payload.code || "").toUpperCase() === "DEMO-12345" ? { ok: true, mtoken: "demo", name: "Pengguna Demo" } : { ok: false, error: "invalid" };
       if (payload.action === "memberLibrary") return { ok: true, name: "Pengguna Demo", email: "demo@contoh.org", data: [
-        { report_id: "CHARIS-2026-001", title: "[Contoh] Biaya Satuan Layanan Rawat Jalan Puskesmas di Kabupaten X", status: "disetujui", requested: "2026-11-12 09:10", available: true },
+        { report_id: "CHARIS-2026-001", title: "Dari Ketergantungan Donor Menuju Pembiayaan Majemuk", status: "disetujui", requested: "2026-11-12 09:10", available: true },
         { report_id: "CHARIS-2026-002", title: "[Contoh] Memperkuat Integrasi Layanan Primer di Tingkat Desa", status: "menunggu", requested: "2026-11-14 08:00", available: false }] };
       if (payload.action === "memberDownload") return { ok: false, error: "demo" };
       return { ok: true, demo: true };
