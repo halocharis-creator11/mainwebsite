@@ -591,7 +591,7 @@
 
       kpiHost.innerHTML = kpis;
       dash.innerHTML = '<div class="pf-grid">' + chartSvc + donut + chartTl + sdgBox + exp + "</div>";
-      const X = window.CharisPFExplorer ? window.CharisPFExplorer(document.getElementById("pfExplorer"), { rows, repo, pcov, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, SV, profileHost: document.getElementById("pfProfile"), focus: focus && rows.some(r => r.service === focus) ? focus : "" }) : null;
+      const X = window.CharisPFExplorer ? window.CharisPFExplorer(document.getElementById("pfExplorer"), { rows, repo, pcov, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, SV, img: (u, w) => API.img(u, w), profileHost: document.getElementById("pfProfile"), focus: focus && rows.some(r => r.service === focus) ? focus : "" }) : null;
 
       dash.addEventListener("click", e => {
         const b = e.target.closest("[data-pf-svc]");

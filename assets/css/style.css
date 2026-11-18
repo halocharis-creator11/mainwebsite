@@ -1076,3 +1076,26 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
   .pf-deliv th, .pf-deliv td { padding: 9px 8px; }
   .pf-deliv td:last-child .pf-cat { font-size: 12px; }
 }
+
+/* ---------- portfolio photos ---------- */
+.pfx-item.has-thumb { grid-template-columns: minmax(0, 1fr) 72px; column-gap: 12px; }
+.pfx-item.has-thumb > :not(.pfx-thumb) { grid-column: 1; }
+.pfx-thumb { grid-column: 2; grid-row: 1 / span 3; width: 72px; height: 72px; border-radius: 10px; overflow: hidden; background: var(--mist); align-self: start; }
+.pfx-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pfp-head.has-photo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 38%); }
+.pfp-head.has-photo .pfp-head-in { grid-column: 1; grid-row: 1; }
+.pfp-photo { grid-column: 2; grid-row: 1; position: relative; display: block; border: 0; padding: 0; margin: 0; cursor: zoom-in; background: var(--teal-deep); border-radius: 0 18px 0 0; overflow: hidden; min-height: 100%; }
+.pfp-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+.pfp-photo:hover img { transform: scale(1.03); }
+.pfp-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11,64,60,.55) 0%, rgba(11,64,60,0) 35%); pointer-events: none; }
+.pfp-head.has-photo .pfp-facts { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1100px) { .pfp-head.has-photo .pfp-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pfp-head.has-photo .pfp-facts li:last-child { grid-column: 1 / -1; } }
+@media (max-width: 900px) {
+  .pfp-head.has-photo { grid-template-columns: minmax(0, 1fr); }
+  .pfp-photo { grid-column: 1; grid-row: 1; aspect-ratio: 16 / 9; min-height: 0; border-radius: 18px 18px 0 0; }
+  .pfp-photo::after { background: linear-gradient(0deg, rgba(11,64,60,.5) 0%, rgba(11,64,60,0) 40%); }
+  .pfp-head.has-photo .pfp-head-in { grid-row: 2; }
+}
+@media (max-width: 600px) { .pfx-item.has-thumb { grid-template-columns: minmax(0, 1fr) 60px; } .pfx-thumb { width: 60px; height: 60px; } }
+@media (prefers-reduced-motion: reduce) { .pfp-photo img { transition: none; } }
+.pfp-close { background: rgba(11,64,60,.55); }

@@ -42,7 +42,8 @@
         ["_h3", "Hanya tampil untuk tingkat A dan B (perlu izin mitra)", "heading"],
         ["client", "Nama klien/mitra (persis seperti disetujui)", "text"], ["official_title", "Judul resmi proyek", "text"],
         ["funder", "Sumber pendanaan", "text"], ["partners", "Mitra pelaksana lain", "text"], ["location_detail", "Lokasi spesifik (kabupaten/kota)", "text"],
-        ["image_url", "Foto kegiatan (tanpa wajah yang bisa dikenali, kecuali ada izin)", "image"],
+        ["image_url", "Foto kegiatan (landscape; tanpa wajah yang bisa dikenali, kecuali ada izin)", "image"],
+        ["photo_public", "Foto boleh tampil juga untuk tingkat C (centang hanya jika foto tidak memuat nama lembaga, logo, papan nama, atau wajah yang dapat dikenali)", "bool"],
         ["testimonial_id", "Testimoni (ID), dengan persetujuan tertulis", "textarea"], ["testimonial_en", "Testimonial (EN)", "textarea"], ["testimonial_by", "Nama dan jabatan pemberi testimoni", "text"],
         ["_h4", "Hanya tampil untuk tingkat A", "heading"],
         ["related_publications", "ID publikasi terkait di Repositori (pisahkan dengan koma)", "text"]] },
@@ -208,7 +209,7 @@
   $("reloadBtn").addEventListener("click", () => { if (type) select(type); });
 
   /* Warn when the live Web App still runs an older Code.gs (edited, but no new deployment version) */
-  const EXPECTED_API = "2026-11-18b";
+  const EXPECTED_API = "2026-11-18c";
   function checkApi() {
     if (DEMO) return;
     fetch(cfg.API_URL).then(r => r.json()).then(j => {

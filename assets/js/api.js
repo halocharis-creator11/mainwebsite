@@ -55,7 +55,7 @@ window.CharisAPI = (function () {
   const P_NAMED = ["client", "funder", "partners", "official_title", "location_detail", "image_url", "testimonial_id", "testimonial_en", "testimonial_by"];
   function publicProject(r) {
     const o = Object.assign({}, r);
-    if (r.disclosure === "C") P_NAMED.concat(["related_publications"]).forEach(k => delete o[k]);
+    if (r.disclosure === "C") { const keep = (r.photo_public === true || String(r.photo_public).toUpperCase() === "TRUE") ? r.image_url : ""; P_NAMED.concat(["related_publications"]).forEach(k => delete o[k]); if (keep) o.image_url = keep; }
     if (r.disclosure === "B") delete o.related_publications;
     return o;
   }

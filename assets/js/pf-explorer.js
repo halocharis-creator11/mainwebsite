@@ -5,6 +5,7 @@
 window.CharisPFExplorer = function (host, ctx) {
   "use strict";
   const { rows, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, repo, pcov, SV, profileHost } = ctx;
+  const img = (u, w) => (ctx.img ? ctx.img(u, w) : u);
   const T2 = (id, en) => (lang === "en" ? en : id);
   const L = window.L;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -185,7 +186,8 @@ window.CharisPFExplorer = function (host, ctx) {
     const list = rowsNow();
     summary(list);
     $("pfxList").innerHTML = list.length ? list.map(r =>
-      '<li><button type="button" class="pfx-item' + (st.sel === r.id ? " on" : "") + '" data-pid="' + esc(r.id) + '" aria-pressed="' + (st.sel === r.id) + '" style="--svc:' + svcColor(r.service) + '">' +
+      '<li><button type="button" class="pfx-item' + (st.sel === r.id ? " on" : "") + (r.image_url ? " has-thumb" : "") + '" data-pid="' + esc(r.id) + '" aria-pressed="' + (st.sel === r.id) + '" style="--svc:' + svcColor(r.service) + '">' +
+      (r.image_url ? '<span class="pfx-thumb"><img src="' + esc(img(r.image_url, 240)) + '" alt="" loading="lazy" decoding="async"></span>' : "") +
       '<span class="pfx-item-tags"><span class="pf-svc">' + svcIcon(r.service, "ic-mini") + esc(serviceName(r.service)) + '</span><span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span></span>" +
       "<strong>" + esc(f(r, "title")) + '</strong><span class="pfx-item-meta"><span>' + svgI(IC.place, 14) + esc(areaText(r)) + "</span>" + (years(r) ? "<span>" + svgI(IC.time, 14) + esc(years(r)) + "</span>" : "") + "</span></button></li>").join("")
       : '<li class="state">' + esc(T2("Tidak ada proyek yang cocok. Ubah kata kunci atau filter.", "No matching projects. Change the keywords or filters.")) + "</li>";
@@ -233,7 +235,9 @@ window.CharisPFExplorer = function (host, ctx) {
     profileHost.hidden = false;
     profileHost.style.setProperty("--svc", svcColor(r.service));
     profileHost.innerHTML =
-      '<article class="pfp" aria-labelledby="pfpTitle"><header class="pfp-head"><div class="pfp-head-in">' +
+      '<article class="pfp" aria-labelledby="pfpTitle"><header class="pfp-head' + (r.image_url ? " has-photo" : "") + '">' +
+      (r.image_url ? '<button type="button" class="pfp-photo" data-zoom="' + esc(img(r.image_url, 2000)) + '" data-alt="' + esc(f(r, "title")) + '" aria-label="' + esc(T2("Perbesar foto kegiatan", "Enlarge the activity photo")) + '"><img src="' + esc(img(r.image_url, 1200)) + '" alt="' + esc(T2("Foto kegiatan: ", "Activity photo: ") + f(r, "title")) + '" decoding="async"></button>' : "") +
+      '<div class="pfp-head-in">' +
       '<p class="pfp-kicker">' + esc(T2("Profil proyek", "Project profile")) + '<span class="pfp-id">' + esc(r.id) + "</span></p>" +
       '<p class="pf-item-tags"><span class="pf-svc">' + svcIcon(r.service, "ic-mini") + esc(serviceName(r.service)) + '</span><span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span>" +
       (/sebelum CHARIS/i.test(r.role || "") ? '<span class="pj-prior" title="' + esc(t("proj.prior.d")) + '">' + esc(t("proj.prior")) + "</span>" : "") + "</p>" +
