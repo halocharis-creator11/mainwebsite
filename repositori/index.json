@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-18",
-  "count": 6,
+  "count": 7,
   "items": [
     {
       "id": "CHARIS-2026-001",
@@ -326,6 +326,61 @@
         "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p3.jpg",
         "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p4.jpg",
         "repositori/2026-03-hipa-kinerja-sistem-kesehatan/auto-p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "request",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-007",
+      "slug": "2026-01-iklim-morbiditas-anak",
+      "url": "repositori/2026-01-iklim-morbiditas-anak/",
+      "type": "Laporan penelitian",
+      "type_en": "Research report",
+      "series": "",
+      "subtitle_id": "Analisis Bayesian multilevel atas ketimpangan spasial, jalur kausal, pemodelan prediktif, dan beban ekonomi",
+      "subtitle_en": "A multilevel Bayesian analysis of spatial inequality, causal pathways, predictive modeling, and economic burden",
+      "title_id": "Kerentanan Iklim, Deprivasi Rumah Tangga, dan Morbiditas Anak di Indonesia",
+      "title_en": "Climate Vulnerability, Household Deprivation, and Child Morbidity in Indonesia",
+      "abstract_id": "Latar belakang: Indonesia menghadapi peningkatan tekanan panas, curah hujan ekstrem, dan kekeringan, tetapi bukti nasional tentang dampaknya terhadap morbiditas anak masih terbatas. Kajian ini menilai pengaruh kerentanan iklim terhadap morbiditas anak, secara mandiri dan dalam interaksinya dengan deprivasi rumah tangga dan kesehatan ibu. Metode: Data SSGI 2024 dihubungkan dengan data iklim harian BMKG yang dikumpulkan sekitar enam bulan sebelumnya dan diringkas menjadi Indeks Kerentanan Iklim (CVI). Analisis mencakup epidemiologi deskriptif tertimbang survei, analisis kelas laten, regresi logistik multilevel Bayesian, mediasi kausal, model interaksi, pemetaan penyakit BYM2, prediksi XGBoost, simulasi kontrafaktual, dan analisis biaya penyakit. Hasil: Prevalensi morbiditas anak berkisar dari 3,6% sampai 17,1% antarprovinsi dan lebih tinggi di perkotaan (10,8%) daripada di perdesaan (8,6%). Prevalensi naik dari 7,0% pada kelas kerentanan rendah menjadi 11,3% pada kelas tinggi. Perbedaan antarprovinsi tetap besar setelah penyesuaian, dengan risiko tertinggi di Jawa Barat, Banten, dan DKI Jakarta. Efek total CVI sekitar 0,0105, dan hanya sekitar 0,001 yang dimediasi deprivasi rumah tangga. Model prediktif hanya sedikit lebih baik daripada tebakan acak. Kasus berlebih terkait iklim terpusat di Jawa Barat (1.608) dan Jawa Timur (1.003), dan skenario gabungan adaptasi iklim dan perlindungan sosial menurunkan beban ekonomi dalam model sekitar 30%. Kesimpulan: Strategi kesehatan anak perlu tersasar secara geografis, berfokus pada kesetaraan, dan tangguh iklim, dengan prioritas pada provinsi titik panas, integrasi adaptasi iklim ke dalam perlindungan sosial, dan intervensi berbasis wilayah. Temuan bersifat awal dan belum melalui telaah sejawat.",
+      "abstract_en": "Background: Indonesia faces increasing heat stress, rainfall extremes and drought, yet national evidence on their effects on child morbidity is limited. This study assesses how climate vulnerability influences child morbidity, independently and in interaction with household deprivation and maternal health. Methods: SSGI 2024 data were linked with daily BMKG climate data collected about six months earlier and summarised into a Climate Vulnerability Index (CVI). The analysis covers survey-weighted descriptive epidemiology, latent class analysis, Bayesian multilevel logistic regression, causal mediation, interaction models, BYM2 disease mapping, XGBoost prediction, counterfactual simulation and cost-of-illness analysis. Results: Child morbidity prevalence ranges from 3.6% to 17.1% across provinces and is higher in urban (10.8%) than rural areas (8.6%). Prevalence rises from 7.0% in the low vulnerability class to 11.3% in the high class. Provincial differences remain large after adjustment, with the highest risk in West Java, Banten and Jakarta. The total CVI effect is about 0.0105, of which only about 0.001 is mediated by household deprivation. Predictive models perform only slightly better than chance. Climate-attributable excess cases are concentrated in West Java (1,608) and East Java (1,003), and a combined climate adaptation and social protection scenario lowers the modelled economic burden by about 30%. Conclusions: Child health strategies should be geographically targeted, equity-focused and climate-resilient, prioritising hotspot provinces, embedding climate adaptation in social protection and favouring place-based interventions. The findings are preliminary and not yet peer reviewed.",
+      "authors": [
+        {
+          "name": "Ngakan Putu Anom Harjana",
+          "affiliation": "Center for Public Health Innovation (CPHI), Universitas Udayana, Bali, Indonesia"
+        }
+      ],
+      "date_published": "2026-01-18",
+      "uploaded": "2026-11-18",
+      "added": "2026-11-18T14:50:10.089Z",
+      "sort_date": "2026-01-18",
+      "language": "id",
+      "keywords": [
+        "kerentanan iklim",
+        "morbiditas anak",
+        "deprivasi rumah tangga",
+        "kesehatan ibu",
+        "analisis Bayesian multilevel",
+        "pemetaan spasial",
+        "analisis mediasi",
+        "pembelajaran mesin",
+        "beban ekonomi",
+        "SSGI 2024"
+      ],
+      "service": "analytics",
+      "project_id": "",
+      "doi": "10.5281/zenodo.18288261",
+      "license": "CC BY-NC 4.0",
+      "pages": 46,
+      "version": "1",
+      "cover": "repositori/2026-01-iklim-morbiditas-anak/auto-cover.jpg",
+      "thumb": "repositori/2026-01-iklim-morbiditas-anak/auto-thumb.jpg",
+      "preview": [
+        "repositori/2026-01-iklim-morbiditas-anak/auto-p1.jpg",
+        "repositori/2026-01-iklim-morbiditas-anak/auto-p2.jpg",
+        "repositori/2026-01-iklim-morbiditas-anak/auto-p3.jpg",
+        "repositori/2026-01-iklim-morbiditas-anak/auto-p4.jpg",
+        "repositori/2026-01-iklim-morbiditas-anak/auto-p5.jpg"
       ],
       "pdf_summary": "",
       "full_pdf": "request",

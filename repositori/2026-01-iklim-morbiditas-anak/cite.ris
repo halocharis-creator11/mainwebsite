@@ -1,0 +1,23 @@
+TY  - RPRT
+AU  - Ngakan Putu Anom Harjana
+TI  - Kerentanan Iklim, Deprivasi Rumah Tangga, dan Morbiditas Anak di Indonesia
+T2  - Climate Vulnerability, Household Deprivation, and Child Morbidity in Indonesia
+PY  - 2026
+DA  - 2026/01/18
+PB  - CHARIS, Yayasan Peduli Insan Rentan (PINAR Foundation)
+CY  - Gianyar, Bali, Indonesia
+DO  - 10.5281/zenodo.18288261
+UR  - https://doi.org/10.5281/zenodo.18288261
+AB  - Latar belakang: Indonesia menghadapi peningkatan tekanan panas, curah hujan ekstrem, dan kekeringan, tetapi bukti nasional tentang dampaknya terhadap morbiditas anak masih terbatas. Kajian ini menilai pengaruh kerentanan iklim terhadap morbiditas anak, secara mandiri dan dalam interaksinya dengan deprivasi rumah tangga dan kesehatan ibu. Metode: Data SSGI 2024 dihubungkan dengan data iklim harian BMKG yang dikumpulkan sekitar enam bulan sebelumnya dan diringkas menjadi Indeks Kerentanan Iklim (CVI). Analisis mencakup epidemiologi deskriptif tertimbang survei, analisis kelas laten, regresi logistik multilevel Bayesian, mediasi kausal, model interaksi, pemetaan penyakit BYM2, prediksi XGBoost, simulasi kontrafaktual, dan analisis biaya penyakit. Hasil: Prevalensi morbiditas anak berkisar dari 3,6% sampai 17,1% antarprovinsi dan lebih tinggi di perkotaan (10,8%) daripada di perdesaan (8,6%). Prevalensi naik dari 7,0% pada kelas kerentanan rendah menjadi 11,3% pada kelas tinggi. Perbedaan antarprovinsi tetap besar setelah penyesuaian, dengan risiko tertinggi di Jawa Barat, Banten, dan DKI Jakarta. Efek total CVI sekitar 0,0105, dan hanya sekitar 0,001 yang dimediasi deprivasi rumah tangga. Model prediktif hanya sedikit lebih baik daripada tebakan acak. Kasus berlebih terkait iklim terpusat di Jawa Barat (1.608) dan Jawa Timur (1.003), dan skenario gabungan adaptasi iklim dan perlindungan sosial menurunkan beban ekonomi dalam model sekitar 30%. Kesimpulan: Strategi kesehatan anak perlu tersasar secara geografis, berfokus pada kesetaraan, dan tangguh iklim, dengan prioritas pada provinsi titik panas, integrasi adaptasi iklim ke dalam perlindungan sosial, dan intervensi berbasis wilayah. Temuan bersifat awal dan belum melalui telaah sejawat.
+KW  - kerentanan iklim
+KW  - morbiditas anak
+KW  - deprivasi rumah tangga
+KW  - kesehatan ibu
+KW  - analisis Bayesian multilevel
+KW  - pemetaan spasial
+KW  - analisis mediasi
+KW  - pembelajaran mesin
+KW  - beban ekonomi
+KW  - SSGI 2024
+LA  - id
+ER  - 
