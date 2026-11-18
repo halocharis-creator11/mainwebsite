@@ -1,6 +1,6 @@
 /* CHARIS portfolio explorer: OpenStreetMap-based map (Leaflet) with a searchable, filterable project list.
    Selecting a project hatches the provinces or countries it covers; clicking a province filters the list.
-   Boundaries: Natural Earth (public domain), simplified. Basemap: CARTO Positron, built on OpenStreetMap data. */
+   Everything is drawn from local files: Natural Earth boundaries (public domain), simplified. No tile server, API or key. */
 window.CharisPFExplorer = function (host, ctx) {
   "use strict";
   const { rows, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, repo, pcov, SV } = ctx;
@@ -56,7 +56,7 @@ window.CharisPFExplorer = function (host, ctx) {
     '<div class="pfx-panel"><ul class="pfx-list" id="pfxList"></ul><article class="pfx-detail" id="pfxDetail" hidden></article></div></div>' +
     '<div class="pfx-mapwrap"><div class="pfx-map" id="pfxMap" role="region" aria-label="' + esc(T2("Peta cakupan proyek", "Project coverage map")) + '"></div>' +
     '<div class="pfx-view" role="group" aria-label="' + esc(T2("Tampilan peta", "Map view")) + '"><button type="button" data-view="idn" aria-pressed="true">Indonesia</button><button type="button" data-view="world" aria-pressed="false">' + esc(T2("Dunia", "World")) + "</button></div>" +
-    '<div class="pfx-legend"><p><strong>' + esc(T2("Jumlah proyek per wilayah", "Projects per area")) + '</strong></p><div class="pfx-scale"><i style="background:#D3E6E2"></i><i style="background:#8FC2BA"></i><i style="background:#3F8C83"></i><i style="background:#0E5A55"></i></div><p class="pfx-scale-l"><span>1</span><span id="pfxMax"></span></p>' +
+    '<div class="pfx-legend"><p><strong>' + esc(T2("Jumlah proyek per wilayah", "Projects per area")) + '</strong></p><div class="pfx-scale"><i style="background:#B5D6CF"></i><i style="background:#7DB8AE"></i><i style="background:#3F8C83"></i><i style="background:#0E5A55"></i></div><p class="pfx-scale-l"><span>1</span><span id="pfxMax"></span></p>' +
     '<p class="pfx-hatch-l"><i></i>' + esc(T2("Cakupan proyek terpilih", "Coverage of the selected project")) + '</p></div><p class="pfx-mapnote">' + esc(T2("Klik wilayah di peta untuk menyaring proyek. Batas wilayah bersifat ilustratif.", "Click an area on the map to filter projects. Boundaries are illustrative.")) + "</p></div></div>";
 
   const $ = id => host.querySelector("#" + id);
@@ -67,7 +67,7 @@ window.CharisPFExplorer = function (host, ctx) {
   /* ---------- map ---------- */
   let map = null, provLayer = null, ctryLayer = null, provFeat = {}, ctryFeat = {}, view = "idn";
   const IDN_BOUNDS = [[-11.2, 94.8], [6.3, 141.2]];
-  const shade = n => !n ? "#F1F5F4" : n >= 4 ? "#0E5A55" : n === 3 ? "#3F8C83" : n === 2 ? "#8FC2BA" : "#D3E6E2";
+  const shade = n => !n ? "#DCE6E3" : n >= 4 ? "#0E5A55" : n === 3 ? "#3F8C83" : n === 2 ? "#7DB8AE" : "#B5D6CF";
   const provCount = id => rowsNow().filter(r => { const c = cover.get(r.id); return c && (c.prov.has(id) || c.national); }).length;
   const ctryCount = id => rowsNow().filter(r => { const c = cover.get(r.id); return c && c.ctry.has(id); }).length;
   function ensureHatch() {
@@ -91,7 +91,7 @@ window.CharisPFExplorer = function (host, ctx) {
     if (ctryLayer) ctryLayer.eachLayer(l => {
       const id = l.feature.properties.id, n = id === "IDN" ? 0 : ctryCount(id); max = Math.max(max, n);
       const on = sel && sel.ctry.has(id);
-      l.setStyle({ fillColor: n ? shade(n) : "#FFFFFF", fillOpacity: n ? (sel && !on ? 0.35 : 0.9) : 0, color: on || st.reg === id ? "#C4621D" : (n ? "#FFFFFF" : "transparent"), weight: on ? 1.6 : 0.8 });
+      l.setStyle({ fillColor: n ? shade(n) : "#EDF1F0", fillOpacity: n ? (sel && !on ? 0.45 : 0.95) : 1, color: on || st.reg === id ? "#C4621D" : "#FFFFFF", weight: on ? 1.6 : 0.6 });
       hatch(l, on);
     });
     $("pfxMax").textContent = max >= 4 ? "4+" : String(max);
@@ -115,10 +115,10 @@ window.CharisPFExplorer = function (host, ctx) {
     if (world) countryNames = world.features.flatMap(ft => [[String(ft.properties.name_en).toLowerCase(), ft.properties.id], [String(ft.properties.name_id).toLowerCase(), ft.properties.id]]);
     rows.forEach(r => cover.set(r.id, resolve(r)));
     map = L.map($("pfxMap"), { zoomControl: true, scrollWheelZoom: false, worldCopyJump: true, minZoom: 2, maxZoom: 9, attributionControl: true });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>; batas: Natural Earth' }).addTo(map);
+    map.attributionControl.setPrefix(false);
+    map.attributionControl.addAttribution(T2("Batas wilayah", "Boundaries") + ': <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>');
     const tip = (l, n) => l.bindTooltip(() => "<strong>" + esc(nameOf(l)) + "</strong><br>" + n() + " " + esc(t("proj.count")), { sticky: true, direction: "top", className: "pfx-tip" });
-    if (world) ctryLayer = L.geoJSON(world, { filter: ft => ft.properties.id !== "IDN", style: { weight: 0.8, fillOpacity: 0, color: "transparent" },
+    if (world) ctryLayer = L.geoJSON(world, { filter: ft => ft.properties.id !== "IDN", style: { weight: 0.6, fillColor: "#EDF1F0", fillOpacity: 1, color: "#FFFFFF" },
       onEachFeature: (ft, l) => { ctryFeat[ft.properties.id] = l; tip(l, () => ctryCount(ft.properties.id)); l.on("click", () => { if (ctryCount(ft.properties.id)) setReg(ft.properties.id); }); } }).addTo(map);
     if (idn) provLayer = L.geoJSON(idn, { style: { weight: 0.8, color: "#fff", fillOpacity: 0.9 },
       onEachFeature: (ft, l) => { provFeat[ft.properties.id] = l; tip(l, () => provCount(ft.properties.id)); l.on("click", () => setReg(ft.properties.id)); } }).addTo(map);

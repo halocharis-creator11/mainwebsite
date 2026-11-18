@@ -993,3 +993,5 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
 #pfExplorer { scroll-margin-top: 84px; }
 @media (max-width: 600px) { .pfx-legend > p:first-child { display: none; } .pfx-legend { top: 48px; } }
 @media (max-width: 600px) { .pfx-legend { top: auto; bottom: 22px; max-width: 132px; } .pfx-scale-l { display: none; } }
+/* map without tiles: sea colour as the background */
+.pfx-map, .pfx .leaflet-container { background: #CFE3EA; }
