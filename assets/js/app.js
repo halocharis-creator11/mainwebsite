@@ -235,7 +235,9 @@
     if (!img.naturalWidth || !img.parentElement) return;
     const box = img.parentElement.getBoundingClientRect(); if (!box.width) return;
     const cs = getComputedStyle(img.parentElement), padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-    const maxW = Math.max(60, box.width - padX), maxH = Math.max(40, box.height - padY), r = img.naturalWidth / img.naturalHeight, area = maxW * maxH * 0.6;
+    const lane = !!img.closest(".marquee"), r = img.naturalWidth / img.naturalHeight;
+    /* in the moving lanes the tile takes the logo's own width, so size by height; in the grid fill the cell */
+    const maxH = Math.max(40, box.height - padY), maxW = lane ? maxH * 3.4 : Math.max(60, box.width - padX), area = lane ? maxH * maxH * 1.6 : maxW * maxH * 0.78;
     let w = Math.sqrt(area * r), h = Math.sqrt(area / r);
     const k = Math.min(maxW / w, maxH / h, 1);
     img.style.width = Math.round(w * k) + "px"; img.style.height = Math.round(h * k) + "px";
