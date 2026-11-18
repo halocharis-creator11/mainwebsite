@@ -497,9 +497,9 @@
     },
 
     async projects(focus, pid) {
-      app.innerHTML = '<header class="page-top pf-top"><div class="wrap"><h1>' + esc(t("nav.projects")) + "</h1><p>" + esc(t("pf.lead")) + "</p></div></header>" +
-        '<section class="sec pf-dash-sec"><div class="wrap"><div id="pfKpis">' + msg("loading") + "</div></div></section>" +
-        '<section class="sec pf-x-sec" id="pf-list"><div class="wrap">' + secHead(t("pf.x.t")) + '<p class="sec-lead">' + esc(t("pf.x.lead")) + '</p><div id="pfExplorer"></div><p class="proj-note">' + esc(t("proj.note")) + "</p></div></section>" +
+      app.innerHTML = '<header class="page-top pf-top"><div class="wrap"><h1>' + esc(t("nav.projects")) + "</h1><p>" + esc(t("pf.lead")) + '</p><div id="pfKpis" class="pf-kpis-host"></div></div></header>' +
+        '<section class="sec pf-x-sec" id="pf-list"><div class="wrap">' + secHead(t("pf.x.t")) + '<p class="sec-lead">' + esc(t("pf.x.lead")) + '</p><div id="pfExplorer"></div>' +
+        '<section id="pfProfile" class="pfp-wrap" hidden aria-live="polite"></section><p class="proj-note">' + esc(t("proj.note")) + "</p></div></section>" +
         '<section class="sec pf-charts-sec"><div class="wrap">' + secHead(t("pf.charts.t")) + '<div id="pfDash" class="pf-dash"></div></div></section>' +
         '<section class="pf-cta"><div class="wrap pf-cta-in"><div><h2>' + esc(t("pf.cta.t")) + "</h2><p>" + esc(t("pf.cta.d")) + '</p></div><div class="pf-cta-act"><a class="btn btn-light" href="#/contact">' + esc(t("pf.cta.b1")) + '</a><a class="btn btn-outline-light" href="#/research">' + esc(t("pf.cta.b2")) + "</a></div></div></section>";
       const [rows, repo, pcov, partners] = await Promise.all([safeList("projects"), API.repo().catch(() => []), API.portfolioCovers().catch(() => ({})), safeList("partners")]);
@@ -558,13 +558,12 @@
       const ys = rows.map(r => Number(r.year_start)).filter(Boolean), ye = rows.map(r => Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start))).filter(Boolean);
       const y0 = Math.min(nowY, ...ys), y1 = Math.max(nowY, ...ye, y0), span = y1 - y0 + 1;
       const tl = rows.filter(r => r.year_start).slice().sort((a, b) => String(a.year_start).localeCompare(String(b.year_start)));
-      const shortT = s => { s = String(s); return s.length > 58 ? s.slice(0, s.lastIndexOf(" ", 56)) : s; };
       const chartTl = '<div class="pf-card pf-card-wide"><h3>' + esc(t("pf.c.tl")) + '</h3><div class="pf-tl" style="--span:' + span + '">' +
         '<div class="pf-tl-axis"><span></span>' + Array.from({ length: span }, (_, i) => "<span>" + (y0 + i) + "</span>").join("") + "</div>" +
         tl.map(r => {
           const a = Number(r.year_start), b = Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start));
           const left = (a - y0) / span * 100, width = (b - a + 1) / span * 100;
-          return '<a class="pf-tl-row" href="#pj-' + esc(r.id) + '" data-pf-jump="' + esc(r.id) + '"><span class="pf-tl-name">' + esc(shortT(f(r, "title"))) + '</span><span class="pf-tl-track"><i class="' + (r.status === "berjalan" ? "on" : "") + '" style="left:' + left + "%;width:" + width + "%;background:" + svcColor(r.service) + '"><em>' + esc(years(r)) + "</em></i></span></a>";
+          return '<a class="pf-tl-row" href="#pj-' + esc(r.id) + '" data-pf-jump="' + esc(r.id) + '"><span class="pf-tl-name">' + esc(f(r, "title")) + '</span><span class="pf-tl-track"><i class="' + (r.status === "berjalan" ? "on" : "") + '" style="left:' + left + "%;width:" + width + "%;background:" + svcColor(r.service) + '"><em>' + esc(years(r)) + "</em></i></span></a>";
         }).join("") + '</div><p class="pf-legend"><span><i class="sw"></i>' + esc(t("proj.st.selesai")) + '</span><span><i class="sw on"></i>' + esc(t("proj.st.berjalan")) + "</span></p></div>";
 
       /* ---------- chart 4: client types (donut) ---------- */
@@ -592,15 +591,15 @@
 
       kpiHost.innerHTML = kpis;
       dash.innerHTML = '<div class="pf-grid">' + chartSvc + donut + chartTl + sdgBox + exp + "</div>";
-      const X = window.CharisPFExplorer ? window.CharisPFExplorer(document.getElementById("pfExplorer"), { rows, repo, pcov, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, SV, focus: focus && rows.some(r => r.service === focus) ? focus : "" }) : null;
+      const X = window.CharisPFExplorer ? window.CharisPFExplorer(document.getElementById("pfExplorer"), { rows, repo, pcov, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, SV, profileHost: document.getElementById("pfProfile"), focus: focus && rows.some(r => r.service === focus) ? focus : "" }) : null;
 
       dash.addEventListener("click", e => {
         const b = e.target.closest("[data-pf-svc]");
         if (b && X) { X.filterService(b.dataset.pfSvc); dash.querySelectorAll("[data-pf-svc]").forEach(x => x.setAttribute("aria-pressed", String(x === b && x.getAttribute("aria-pressed") !== "true"))); document.getElementById("pf-list").scrollIntoView({ behavior: smoothOK() ? "smooth" : "auto", block: "start" }); return; }
         const j = e.target.closest("[data-pf-jump]");
-        if (j && X) { e.preventDefault(); X.select(j.dataset.pfJump, true); }
+        if (j && X) { e.preventDefault(); X.select(j.dataset.pfJump); }
       });
-      if (pid && X && rows.some(r => r.id === pid)) { app.dataset.keep = "1"; X.select(pid, true); setTimeout(() => { delete app.dataset.keep; }, 1500); }
+      if (pid && X && rows.some(r => r.id === pid)) { app.dataset.keep = "1"; X.select(pid, "jump"); setTimeout(() => { delete app.dataset.keep; }, 1500); }
       /* count-up on the KPI numbers, once */
       if (smoothOK()) kpiHost.querySelectorAll(".pf-kpi b[data-count]").forEach(b => {
         const n = Number(b.dataset.count); if (!n || n < 2) return;
