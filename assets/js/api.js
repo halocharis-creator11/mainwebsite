@@ -1,6 +1,6 @@
 /* Thin client for the Google Apps Script backend.
-   GET  ?action=list&type=<collection>        -> { ok, data: [...] }
-   POST text/plain JSON { action: "contact", ... } -> { ok }
+   GET  ?action=list&type=<collection>        returns { ok, data: [...] }
+   POST text/plain JSON { action: "contact", ... } returns { ok }
    text/plain avoids the CORS preflight that Apps Script cannot answer. */
 window.CharisAPI = (function () {
   const cfg = window.CHARIS_CONFIG || {};
@@ -79,7 +79,7 @@ window.CharisAPI = (function () {
     return res.json();
   }
 
-  /* Google Drive links -> embeddable image / download URLs */
+  /* Google Drive links to embeddable image / download URLs */
   function driveId(url) {
     if (!url) return "";
     const m = String(url).match(/(?:\/d\/|id=)([a-zA-Z0-9_-]{20,})/);

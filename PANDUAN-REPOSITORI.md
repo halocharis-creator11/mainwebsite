@@ -56,7 +56,7 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 | `type` | `Laporan riset`, `Kertas kerja`, `Policy brief`, `Panduan`, `Laporan evaluasi` | ✔ |
 | `series` | mis. `Kertas Kerja CHARIS No. 2` | |
 | `title_id`, `title_en` | Judul Indonesia dan Inggris | ✔ (`title_id`) |
-| `abstract_id`, `abstract_en` | Abstrak lengkap, 150–300 kata | ✔ (`abstract_id`) |
+| `abstract_id`, `abstract_en` | Abstrak lengkap, 150 sampai 300 kata | ✔ (`abstract_id`) |
 | `authors` | Daftar penulis: `name`, `affiliation`, `orcid` (opsional) | ✔ |
 | `date_published` | Tanggal terbit, format `YYYY-MM-DD`. **Menentukan urutan di Repositori** | ✔ |
 | `language` | `id` atau `en` | |
@@ -73,7 +73,7 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 3. Tulis isi laporan di antara penanda **ISI LAPORAN**. Gunakan:
    - `<h2>` untuk bab dan `<h3>` untuk subbab (daftar isi dibuat otomatis);
    - `<figure>` + `<figcaption>` untuk gambar, `<table>` + `<caption>` untuk tabel;
-   - `<aside class="callout">` untuk kotak temuan kunci;
+   - `<aside class=*callout*>` untuk kotak temuan kunci;
    - bagian **Daftar Pustaka** di akhir, karena Google Scholar membaca bagian referensi.
 4. **Jangan** mengedit bagian di antara penanda `CHARIS:AUTO`. Bagian itu ditulis ulang otomatis.
 
@@ -86,7 +86,7 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 3. Klik **Commit changes**.
 4. Buka tab **Actions** dan tunggu proses *Bangun repositori CHARIS* selesai (±1 menit, tanda ✔ hijau).
    - Jika muncul tanda ✖ merah, buka prosesnya. Bagian **MASALAH yang perlu diperbaiki** menjelaskan kolom mana yang salah, misalnya tanda kutip atau koma di DATA PRODUK.
-5. Produk tampil di Repositori setelah GitHub Pages diperbarui (1–2 menit).
+5. Produk tampil di Repositori setelah GitHub Pages diperbarui (1 sampai 2 menit).
 
 ### 4. Daftarkan PDF lengkap (privat)
 
@@ -96,7 +96,7 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 
 ### 5. Publish di Zenodo
 
-Kembali ke draf Zenodo. Tambahkan *Related identifier* berupa URL halaman produk di website CHARIS (`…/repositori/nama-folder/`), lalu klik **Publish**. DOI langsung aktif.
+Kembali ke draf Zenodo. Tambahkan *Related identifier* berupa URL halaman produk di website CHARIS (`https://<alamat-website>/repositori/nama-folder/`), lalu klik **Publish**. DOI langsung aktif.
 
 ---
 
@@ -118,8 +118,8 @@ Sampul untuk **Portofolio** diunggah ke folder `portofolio/<ID-PROYEK>/` dengan 
 
 Pembaca bisa membalik **lima halaman pertama** laporan seperti buku, langsung dari daftar Repositori, halaman Layanan Kami, dan halaman laporan. Di akhir pratinjau ada tombol **Minta PDF lengkap**.
 
-1. Dari Word atau PDF laporan, simpan **hanya halaman 1–5** (sampul, daftar isi, ringkasan, dan seterusnya) sebagai `pratinjau.pdf`.
-   Di Word: *File → Save as → PDF → Options → Pages from 1 to 5*. Di Adobe/Preview: ekstrak halaman 1–5.
+1. Dari Word atau PDF laporan, simpan **hanya halaman 1 sampai 5** (sampul, daftar isi, ringkasan, dan seterusnya) sebagai `pratinjau.pdf`.
+   Di Word: menu *File > Save as > PDF > Options > Pages from 1 to 5*. Di Adobe/Preview: ekstrak halaman 1 sampai 5.
 2. Unggah `pratinjau.pdf` ke folder produk, bersama `index.html` dan `sampul.pdf`.
 3. GitHub Actions membuat gambar `auto-p1.jpg` sampai `auto-p5.jpg`. Jika PDF lebih dari 5 halaman, hanya 5 halaman pertama yang dipakai.
 
@@ -165,6 +165,6 @@ Yang perlu Anda lakukan:
 
 **Bagaimana kalau laporan direvisi?** Edit `index.html`, naikkan `version` (mis. `1.1`), lalu upload ulang. Urutan tidak berubah karena mengikuti `date_published`. Di Zenodo, gunakan **New version** agar DOI versi lama tetap tercatat.
 
-**Bisa menerbitkan dalam bahasa Inggris saja?** Bisa. Isi `language: "en"`, tulis isi laporan dalam bahasa Inggris, dan tetap isi `title_id` serta `abstract_id` (boleh sama dengan versi Inggris).
+**Bisa menerbitkan dalam bahasa Inggris saja?** Bisa. Isi `language: *en*`, tulis isi laporan dalam bahasa Inggris, dan tetap isi `title_id` serta `abstract_id` (boleh sama dengan versi Inggris).
 
 **Berapa batas ukuran?** Upload lewat browser GitHub maksimal 25 MB per file. Usahakan total repository di bawah 1 GB. PDF lengkap di Drive maksimal 25 MB per file lewat panel admin.

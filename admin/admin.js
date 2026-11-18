@@ -1,4 +1,4 @@
-/* CHARIS admin panel — talks to the Apps Script API with a session token. */
+/* CHARIS admin panel. Talks to the Apps Script API with a session token. */
 (function () {
   const cfg = window.CHARIS_CONFIG || {};
   const DEMO = !cfg.API_URL;
@@ -24,7 +24,7 @@
     projects: { title: "Portofolio proyek", hint: "Satu entri = satu proyek. Tingkat keterbukaan menentukan kolom yang tampil: A terbuka penuh, B klien disebut tanpa hasil, C anonim, D tidak tampil.",
       cols: [["title_id", "Judul"], ["disclosure", "Tingkat"], ["client_type", "Jenis klien"], ["year_start", "Tahun"], ["published", "Tayang"]],
       fields: [["_h1", "Keterbukaan", "heading"],
-        ["disclosure", "Tingkat keterbukaan (sesuai perjanjian)", "select", [["A", "A · Terbuka penuh (klien + publikasi)"], ["B", "B · Klien disebut, hasil tertutup"], ["C", "C · Anonim (tanpa nama klien)"], ["D", "D · Tidak ditampilkan di website"]]],
+        ["disclosure", "Tingkat keterbukaan (sesuai perjanjian)", "select", [["A", "A. Terbuka penuh (klien dan publikasi)"], ["B", "B. Klien disebut, hasil tertutup"], ["C", "C. Anonim (tanpa nama klien)"], ["D", "D. Tidak ditampilkan di website"]]],
         ["published", "Tayangkan di website", "bool"],
         ["_h2", "Informasi inti (aman untuk semua tingkat)", "heading"],
         ["title_id", "Judul generik (ID), tanpa nama klien", "text"], ["title_en", "Generic title (EN)", "text"],
@@ -147,7 +147,7 @@
       if (pw !== $("pw2").value) { $("loginErr").textContent = "Kedua password tidak sama."; $("pw2").focus(); return; }
     }
     const label = $("loginBtn").textContent;
-    $("loginBtn").disabled = true; $("loginBtn").textContent = "Memeriksa…";
+    $("loginBtn").disabled = true; $("loginBtn").textContent = "Memeriksa";
     try {
       const r = await api({ action: setupMode ? "bootstrap" : "login", email: em, password: pw });
       if (!r.ok) throw new Error(r.error || "Gagal masuk");
@@ -190,7 +190,7 @@
     $("viewTitle").textContent = d.title; $("viewHint").textContent = d.hint;
     $("addBtn").hidden = !!d.readonlyAdd; $("q").value = "";
     $("table").querySelector("thead").innerHTML = "<tr>" + d.cols.map(c => "<th scope=\"col\">" + esc(c[1]) + "</th>").join("") + '<th scope="col"><span class="sr-only">Aksi</span></th></tr>';
-    $("table").querySelector("tbody").innerHTML = ""; $("tableState").textContent = "Memuat…";
+    $("table").querySelector("tbody").innerHTML = ""; $("tableState").textContent = "Memuat";
     try {
       const r = await api({ action: "adminList", type: t });
       if (!r.ok) throw new Error(r.error);
@@ -249,7 +249,7 @@
     let ctl;
     if (kind === "textarea") ctl = '<textarea id="' + id + '" name="' + k + '" rows="3">' + esc(val) + "</textarea>";
     else if (kind === "long") ctl = '<textarea id="' + id + '" name="' + k + '" rows="9">' + esc(val) + "</textarea>";
-    else if (kind === "select") ctl = '<select id="' + id + '" name="' + k + '"><option value="">— pilih —</option>' + opts.map(o => '<option value="' + esc(o[0]) + '"' + (String(val) === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>").join("") + "</select>";
+    else if (kind === "select") ctl = '<select id="' + id + '" name="' + k + '"><option value="">Pilih</option>' + opts.map(o => '<option value="' + esc(o[0]) + '"' + (String(val) === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>").join("") + "</select>";
     else if (kind === "readonly") ctl = '<div class="ro" id="' + id + '">' + esc(val).replace(/\n/g, "<br>") + "</div>";
     else if (kind === "image" || kind === "file") ctl = '<div class="upload"><input id="' + id + '" name="' + k + '" type="url" placeholder="Tempel link Google Drive atau unggah" value="' + esc(val) + '">' +
       '<label class="btn btn-outline sm">Unggah<input type="file" class="sr-only" data-target="' + id + '" accept="' + (kind === "image" ? "image/jpeg,image/png,image/webp" : "application/pdf,.docx,.pptx") + '"></label></div>' +
@@ -279,7 +279,7 @@
     const file = inp.files[0];
     const priv = inp.dataset.private === "1";
     if (file.size > (priv ? 25 : 15) * 1024 * 1024) { $("dlgStatus").textContent = "File maksimal " + (priv ? 25 : 15) + " MB."; return; }
-    $("dlgStatus").textContent = "Mengunggah " + file.name + "…";
+    $("dlgStatus").textContent = "Mengunggah " + file.name;
     try {
       const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1]); fr.onerror = rej; fr.readAsDataURL(file); });
       const r = await api({ action: priv ? "uploadPrivate" : "upload", name: file.name, mimeType: file.type, data });
@@ -301,7 +301,7 @@
     if (d.readonly) { closeDlg(); return; }
     if (d.decide) {
       if (!row.decision) { $("dlgStatus").textContent = "Pilih keputusan terlebih dahulu."; $("fld-decision").focus(); return; }
-      $("saveBtn").disabled = true; $("dlgStatus").textContent = "Memproses dan mengirim email…";
+      $("saveBtn").disabled = true; $("dlgStatus").textContent = "Memproses dan mengirim email";
       try {
         const r = await api({ action: "decide", id: editing.id, decision: row.decision, note: row.decided_note });
         if (!r.ok) throw new Error(r.error);
@@ -314,7 +314,7 @@
     const titleKey = tf[0];
     if (!["inquiries", "members", "subscribers"].includes(type) && !row[titleKey]) { $("dlgStatus").textContent = "Isi kolom '" + tf[1] + "' terlebih dahulu."; $("fld-" + titleKey).focus(); return; }
     if (type === "projects" && !row.disclosure) { $("dlgStatus").textContent = "Pilih tingkat keterbukaan terlebih dahulu."; $("fld-disclosure").focus(); return; }
-    $("saveBtn").disabled = true; $("dlgStatus").textContent = "Menyimpan…";
+    $("saveBtn").disabled = true; $("dlgStatus").textContent = "Menyimpan";
     try {
       const r = await api({ action: "save", type, row });
       if (!r.ok) throw new Error(r.error);

@@ -325,7 +325,7 @@
       const yr = r => (r.date_published || "").slice(0, 4);
       const facetDefs = [["type", t("repo.f.type"), r => r.type, v => v], ["service", t("repo.f.topic"), r => r.service, v => serviceName(v)], ["year", t("repo.f.year"), yr, v => v]];
       const years = [...new Set(rows.map(yr))];
-      document.getElementById("repoStats").textContent = rows.length + " " + t("repo.products") + (years.length ? " · " + Math.min(...years) + "–" + Math.max(...years) : "");
+      document.getElementById("repoStats").textContent = rows.length + " " + t("repo.products") + (years.length ? ", " + (Math.min(...years) === Math.max(...years) ? Math.min(...years) : Math.min(...years) + (lang === "en" ? " to " : " sampai ") + Math.max(...years)) : "");
       const match = (r, skip) => {
         if (st.q) { const hay = [r.title_id, r.title_en, r.abstract_id, r.abstract_en, (r.keywords || []).join(" "), r.authors.map(a => a.name).join(" "), r.series, r.doi].join(" ").toLowerCase(); if (!st.q.split(/\s+/).every(w => hay.includes(w))) return false; }
         return facetDefs.every(([k, , get]) => k === skip || !st[k].size || st[k].has(String(get(r))));
@@ -347,7 +347,7 @@
         sel = sel.slice().sort(st.sort === "old" ? (a, b) => a.sort_date.localeCompare(b.sort_date) : st.sort === "title" ? (a, b) => f(a, "title").localeCompare(f(b, "title")) : (a, b) => b.sort_date.localeCompare(a.sort_date));
         document.getElementById("repoCount").textContent = sel.length + " " + t("repo.results");
         const chips = []; facetDefs.forEach(([k, , , show]) => st[k].forEach(v => chips.push('<button type="button" data-chip="' + k + '" data-v="' + esc(v) + '">' + esc(show(v)) + ' <span aria-hidden="true">×</span><span class="sr-only">' + esc(t("repo.remove")) + "</span></button>")));
-        if (st.q) chips.unshift('<button type="button" data-chip="q">“' + esc(st.q) + '” <span aria-hidden="true">×</span></button>');
+        if (st.q) chips.unshift('<button type="button" data-chip="q"><em>' + esc(st.q) + '</em> <span aria-hidden="true">×</span></button>');
         document.getElementById("repoChips").innerHTML = chips.length ? chips.join("") + '<button type="button" class="clear" data-chip="all">' + esc(t("repo.clear")) + "</button>" : "";
         list.innerHTML = sel.length ? sel.map(r => '<li class="ritem"><div class="ritem-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + '</div><div class="ritem-body">' +
           '<p class="card-meta"><span class="card-cat">' + esc(r.type) + "</span>" + (r.series ? "<span>" + esc(r.series) + "</span>" : "") + "<time>" + fmtDate(r.date_published) + "</time></p>" +
@@ -406,7 +406,7 @@
           const res = await API.post(Object.assign({ action: "requestReport", lang }, data));
           if (!res.ok) throw new Error(res.error);
           if (res.demo) { s.textContent = t("req.demo"); s.classList.add("err"); btn.disabled = false; btn.textContent = t("req.submit"); return; }
-          form.innerHTML = '<div class="req-done"><h2>' + esc(t("req.doneT")) + "</h2><p>" + esc(res.duplicate ? t("req.dup") : t("req.doneD")) + '</p><p><a href="' + esc(r.url) + '">' + esc(t("repo.readOpen")) + '</a> · <a href="#/research">' + esc(t("repo.t")) + "</a></p></div>";
+          form.innerHTML = '<div class="req-done"><h2>' + esc(t("req.doneT")) + "</h2><p>" + esc(res.duplicate ? t("req.dup") : t("req.doneD")) + '</p><p><a href="' + esc(r.url) + '">' + esc(t("repo.readOpen")) + '</a><a href="#/research">' + esc(t("repo.t")) + "</a></p></div>";
         } catch (err) { s.textContent = t("form.err"); s.classList.add("err"); btn.disabled = false; btn.textContent = t("req.submit"); }
       });
     },
@@ -488,7 +488,7 @@
       sel.innerHTML += ctypes.map(c => '<option value="' + esc(c) + '">' + esc(c) + "</option>").join("");
       const filt = document.getElementById("projFilters");
       let svcK = focus && keys.includes(focus) ? focus : "all";
-      const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + "–" + r.year_end : (r.year_start || r.year_end || "");
+      const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + (lang === "en" ? " to " : " sampai ") + r.year_end : (r.year_start || r.year_end || "");
       const roleLabel = v => { const k = "role." + v, x = t(k); return x === k ? v : x; };
       const row = (label, val) => val ? "<div><dt>" + esc(label) + "</dt><dd>" + esc(val) + "</dd></div>" : "";
       const item = r => {
@@ -502,13 +502,13 @@
           '<span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span>" +
           (/sebelum CHARIS/i.test(r.role || "") ? '<span class="pj-prior" title="' + esc(t("proj.prior.d")) + '">' + esc(t("proj.prior")) + "</span>" : "") + "</p>" +
           "<h3>" + esc(f(r, "title")) + "</h3>" +
-          '<p class="pj-client">' + esc(named && r.client ? r.client : r.client_type || "") + (named && r.location_detail ? ", " + esc(r.location_detail) : "") + (r.region ? " · " + esc(r.region) : "") + (years(r) ? " · " + esc(years(r)) : "") + "</p>" +
+          '<p class="pj-client">' + esc(named && r.client ? r.client : r.client_type || "") + (named && r.location_detail ? ", " + esc(r.location_detail) : "") + (r.region ? ", " + esc(r.region) : "") + (years(r) ? ", " + esc(years(r)) : "") + "</p>" +
           "<p>" + esc(f(r, "summary")) + "</p>" +
           '<dl class="pj-facts">' + row(t("proj.role"), roleLabel(r.role)) + row(t("proj.duration"), r.duration_months ? r.duration_months + " " + t("proj.months") : "") +
           row(t("proj.methods"), f(r, "methods")) + row(t("proj.outputs"), f(r, "outputs")) + row(t("proj.capacity"), f(r, "capacity")) +
           (named ? row(t("proj.funder"), r.funder) + row(t("proj.partners"), r.partners) : "") + row("SDG", r.sdg) + "</dl>" +
           (named && f(r, "testimonial") ? '<blockquote class="pj-quote"><p>' + esc(f(r, "testimonial")) + "</p>" + (r.testimonial_by ? "<cite>" + esc(r.testimonial_by) + "</cite>" : "") + "</blockquote>" : "") +
-          (pubs.length ? '<p class="pj-pubs"><span>' + esc(t("proj.pubs")) + ":</span> " + pubs.map(p => '<a href="' + esc(p.url) + '">' + esc(f(p, "title")) + "</a>").join(" · ") + "</p>" : "") +
+          (pubs.length ? '<p class="pj-pubs"><span>' + esc(t("proj.pubs")) + ":</span> " + pubs.map(p => '<a href="' + esc(p.url) + '">' + esc(f(p, "title")) + "</a>").join("; ") + "</p>" : "") +
           (r.keywords ? '<p class="badges">' + String(r.keywords).split(",").map(k => k.trim()).filter(Boolean).map(k => '<span class="badge">' + esc(k) + "</span>").join("") + "</p>" : "") +
           "</div></li>";
       };
@@ -549,7 +549,7 @@
       if (!rows) { app.innerHTML = '<section class="sec"><div class="wrap narrow">' + errMsg() + "</div></section>"; return; }
       const n = rows.find(r => String(r.id) === id);
       if (!n) { app.innerHTML = '<section class="sec"><div class="wrap narrow">' + msg("empty") + "</div></section>"; return; }
-      document.title = f(n, "title") + " · CHARIS";
+      document.title = f(n, "title") + " | CHARIS";
       app.innerHTML = '<article class="sec"><div class="wrap narrow"><a class="back" href="#/latest">' + esc(t("back")) + '</a><p class="card-meta"><span class="card-cat">' + esc(n.category || t("type.news")) + "</span><time>" + fmtDate(n.date) + "</time></p>" +
         '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (n.image_url ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
         '<div class="prose">' + paras(f(n, "body")) + "</div></div></article>" + newsletter();
@@ -658,7 +658,7 @@
     let id = rest.join("/");
     const m = page.match(/^(latest|search|request)-(.+)$/);   /* artifact-safe form: #latest-n1 */
     if (m) { page = m[1]; id = m[2]; }
-    document.title = "CHARIS · Center for Health Analytics, Research and Integrated Services";
+    document.title = "CHARIS | Center for Health Analytics, Research and Integrated Services";
     const navPage = page === "work" ? "services" : page;
     document.querySelectorAll(".main-nav a:not(.nav-cta)").forEach(a => {
       const on = a.getAttribute("href").replace("#/", "#") === "#" + navPage;

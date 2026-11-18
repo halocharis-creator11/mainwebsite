@@ -1,12 +1,12 @@
 /**
- * CHARIS website backend — Google Apps Script
+ * CHARIS website backend, Google Apps Script
  * --------------------------------------------------------------
  * Storage : the Google Spreadsheet this script is bound to
  * Files   : a Google Drive folder created by setup()
  * API     : deployed as a Web App (Execute as: Me, Access: Anyone)
  *
  * First-time steps (see README):
- *   1. Run setup()            -> creates sheets, headers, Drive folders, and opens a
+ *   1. Run setup()            : creates sheets, headers, Drive folders, and opens a
  *                                60-minute window to create the superuser account
  *   2. Deploy > New deployment > Web app
  *   3. Open /admin/ on the website, enter the script owner's email and a new password.
@@ -70,13 +70,13 @@ function seedTeamExperience() {
     ["Dinas Kesehatan Kabupaten Sorong", "DINKES SORONG", "gov"],
     ["Perwakilan BKKBN Provinsi Bali", "BKKBN BALI", "gov"],
     ["Rumah Sakit Mata Bali Mandara", "RSMBM", "gov"],
-    ["World Health Organization – Indonesia", "WHO", "un"],
-    ["World Health Organization – Timor-Leste", "WHO", "un"],
+    ["World Health Organization, Indonesia", "WHO", "un"],
+    ["World Health Organization, Timor-Leste", "WHO", "un"],
     ["UNAIDS Indonesia", "UNAIDS", "un"],
     ["UNICEF Indonesia", "UNICEF", "un"],
     ["UNFPA Indonesia", "UNFPA", "un"],
     ["The Global Fund to Fight AIDS, Tuberculosis and Malaria", "THE GLOBAL FUND", "intl"],
-    ["USAID – EPIC, FHI 360", "USAID", "intl"],
+    ["USAID, EPIC, FHI 360", "USAID", "intl"],
     ["U.S. Centers for Disease Control and Prevention", "US CDC", "intl"],
     ["Oxford Policy Management", "OPM", "intl"],
     ["Global Alliance for Improved Nutrition", "GAIN", "intl"],
@@ -94,7 +94,7 @@ function seedTeamExperience() {
     ["Yayasan Gemilang Sehat Indonesia", "YGSI", "ngo"],
     ["Yayasan Siklus Sehat Indonesia", "SIKLUS", "ngo"],
     ["YKIS", "YKIS", "ngo"],
-    ["Universitas Udayana – Center for Public Health Innovation", "UNUD", "uni"],
+    ["Universitas Udayana, Center for Public Health Innovation", "UNUD", "uni"],
     ["Institute for Population and Social Research, Mahidol University", "MAHIDOL", "uni"],
     ["The Kirby Institute, UNSW Sydney", "KIRBY", "uni"],
     ["Fakultas Kedokteran dan Ilmu Kesehatan, Universitas Warmadewa", "WARMADEWA", "uni"]
@@ -150,7 +150,7 @@ function seedFirstPortfolio() {
     "client_type": "Kemitraan pemerintah dan LSM",
     "service": "planning",
     "component": "financing",
-    "region": "Nasional · 7 provinsi",
+    "region": "Nasional, 7 provinsi",
     "year_start": "2026",
     "year_end": "",
     "duration_months": "",
@@ -165,7 +165,7 @@ function seedFirstPortfolio() {
     "capacity_id": "Pelatihan lima sesi bagi pimpinan dan staf keuangan klinik: menilai kesiapan, menghitung biaya per kunjungan, kredensialing JKN dan kerja sama dengan pemerintah daerah, proyeksi arus kas, serta rencana transisi yang tetap menjaga akses layanan; lokakarya tiga hari dan pendampingan revisi rencana tindak lanjut",
     "capacity_en": "Five-session training for clinic heads and finance staff: assessing readiness, costing a visit, JKN credentialing and local government contracting, cash-flow projection, and transition plans that protect access to services; three-day workshop and coaching to revise the action plans",
     "keywords": "keberlanjutan program, transisi pendanaan donor, klinik berbasis komunitas, populasi kunci, JKN, biaya per kunjungan, penilaian mandiri, dashboard, rencana tindak lanjut, peta jalan 2030, swakelola tipe III",
-    "sdg": "SDG 3.8 · SDG 17.17",
+    "sdg": "SDG 3.8, SDG 17.17",
     "client": "",
     "funder": "",
     "partners": "",
@@ -185,11 +185,11 @@ function seedFirstPortfolio() {
     "contract_date": "",
     "contract_value": "",
     "employer_contact": "[Isi nama, jabatan, dan kontak pemberi kerja]",
-    "team": "Ngakan Putu Anom Harjana – konsultan utama (kontrak individu, sebelum CHARIS berdiri)",
+    "team": "Ngakan Putu Anom Harjana, konsultan utama (kontrak individu, sebelum CHARIS berdiri)",
     "disclosure_basis": "Tingkat C ditetapkan pemilik: semua nama lembaga dan klinik disamarkan. Naikkan ke A/B hanya setelah ada persetujuan tertulis pemberi kerja.",
     "consent_link": "",
     "last_review": "2026-11-18",
-    "notes": "Kajian Kerangka Strategi Keberlanjutan CBC. Kolaborasi Kementerian Kesehatan dan Yayasan Spiritia; tujuh klinik CBC yang didukung Global Fund. Penilaian mandiri INS-01 15–28 Oktober 2026, dilanjutkan KII pengelola (INS-02E), perangkat Excel, modul pelatihan MP1–MP5, dan Workshop Keberlanjutan CBC 9–11 November 2026 (RTL dan Peta Jalan 2030). Temuan agregat anonim terbit sebagai Kertas Kerja CHARIS No. 1/2026 (CHARIS-2026-001) dengan izin pemberi kerja; simpan bukti izin di consent_link."
+    "notes": "Kajian Kerangka Strategi Keberlanjutan CBC. Kolaborasi Kementerian Kesehatan dan Yayasan Spiritia; tujuh klinik CBC yang didukung Global Fund. Penilaian mandiri INS-01 15 hingga 28 Oktober 2026, dilanjutkan KII pengelola (INS-02E), perangkat Excel, modul pelatihan MP1 sampai MP5, dan Workshop Keberlanjutan CBC 9 hingga 11 November 2026 (RTL dan Peta Jalan 2030). Temuan agregat anonim terbit sebagai Kertas Kerja CHARIS No. 1/2026 (CHARIS-2026-001) dengan izin pemberi kerja; simpan bukti izin di consent_link."
   };
   const existed = findBy_('projects', 'id', pub.id).length > 0;
   save_('projects', pub);                                  /* insert, or update the texts if the row already exists */
@@ -204,7 +204,7 @@ function cekSistem() {
   Logger.log('Versi Code.gs: ' + API_VERSION);
   Object.keys(SCHEMA).forEach(function (t) {
     const sh = ss.getSheetByName(t);
-    Logger.log((sh ? 'OK   ' : 'HILANG ') + t + (sh ? ' — ' + Math.max(sh.getLastRow() - 1, 0) + ' baris' : ''));
+    Logger.log((sh ? 'OK   ' : 'HILANG ') + t + (sh ? ': ' + Math.max(sh.getLastRow() - 1, 0) + ' baris' : ''));
   });
   Logger.log('Email notifikasi: ' + (PROPS.getProperty('NOTIFY_EMAIL') || '(kosong)'));
   Logger.log('Akun superuser: ' + (PROPS.getProperty('ADMIN_EMAIL') || '(belum dibuat)'));
@@ -336,7 +336,7 @@ function contact_(b) {
         to: to, replyTo: email,
         subject: '[CHARIS] Permintaan baru dari ' + name + (row.org ? ' (' + row.org + ')' : ''),
         body: 'Nama: ' + name + '\nLembaga: ' + row.org + '\nEmail: ' + email + '\nTelepon: ' + row.phone +
-              '\nLayanan: ' + row.service + '\n\nPesan:\n' + message + '\n\n— Dikirim dari website CHARIS'
+              '\nLayanan: ' + row.service + '\n\nPesan:\n' + message + '\n\nDikirim dari website CHARIS'
       });
     } catch (e) { console.warn('contact_ email gagal: ' + e.message); }   /* the message is already saved */
   }

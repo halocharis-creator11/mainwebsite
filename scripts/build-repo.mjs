@@ -124,7 +124,7 @@ function resolvePreview(dir, extraPdf) {
     let n = MAX_PREVIEW;
     try { n = Math.min(MAX_PREVIEW, +execFileSync("pdfinfo", [path.join(dir, pdf)]).toString().match(/Pages:\s+(\d+)/)[1]); } catch (e) { /* assume 5 */ }
     execFileSync("pdftoppm", ["-f", "1", "-l", String(n), "-jpeg", "-jpegopt", "quality=88", "-scale-to", "1600", "-aa", "yes", "-aaVector", "yes", path.join(dir, pdf), path.join(dir, "auto-p")]);
-    /* pdftoppm pads numbers (auto-p-1 or auto-p-01); normalise to auto-p1.jpg … */
+    /* pdftoppm pads numbers (auto-p-1 or auto-p-01); normalise to auto-p1.jpg and so on */
     fs.readdirSync(dir).filter(f => /^auto-p-\d+\.jpg$/.test(f)).forEach(f => fs.renameSync(path.join(dir, f), path.join(dir, "auto-p" + parseInt(f.slice(7), 10) + ".jpg")));
     const made = fs.readdirSync(dir).filter(f => /^auto-p\d+\.jpg$/.test(f));
     rec.previewOf = pdf; rec.previewSha = h; rec.previewCount = made.length;
@@ -163,7 +163,7 @@ function citeRIS(m, url) {
 function headBlock(m, url, slug) {
   const L = [];
   const t = (n, c) => { if (c) L.push(`  <meta name="${n}" content="${attr(c)}">`); };
-  L.push(`  <title>${esc(m.title_id)} · ${esc(site.publisher_short)}</title>`);
+  L.push(`  <title>${esc(m.title_id)} | ${esc(site.publisher_short)}</title>`);
   L.push(`  <meta name="description" content="${attr((m.abstract_id || "").slice(0, 300))}">`);
   L.push(`  <link rel="canonical" href="${attr(url)}">`);
   /* Google Scholar (Highwire Press) */
@@ -228,7 +228,7 @@ function bodyBlock(m, url, slug) {
     </div>
     <aside class="rp-meta" aria-label="Informasi publikasi">
       <dl>
-        <div><dt>Terbit</dt><dd><time datetime="${attr(m.date_published)}">${esc(fmtDate(m.date_published))}</time>${m.version ? ` · versi ${esc(m.version)}` : ""}</dd></div>
+        <div><dt>Terbit</dt><dd><time datetime="${attr(m.date_published)}">${esc(fmtDate(m.date_published))}</time>${m.version ? `, versi ${esc(m.version)}` : ""}</dd></div>
         ${m.doi ? `<div><dt>DOI</dt><dd><a href="${attr(doiUrl(m.doi))}">${esc(cleanDoi(m.doi))}</a></dd></div>` : ""}
         <div><dt>Nomor</dt><dd>${esc(m.series || m.id)}</dd></div>
         ${m.pages ? `<div><dt>Halaman</dt><dd>${esc(m.pages)}</dd></div>` : ""}
@@ -258,8 +258,8 @@ function bodyBlock(m, url, slug) {
 
 function footBlock(m) {
   return `  <footer class="rp-foot"><div class="rp-wrap rp-foot-in">
-    <p><strong>${esc(site.publisher_short)}</strong> · ${esc(site.institution)} · ${esc(site.place)}</p>
-    <p>${m.license ? `Karya ini dilisensikan di bawah ${esc(m.license)}. ` : ""}<a href="../../index.html#/research">Kembali ke Repositori</a> · <a href="../../index.html#/privacy">Kebijakan Privasi</a></p>
+    <p><strong>${esc(site.publisher_short)}</strong>, ${esc(site.institution)}, ${esc(site.place)}</p>
+    <p>${m.license ? `Karya ini dilisensikan di bawah ${esc(m.license)}. ` : ""}<span class="rp-foot-links"><a href="../../index.html#/research">Kembali ke Repositori</a><a href="../../index.html#/privacy">Kebijakan Privasi</a></span></p>
   </div></footer>
   <script src="../assets/flipbook.js" defer></script>`;
 }
@@ -274,7 +274,7 @@ function browsePage(items) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Repositori · ${esc(site.publisher_short)}</title>
+  <title>Repositori | ${esc(site.publisher_short)}</title>
   <meta name="description" content="Repositori produk pengetahuan ${esc(site.publisher)}: laporan riset, kertas kerja, policy brief, dan panduan sistem kesehatan.">
   <link rel="canonical" href="${attr(BASE)}/repositori/">
   <link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
@@ -292,7 +292,7 @@ function browsePage(items) {
   <p class="rp-subtitle">Daftar lengkap produk pengetahuan menurut tahun terbit. Untuk pencarian dan filter, buka <a href="../index.html#/research">repositori interaktif</a>.</p></div></section>
   <main class="rp-wrap rp-browse">
 ${years.map(y => `    <section><h2>${esc(y)}</h2><ul>
-${byYear[y].map(i => `      <li><a href="${attr(i.slug)}/">${esc(i.title_id)}</a><span>${esc(authorList(i.authors))} · ${esc(i.type)} · ${esc(fmtDate(i.date_published))}${i.doi ? ` · DOI ${esc(cleanDoi(i.doi))}` : ""}</span></li>`).join("\n")}
+${byYear[y].map(i => `      <li><a href="${attr(i.slug)}/">${esc(i.title_id)}</a><span>${esc(authorList(i.authors))}. ${esc(i.type)}, ${esc(fmtDate(i.date_published))}${i.doi ? `. DOI ${esc(cleanDoi(i.doi))}` : ""}</span></li>`).join("\n")}
     </ul></section>`).join("\n")}
   </main>
 </body>

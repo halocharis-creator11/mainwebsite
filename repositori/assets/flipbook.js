@@ -170,7 +170,7 @@
         const vis = [left, right].filter(i => i >= 0 && i < F);
         active = vis;
         const pg = vis.filter(i => !faces[i].end).map(i => i + 1);
-        txt = !pg.length ? T.end : T.page + " " + (pg.length > 1 ? pg[0] + "–" + pg[pg.length - 1] : pg[0]) + " " + T.of + " " + n;
+        txt = !pg.length ? T.end : T.page + " " + (pg.length > 1 ? pg[0] + (lang === "en" ? " and " : " dan ") + pg[pg.length - 1] : pg[0]) + " " + T.of + " " + n;
         if (book) book.style.transform = cur === 0 ? "translateX(-25%)" : (right < 0 || right >= F) ? "translateX(25%)" : "none";
         prevB.disabled = cur === 0; nextB.disabled = cur >= LEAVES || 2 * cur >= F;
       } else {
