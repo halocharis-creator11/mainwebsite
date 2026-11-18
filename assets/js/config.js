@@ -6,7 +6,7 @@
    with sample content (useful for previewing the design).
    ============================================================ */
 window.CHARIS_CONFIG = {
-  API_URL: "",
+  API_URL: "https://script.google.com/macros/s/AKfycbz1Vo950aORV0beuoR48apqLzzAALu1J62dcsv3JKA4XzTQmto3-G9BAZRbyVPf1M6wOQ/exec",
   DEFAULT_LANG: "id",          // "id" or "en"
   CONTACT_EMAIL: "[email]",    // shown in footer & contact page
   CONTACT_PHONE: "[telepon]",
@@ -16,8 +16,8 @@ window.CHARIS_CONFIG = {
      then fill src, a short description (alt), and the credit the licence asks for.
      Leave src "" to show the CHARIS block motif instead. */
   PHOTOS: {
-    hero:      { src: "", alt: "", credit: "", credit_url: "" },   // first slide on the home page
-    highlight: { src: "", alt: "", credit: "", credit_url: "" },   // "Pembiayaan kesehatan" highlight on the home page
+    hero:      { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.51.20.jpeg", alt: "", credit: "", credit_url: "" },   // first slide on the home page
+    highlight: { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg", alt: "", credit: "", credit_url: "" },   // "Pembiayaan kesehatan" highlight on the home page
     about:     { src: "", alt: "", credit: "", credit_url: "" },   // banner on Tentang Kami
     services:  { src: "", alt: "", credit: "", credit_url: "" }    // banner on Layanan Kami
   },
