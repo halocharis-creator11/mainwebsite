@@ -164,6 +164,7 @@ function headBlock(m, url, slug) {
   const L = [];
   const t = (n, c) => { if (c) L.push(`  <meta name="${n}" content="${attr(c)}">`); };
   L.push(`  <title>${esc(m.title_id)} | ${esc(site.publisher_short)}</title>`);
+  L.push(`  <script>try{var q=new URLSearchParams(location.search).get("lang"),s=localStorage.getItem("charis_lang"),l=q||s;if(l==="en"||l==="id")document.documentElement.lang=l}catch(e){}</script>`);
   L.push(`  <meta name="description" content="${attr((m.abstract_id || "").slice(0, 300))}">`);
   L.push(`  <link rel="canonical" href="${attr(url)}">`);
   /* Google Scholar (Highwire Press) */
@@ -200,66 +201,80 @@ function headBlock(m, url, slug) {
   return L.join("\n");
 }
 
-/* ---------- visible header ---------- */
+/* ---------- visible header (bilingual: spans marked data-l="id" or data-l="en"; report.js shows one) ---------- */
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const fmtDateEn = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ""); return m ? `${Number(m[3])} ${MONTHS_EN[Number(m[2]) - 1]} ${m[1]}` : (d || ""); };
+const TYPE_EN = { "Kertas kerja": "Working paper", "Laporan riset": "Research report", "Policy brief": "Policy brief", "Panduan": "Guide",
+  "Laporan evaluasi": "Evaluation report", "Presentasi": "Presentation", "Presentasi interaktif": "Interactive presentation" };
+const L2 = (id, en) => id === en ? esc(id) : `<span data-l="id">${esc(id)}</span><span data-l="en" lang="en">${esc(en)}</span>`;
+const L2h = (id, en) => `<span data-l="id">${id}</span><span data-l="en" lang="en">${en}</span>`;   /* already-escaped HTML */
 function bodyBlock(m, url, slug) {
   const svc = SERVICES[m.service];
+  const typeEn = m.type_en || TYPE_EN[m.type] || m.type;
   const affs = [...new Set(m.authors.map(a => a.affiliation).filter(Boolean))];
   const authors = m.authors.map(a => `<li><span class="rp-author">${esc(a.name)}</span>${a.affiliation ? `<sup>${affs.indexOf(a.affiliation) + 1}</sup>` : ""}` +
     (a.orcid ? ` <a class="rp-orcid" href="https://orcid.org/${attr(a.orcid)}" aria-label="ORCID ${attr(a.name)}">iD</a>` : "") + "</li>").join("");
   const requestUrl = `../../index.html#/request/${encodeURIComponent(m.id)}`;
+  const openPdf = /^https?:\/\//.test(m.full_pdf || "");   /* open-access product: link the PDF instead of a request form */
+  const ctaUrl = openPdf ? m.full_pdf : requestUrl;
+  const ctaText = openPdf ? L2("Unduh PDF lengkap", "Download full PDF") : L2("Minta PDF lengkap", "Request full PDF");
+  const bilingual = !!m.bilingual;
+  const n = m.preview.length;
+  const flip = n > 1 ? `data-flip-pages="${attr(JSON.stringify(m.preview))}" data-flip-title="${attr(m.title_id)}" data-flip-request="${attr(requestUrl)}"` : "";
   return `  <header class="rp-bar"><div class="rp-wrap rp-bar-in">
     <a class="rp-brand" href="../../index.html"><img src="../../assets/img/charis-mark.svg" alt="CHARIS" width="112" height="30"></a>
-    <nav class="rp-crumbs" aria-label="Breadcrumb"><a href="../../index.html#/research">Repositori</a><span aria-hidden="true">/</span><span>${esc(m.type)}</span></nav>
-    <a class="rp-bar-cta" href="${attr(requestUrl)}">Minta PDF lengkap</a>
+    <nav class="rp-crumbs" aria-label="Breadcrumb"><a href="../../index.html#/research">${L2("Repositori", "Repository")}</a><span aria-hidden="true">/</span><span>${L2(m.type, typeEn)}</span></nav>
+    ${bilingual ? `<div class="rp-lang" role="group" aria-label="Bahasa / Language"><button type="button" data-setlang="id" aria-pressed="true">ID</button><button type="button" data-setlang="en" aria-pressed="false">EN</button></div>` : ""}
+    <a class="rp-bar-cta" href="${attr(ctaUrl)}">${ctaText}</a>
   </div></header>
   <section class="rp-hero"><div class="rp-wrap${m.cover ? " rp-hero-cover" : ""}"><div class="rp-hero-text">
-    <p class="rp-kind"><span>${esc(m.type)}</span>${m.series ? `<span>${esc(m.series)}</span>` : ""}${svc ? `<span>${esc(svc[0])}</span>` : ""}</p>
-    <h1 class="rp-title">${esc(m.title_id)}</h1>
-    ${m.subtitle ? `<p class="rp-subtitle">${esc(m.subtitle)}</p>` : ""}
-    ${m.title_en ? `<p class="rp-title-en" lang="en">${esc(m.title_en)}</p>` : ""}
+    <p class="rp-kind"><span>${L2(m.type, typeEn)}</span>${m.series ? `<span>${L2(m.series, m.series_en || m.series)}</span>` : ""}${svc ? `<span>${L2(svc[0], svc[1])}</span>` : ""}</p>
+    <h1 class="rp-title">${m.title_en ? L2(m.title_id, m.title_en) : esc(m.title_id)}</h1>
+    ${m.subtitle ? `<p class="rp-subtitle">${L2(m.subtitle, m.subtitle_en !== undefined ? m.subtitle_en : m.subtitle)}</p>` : ""}
+    ${m.title_en ? `<p class="rp-title-en"><span data-l="id" lang="en">${esc(m.title_en)}</span><span data-l="en" lang="id">${esc(m.title_id)}</span></p>` : ""}
     <ul class="rp-authors">${authors}</ul>
     ${affs.length ? `<ol class="rp-affs">${affs.map(a => `<li>${esc(a)}</li>`).join("")}</ol>` : ""}
-  </div>${m.cover ? `<a class="rp-cover" href="${attr(m.cover)}" ${m.preview.length > 1 ? `data-flip-pages="${attr(JSON.stringify(m.preview))}" data-flip-title="${attr(m.title_id)}" data-flip-request="${attr(requestUrl)}" aria-label="Pratinjau ${m.preview.length} halaman pertama"` : `data-zoom aria-label="Perbesar sampul"`}><img src="${attr(m.thumb || m.cover)}"${m.thumb && m.thumb !== m.cover ? ` srcset="${attr(m.thumb)} 720w, ${attr(m.cover)} 1800w" sizes="(max-width: 960px) 170px, 240px"` : ""} alt="Sampul ${attr(m.title_id)}" width="240" height="339" decoding="async">${m.preview.length > 1 ? `<span class="rp-cover-tag">Pratinjau ${m.preview.length} halaman</span>` : ""}</a>` : ""}</div></section>
+  </div>${m.cover ? `<a class="rp-cover" href="${attr(m.cover)}" ${n > 1 ? `${flip} aria-label="Pratinjau ${n} halaman pertama"` : `data-zoom aria-label="Perbesar sampul"`}><img src="${attr(m.thumb || m.cover)}"${m.thumb && m.thumb !== m.cover ? ` srcset="${attr(m.thumb)} 720w, ${attr(m.cover)} 1800w" sizes="(max-width: 960px) 170px, 240px"` : ""} alt="Sampul ${attr(m.title_id)}" width="240" height="339" decoding="async">${n > 1 ? `<span class="rp-cover-tag">${L2(`Pratinjau ${n} halaman`, `Preview ${n} pages`)}</span>` : ""}</a>` : ""}</div></section>
   <section class="rp-front"><div class="rp-wrap rp-front-in">
     <div class="rp-abstracts">
-      <section class="rp-abstract" lang="id"><h2>Abstrak</h2><p>${esc(m.abstract_id)}</p></section>
+      <section class="rp-abstract" lang="id" data-l="id"><h2>Abstrak</h2><p>${esc(m.abstract_id)}</p></section>
       ${m.abstract_en ? `<section class="rp-abstract" lang="en"><h2>Abstract</h2><p>${esc(m.abstract_en)}</p></section>` : ""}
-      ${(m.keywords || []).length ? `<p class="rp-keywords"><strong>Kata kunci:</strong> ${m.keywords.map(esc).join(", ")}</p>` : ""}
+      ${(m.keywords || []).length ? `<p class="rp-keywords">${L2h("<strong>Kata kunci:</strong> " + m.keywords.map(esc).join(", "), "<strong>Keywords:</strong> " + (m.keywords_en || m.keywords).map(esc).join(", "))}</p>` : ""}
     </div>
     <aside class="rp-meta" aria-label="Informasi publikasi">
       <dl>
-        <div><dt>Terbit</dt><dd><time datetime="${attr(m.date_published)}">${esc(fmtDate(m.date_published))}</time>${m.version ? `, versi ${esc(m.version)}` : ""}</dd></div>
+        <div><dt>${L2("Terbit", "Published")}</dt><dd><time datetime="${attr(m.date_published)}">${L2(fmtDate(m.date_published), fmtDateEn(m.date_published))}</time>${m.version ? L2(`, versi ${m.version}`, `, version ${m.version}`) : ""}</dd></div>
         ${m.doi ? `<div><dt>DOI</dt><dd><a href="${attr(doiUrl(m.doi))}">${esc(cleanDoi(m.doi))}</a></dd></div>` : ""}
-        <div><dt>Nomor</dt><dd>${esc(m.series || m.id)}</dd></div>
-        ${m.pages ? `<div><dt>Halaman</dt><dd>${esc(m.pages)}</dd></div>` : ""}
-        <div><dt>Bahasa</dt><dd>${m.language === "en" ? "Inggris" : "Indonesia"}</dd></div>
-        ${m.license ? `<div><dt>Lisensi</dt><dd>${esc(m.license)}</dd></div>` : ""}
+        <div><dt>${L2("Nomor", "Number")}</dt><dd>${m.series ? L2(m.series, m.series_en || m.series) : esc(m.id)}</dd></div>
+        ${m.pages ? `<div><dt>${L2("Halaman", "Pages")}</dt><dd>${esc(m.pages)}</dd></div>` : ""}
+        <div><dt>${L2("Bahasa", "Language")}</dt><dd>${bilingual ? L2("Indonesia dan Inggris", "Indonesian and English") : (m.language === "en" ? L2("Inggris", "English") : L2("Indonesia", "Indonesian"))}</dd></div>
+        ${m.license ? `<div><dt>${L2("Lisensi", "Licence")}</dt><dd>${esc(m.license)}</dd></div>` : ""}
       </dl>
       <div class="rp-actions">
-        <a class="rp-btn" href="${attr(requestUrl)}">Minta PDF lengkap</a>
-        ${m.preview.length > 1 ? `<button type="button" class="rp-btn rp-btn-ghost" data-flip-pages="${attr(JSON.stringify(m.preview))}" data-flip-title="${attr(m.title_id)}" data-flip-request="${attr(requestUrl)}">Pratinjau ${m.preview.length} halaman pertama</button>` : ""}
-        ${m.pdf_summary ? `<a class="rp-btn rp-btn-ghost" href="${attr(m.pdf_summary)}">Unduh ringkasan (PDF)</a>` : ""}
-        <button type="button" class="rp-btn rp-btn-ghost" data-open-cite>Kutip</button>
+        <a class="rp-btn" href="${attr(ctaUrl)}">${ctaText}</a>
+        ${n > 1 ? `<button type="button" class="rp-btn rp-btn-ghost" ${flip}>${L2(`Pratinjau ${n} halaman pertama`, `Preview first ${n} pages`)}</button>` : ""}
+        ${m.pdf_summary ? `<a class="rp-btn rp-btn-ghost" href="${attr(m.pdf_summary)}">${L2("Unduh ringkasan (PDF)", "Download summary (PDF)")}</a>` : ""}
+        <button type="button" class="rp-btn rp-btn-ghost" data-open-cite>${L2("Kutip", "Cite")}</button>
       </div>
-      <p class="rp-note">Versi lengkap dalam format PDF diberikan setelah permintaan disetujui tim CHARIS.</p>
+      <p class="rp-note">${openPdf ? L2("PDF lengkap tersedia terbuka di arsip Zenodo.", "The full PDF is openly available in the Zenodo archive.") : L2("Versi lengkap dalam format PDF diberikan setelah permintaan disetujui tim CHARIS.", "The full PDF is shared once the CHARIS team approves a request.")}</p>
     </aside>
   </div></section>
   <section class="rp-cite" id="cite" hidden><div class="rp-wrap">
-    <h2>Cara mengutip</h2>
+    <h2>${L2("Cara mengutip", "How to cite")}</h2>
     <div class="rp-cite-tabs" role="group" aria-label="Format kutipan">
       <button type="button" data-fmt="apa" aria-pressed="true">APA</button><button type="button" data-fmt="bib" aria-pressed="false">BibTeX</button><button type="button" data-fmt="ris" aria-pressed="false">RIS</button>
     </div>
     <pre class="rp-cite-box" data-fmt-box="apa">${esc(citeAPA(m, url))}</pre>
     <pre class="rp-cite-box" data-fmt-box="bib" hidden>${esc(citeBib(m, url))}</pre>
     <pre class="rp-cite-box" data-fmt-box="ris" hidden>${esc(citeRIS(m, url))}</pre>
-    <div class="rp-cite-actions"><button type="button" class="rp-btn rp-btn-ghost" data-copy-cite>Salin</button><a class="rp-btn rp-btn-ghost" href="cite.ris" download>Unduh .ris</a><a class="rp-btn rp-btn-ghost" href="cite.bib" download>Unduh .bib</a></div>
+    <div class="rp-cite-actions"><button type="button" class="rp-btn rp-btn-ghost" data-copy-cite>${L2("Salin", "Copy")}</button><a class="rp-btn rp-btn-ghost" href="cite.ris" download>${L2("Unduh .ris", "Download .ris")}</a><a class="rp-btn rp-btn-ghost" href="cite.bib" download>${L2("Unduh .bib", "Download .bib")}</a></div>
   </div></section>`;
 }
 
 function footBlock(m) {
   return `  <footer class="rp-foot"><div class="rp-wrap rp-foot-in">
     <p><strong>${esc(site.publisher_short)}</strong>, ${esc(site.institution)}, ${esc(site.place)}</p>
-    <p>${m.license ? `Karya ini dilisensikan di bawah ${esc(m.license)}. ` : ""}<span class="rp-foot-links"><a href="../../index.html#/research">Kembali ke Repositori</a><a href="../../index.html#/privacy">Kebijakan Privasi</a></span></p>
+    <p>${m.license ? L2(`Karya ini dilisensikan di bawah ${m.license}. `, `This work is licensed under ${m.license}. `) : ""}<span class="rp-foot-links"><a href="../../index.html#/research">${L2("Kembali ke Repositori", "Back to the Repository")}</a><a href="../../index.html#/privacy">${L2("Kebijakan Privasi", "Privacy Policy")}</a></span></p>
   </div></footer>
   <script src="../assets/flipbook.js" defer></script>`;
 }

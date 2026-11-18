@@ -48,6 +48,7 @@
   }
   const media = (url, alt, seed, w) => url ? '<img src="' + esc(API.img(url, w)) + '" alt="' + esc(alt || "") + '" loading="lazy">' : tile(seed);
   /* cover thumbnail that opens the full cover in a lightbox */
+  const openPdf = (r) => /^https?:\/\//.test(r.full_pdf || "");   /* open-access products link straight to their PDF */
   const flipAttrs = (r) => ' data-flip-pages="' + esc(JSON.stringify(r.preview)) + '" data-flip-title="' + esc(f(r, "title")) + '" data-flip-request="#/request/' + encodeURIComponent(r.id) + '" data-flip-read="' + esc(r.url || "") + '"';
   const hasFlip = r => r && Array.isArray(r.preview) && r.preview.length > 1;
   const coverBox = (thumb, full, alt, seed, r) => thumb
@@ -353,8 +354,8 @@
           '<p class="card-meta"><span class="card-cat">' + esc(r.type) + "</span>" + (r.series ? "<span>" + esc(r.series) + "</span>" : "") + "<time>" + fmtDate(r.date_published) + "</time></p>" +
           '<h2><a href="' + esc(r.url) + '">' + esc(f(r, "title")) + "</a></h2><p class=\"ritem-auth\">" + esc(authorsStr(r.authors)) + '</p><p class="ritem-abs">' + esc(f(r, "abstract")) + "</p>" +
           '<p class="badges">' + (r.doi ? '<a class="badge doi" href="https://doi.org/' + esc(r.doi) + '">DOI ' + esc(r.doi) + "</a>" : "") + '<span class="badge open">' + esc(t("repo.html")) + "</span>" +
-          '<span class="badge lock">' + esc(t("repo.pdfReq")) + "</span>" + (r.license ? '<span class="badge">' + esc(r.license) + "</span>" : "") + "</p>" +
-          '<p class="ritem-act"><a class="btn btn-sm" href="' + esc(r.url) + '">' + esc(t("repo.read")) + "</a>" + (hasFlip(r) ? '<button type="button" class="btn btn-sm btn-ghost"' + flipAttrs(r) + ">" + esc(t("flip.open").replace("{n}", r.preview.length)) + "</button>" : "") + '<a class="btn btn-sm btn-ghost" href="#/request/' + encodeURIComponent(r.id) + '">' + esc(t("repo.request")) + "</a></p></div></li>").join("")
+          (openPdf(r) ? '<span class="badge open">' + esc(t("repo.pdfOpen")) + "</span>" : '<span class="badge lock">' + esc(t("repo.pdfReq")) + "</span>") + (r.license ? '<span class="badge">' + esc(r.license) + "</span>" : "") + "</p>" +
+          '<p class="ritem-act"><a class="btn btn-sm" href="' + esc(r.url) + '">' + esc(t("repo.read")) + "</a>" + (hasFlip(r) ? '<button type="button" class="btn btn-sm btn-ghost"' + flipAttrs(r) + ">" + esc(t("flip.open").replace("{n}", r.preview.length)) + "</button>" : "") + (openPdf(r) ? '<a class="btn btn-sm btn-ghost" href="' + esc(r.full_pdf) + '" rel="noopener">' + esc(t("repo.download")) + "</a>" : '<a class="btn btn-sm btn-ghost" href="#/request/' + encodeURIComponent(r.id) + '">' + esc(t("repo.request")) + "</a>") + "</p></div></li>").join("")
           : '<li class="state">' + esc(t("repo.none")) + "</li>";
         drawFacets();
       }

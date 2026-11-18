@@ -7,8 +7,11 @@
   const root = document.getElementById("worlds");
   if (!root) return;
   const $ = id => document.getElementById(id);
-  const NF = new Intl.NumberFormat("id-ID");
-  const MON = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  let LANG = document.documentElement.lang === "en" ? "en" : "id";
+  let NF = new Intl.NumberFormat(LANG === "en" ? "en-GB" : "id-ID");
+  const tr = (id, en) => LANG === "en" ? en : id;
+  const MONS = { id: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"],
+    en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] };
   const CITY = {
     JKT: { prev: 0.244, condom: 0.597, unable: 0.406, pMain: 0.285 },
     BALI: { prev: 0.244, condom: 0.731, unable: 0.389, pMain: 0.237 }
@@ -119,7 +122,7 @@
   function stats() {
     const [a, b] = worlds, m = a.m;
     const mo = Math.min(m, MONTHS - 1), yr = 2026 + Math.floor(mo / 12);
-    $("w_now").textContent = MON[mo % 12] + " " + yr;
+    $("w_now").textContent = MONS[LANG][mo % 12] + " " + yr;
     $("w_fill").style.width = (m / MONTHS * 100) + "%";
     worlds.forEach((W, k) => {
       const onPrEP = W.A.filter(x => !x.hiv && x.prep).length;
@@ -127,12 +130,16 @@
       $("w" + k + "_post").textContent = NF.format(W.infPost);
       $("w" + k + "_prep").textContent = NF.format(onPrEP);
     });
-    $("w_phase").textContent = m < 12 ? "Dukungan 2026 berlanjut" : m < CLIFF ? "Rencana 2027 sampai 2029 berjalan: PrEP diperluas" + (opt.len && m >= 24 ? ", lenacapavir tersedia" : "") : "PrEP oral kini berbayar";
+    $("w_phase").textContent = m < 12 ? tr("Dukungan 2026 berlanjut", "2026 support continues") : m < CLIFF ? tr("Rencana 2027 sampai 2029 berjalan: PrEP diperluas", "The 2027 to 2029 plan is running: PrEP is scaled up") + (opt.len && m >= 24 ? tr(", lenacapavir tersedia", ", lenacapavir available") : "") : tr("PrEP oral kini berbayar", "Oral PrEP now has to be paid for");
     if (a.done) {
-      const d = b.infPost - a.infPost, exp = opt.city === "JKT" ? 126 : 72;
-      $("w_sum").innerHTML = `Selesai. Pada Januari 2029, <b>${NF.format(b.lost)}</b> orang di dunia kanan kehilangan PrEP oral karena tidak mampu membayar. Sejak saat itu terjadi <b>${NF.format(a.infPost)}</b> infeksi baru di dunia dengan jaring pengaman dan <b>${NF.format(b.infPost)}</b> di dunia tanpa jaring pengaman` +
-        (d > 0 ? `, selisih ${NF.format(d)} infeksi.` : ". Kali ini tidak ada selisih, karena tidak seorang pun dari mereka yang kehilangan PrEP bertemu pasangan yang menularkan.") +
-        ` Kedua dunia memakai jaringan dan peristiwa acak yang sama, sehingga selisih berasal dari jaring pengaman. Pada model utama, selisih rata-rata di ${opt.city === "JKT" ? "Jakarta" : "Bali"} sekitar ${NF.format(exp)} infeksi per 10.000 orang, atau sekitar ${NF.format(Math.round(exp * N / 1000) / 10)} per ${N} orang, sehingga satu jalan kecil seperti ini wajar menunjukkan selisih nol sampai beberapa infeksi.`;
+      const d = b.infPost - a.infPost, exp = opt.city === "JKT" ? 126 : 72, cityN = opt.city === "JKT" ? "Jakarta" : "Bali", per = NF.format(Math.round(exp * N / 1000) / 10);
+      $("w_sum").innerHTML = LANG === "en"
+        ? `Finished. In January 2029, <b>${NF.format(b.lost)}</b> people in the right-hand world lost oral PrEP because they could not pay. Since then there have been <b>${NF.format(a.infPost)}</b> new infections in the world with a safety net and <b>${NF.format(b.infPost)}</b> in the world without one` +
+          (d > 0 ? `, a difference of ${NF.format(d)} infections.` : ". This time there is no difference, because none of the people who lost PrEP met a partner who transmitted HIV.") +
+          ` Both worlds share the same network and chance events, so any difference comes from the safety net. In the main model, the average difference in ${cityN} is about ${NF.format(exp)} infections per 10,000 people, or about ${per} per ${N} people, so a small single run like this one can reasonably show a difference of zero to a few infections.`
+        : `Selesai. Pada Januari 2029, <b>${NF.format(b.lost)}</b> orang di dunia kanan kehilangan PrEP oral karena tidak mampu membayar. Sejak saat itu terjadi <b>${NF.format(a.infPost)}</b> infeksi baru di dunia dengan jaring pengaman dan <b>${NF.format(b.infPost)}</b> di dunia tanpa jaring pengaman` +
+          (d > 0 ? `, selisih ${NF.format(d)} infeksi.` : ". Kali ini tidak ada selisih, karena tidak seorang pun dari mereka yang kehilangan PrEP bertemu pasangan yang menularkan.") +
+          ` Kedua dunia memakai jaringan dan peristiwa acak yang sama, sehingga selisih berasal dari jaring pengaman. Pada model utama, selisih rata-rata di ${cityN} sekitar ${NF.format(exp)} infeksi per 10.000 orang, atau sekitar ${per} per ${N} orang, sehingga satu jalan kecil seperti ini wajar menunjukkan selisih nol sampai beberapa infeksi.`;
       setPlaying(false);
     } else $("w_sum").textContent = "";
   }
@@ -147,7 +154,7 @@
     render(time);
     raf = requestAnimationFrame(frame);
   }
-  function setPlaying(p) { playing = p; $("w_play").textContent = p ? "Jeda" : (worlds[0].done ? "Putar ulang" : "Putar"); $("w_play").setAttribute("aria-pressed", String(p)); }
+  function setPlaying(p) { playing = p; $("w_play").textContent = p ? tr("Jeda", "Pause") : (worlds[0].done ? tr("Putar ulang", "Play again") : tr("Putar", "Play")); $("w_play").setAttribute("aria-pressed", String(p)); }
 
   $("w_play").addEventListener("click", () => { if (worlds[0].done) reset(); setPlaying(!playing); });
   $("w_new").addEventListener("click", () => { opt.seed = Math.floor(Math.random() * 1e6); reset(); setPlaying(true); });
@@ -156,7 +163,8 @@
   $("w_r3").addEventListener("input", e => { opt.r3 = +e.target.value; $("w_r3_o").textContent = Math.round(opt.r3 * 100) + "%"; });
   $("w_len").addEventListener("change", e => { opt.len = e.target.checked; });
 
-  size(); reset();
+  size(); reset(); setPlaying(false);
+  document.addEventListener("charis:lang", ev => { LANG = ev.detail === "en" ? "en" : "id"; NF = new Intl.NumberFormat(LANG === "en" ? "en-GB" : "id-ID"); stats(); setPlaying(playing); });
   window.addEventListener("resize", () => { size(); render(performance.now()); });
   raf = requestAnimationFrame(frame);
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

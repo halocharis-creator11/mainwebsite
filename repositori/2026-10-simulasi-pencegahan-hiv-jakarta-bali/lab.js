@@ -6,13 +6,18 @@
   const M = window.CharisHIVModel;
   if (!root || !M) return;
 
-  const NF0 = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 });
-  const NF1 = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const NF2 = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let LANG = document.documentElement.lang === "en" ? "en" : "id";
+  let NF0, NF1, NF2;
+  const setFmt = () => { const loc = LANG === "en" ? "en-GB" : "id-ID";
+    NF0 = new Intl.NumberFormat(loc, { maximumFractionDigits: 0 });
+    NF1 = new Intl.NumberFormat(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    NF2 = new Intl.NumberFormat(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  setFmt();
+  const tr = (id, en) => LANG === "en" ? en : id;
   const pct = v => NF0.format(Math.round(v * 100)) + "%";
   const sgn = v => (v > 0.5 ? "+" : v < -0.5 ? "−" : "") + NF0.format(Math.abs(Math.round(v)));
   const YRS = [2026, 2027, 2028, 2029, 2030, 2031, 2032];
-  const CITYNAME = { JKT: "Jakarta", BALI: "Bali", ALL: "Jakarta dan Bali" };
+  const cityName = c => ({ JKT: "Jakarta", BALI: "Bali", ALL: tr("Jakarta dan Bali", "Jakarta and Bali") })[c];
 
   const DEF = { city: "JKT", safetyNet: 1, r3plan: 0.55, lenCap: 300, strat: "kML", Tplan: 0.70, absorption: 1, shock: 0, pop: "" };
   const PRESETS = {
@@ -27,7 +32,7 @@
   /* ---------- controls ---------- */
   const $ = id => document.getElementById(id);
   const ranges = [
-    ["lab_net", "safetyNet", v => pct(v)], ["lab_r3", "r3plan", v => pct(v)], ["lab_len", "lenCap", v => v > 0 ? NF0.format(v) : "tidak ada"],
+    ["lab_net", "safetyNet", v => pct(v)], ["lab_r3", "r3plan", v => pct(v)], ["lab_len", "lenCap", v => v > 0 ? NF0.format(v) : tr("tidak ada", "none")],
     ["lab_T", "Tplan", v => pct(v)], ["lab_abs", "absorption", v => pct(v)], ["lab_shock", "shock", v => pct(v)]
   ];
   function syncControls() {
@@ -93,7 +98,7 @@
     svg.addEventListener("mouseleave", () => { tip.style.opacity = 0; hl.setAttribute("opacity", "0"); });
   }
   function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
-  const MON = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  const MONS = { id: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"], en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] };
 
   /* ---------- update ---------- */
   function update() {
@@ -107,40 +112,42 @@
     const C = getComputedStyle(root);
     const col = n => C.getPropertyValue(n).trim();
     lineChart($("lab_c1"), [
-      { name: "Dukungan saat ini berlanjut", color: col("--s-cur"), data: inc(cur) },
-      { name: "Pemotongan tanpa redesain", color: col("--s-cut"), data: inc(cut) },
-      { name: "Rencana sesuai desain", color: col("--s-plan"), dash: "5 4", data: inc(design) },
-      { name: "Skenario Anda", color: col("--s-you"), w: 3.4, data: inc(you) }
-    ], { aria: "Insidens HIV per 100 orang-tahun, 2026 sampai 2032", yFmt: v => NF1.format(v), tipFmt: v => NF2.format(v), xFmt: v => String(v), vlines: [{ x: 2029, label: "Tebing biaya 2029" }] });
+      { name: tr("Dukungan saat ini berlanjut", "Current support continues"), color: col("--s-cur"), data: inc(cur) },
+      { name: tr("Pemotongan tanpa redesain", "Cut without redesign"), color: col("--s-cut"), data: inc(cut) },
+      { name: tr("Rencana sesuai desain", "Plan as designed"), color: col("--s-plan"), dash: "5 4", data: inc(design) },
+      { name: tr("Skenario Anda", "Your scenario"), color: col("--s-you"), w: 3.4, data: inc(you) }
+    ], { aria: tr("Insidens HIV per 100 orang-tahun, 2026 sampai 2032", "HIV incidence per 100 person-years, 2026 to 2032"), yFmt: v => NF1.format(v), tipFmt: v => NF2.format(v), xFmt: v => String(v), vlines: [{ x: 2029, label: tr("Tebing biaya 2029", "2029 cost cliff") }] });
     const monthly = (arr) => arr.map((v, i) => [2026 + i / 12, v]);
     lineChart($("lab_c2"), [
-      { name: "PrEP oral", color: col("--s-oral"), data: monthly(you.oral) },
+      { name: tr("PrEP oral", "Oral PrEP"), color: col("--s-oral"), data: monthly(you.oral) },
       { name: "Lenacapavir", color: col("--s-len"), data: monthly(you.len) }
-    ], { aria: "Pengguna PrEP per 10.000 dalam skenario Anda", h: 200, yFmt: v => NF0.format(v), tipFmt: v => NF0.format(v), xFmt: v => { const y = Math.floor(v + 1e-6), mo = Math.round((v - y) * 12) % 12; return MON[mo] + " " + y; }, vlines: [{ x: 2029, label: "Jan 2029" }] });
+    ], { aria: tr("Pengguna PrEP per 10.000 dalam skenario Anda", "PrEP users per 10,000 in your scenario"), h: 200, yFmt: v => NF0.format(v), tipFmt: v => NF0.format(v), xFmt: v => { const y = Math.floor(v + 1e-6), mo = Math.round((v - y) * 12) % 12; return MONS[LANG][mo] + " " + y; }, vlines: [{ x: 2029, label: "Jan 2029" }] });
 
     const cY = cum(you), cC = cum(cut), cD = cum(design), cCur = cum(cur);
     const averted = cC - cY, vsPlan = cY - cD, gains = cC - cD;
     const lost = gains > 0 ? Math.max(0, vsPlan) / gains : 0;
     const users = you.oral[47] + you.len[47];
     const pop = parseFloat(String(S.pop).replace(/[^0-9]/g, ""));
-    const abs = v => pop > 0 ? `sekitar ${NF0.format(Math.round(v * pop / 10000))} orang di ${CITYNAME[city]}` : "";
+    const abs = v => pop > 0 ? tr(`sekitar ${NF0.format(Math.round(v * pop / 10000))} orang di ${cityName(city)}`, `about ${NF0.format(Math.round(v * pop / 10000))} people in ${cityName(city)}`) : "";
     $("lab_kpi").innerHTML = [
-      [NF0.format(cY), "infeksi baru 2027 sampai 2032 per 10.000, skenario Anda", abs(cY)],
-      [NF0.format(averted), "infeksi dicegah dibanding pemotongan tanpa redesain", abs(averted)],
-      [sgn(vsPlan), "selisih dibanding rencana sesuai desain", vsPlan > 0.5 ? pct(lost) + " manfaat rencana hilang" : ""],
-      [NF0.format(users), "pengguna PrEP per 10.000, Desember 2029", "oral " + NF0.format(you.oral[47]) + ", lenacapavir " + NF0.format(you.len[47])]
+      [NF0.format(cY), tr("infeksi baru 2027 sampai 2032 per 10.000, skenario Anda", "new infections 2027 to 2032 per 10,000, your scenario"), abs(cY)],
+      [NF0.format(averted), tr("infeksi dicegah dibanding pemotongan tanpa redesain", "infections averted compared with cut without redesign"), abs(averted)],
+      [sgn(vsPlan), tr("selisih dibanding rencana sesuai desain", "difference from the plan as designed"), vsPlan > 0.5 ? pct(lost) + tr(" manfaat rencana hilang", " of the plan's benefit lost") : ""],
+      [NF0.format(users), tr("pengguna PrEP per 10.000, Desember 2029", "PrEP users per 10,000, December 2029"), "oral " + NF0.format(you.oral[47]) + ", lenacapavir " + NF0.format(you.len[47])]
     ].map(k => `<div><b>${k[0]}</b><span>${k[1]}</span>${k[2] ? `<em>${k[2]}</em>` : ""}</div>`).join("");
 
     const parts = [];
-    parts.push(`Di ${CITYNAME[city]}, skenario Anda menghasilkan sekitar <b>${NF0.format(cY)}</b> infeksi baru per 10.000 LSL dan transpuan selama 2027 sampai 2032, dibanding ${NF0.format(cC)} bila anggaran dipotong tanpa redesain dan ${NF0.format(cCur)} bila dukungan saat ini sekadar berlanjut.`);
-    if (vsPlan > 5) parts.push(`Pengaturan Anda kehilangan sekitar <b>${pct(lost)}</b> dari infeksi yang dapat dicegah rencana sesuai desain.`);
-    else if (vsPlan < -5) parts.push(`Pengaturan Anda mencegah <b>${NF0.format(-vsPlan)}</b> infeksi lebih banyak daripada rencana sesuai desain.`);
-    else parts.push("Hasilnya setara dengan rencana sesuai desain.");
-    if (S.safetyNet < 0.5) parts.push("Jaring pengaman yang tipis membuat sebagian pengguna PrEP berhenti pada Januari 2029, terlihat sebagai penurunan tajam pada grafik pengguna PrEP.");
-    if (S.shock >= 0.3) parts.push("Guncangan lingkungan hukum memutus layanan penjangkauan daring tepat pada tahun perluasan program.");
+    parts.push(tr(`Di ${cityName(city)}, skenario Anda menghasilkan sekitar <b>${NF0.format(cY)}</b> infeksi baru per 10.000 LSL dan transpuan selama 2027 sampai 2032, dibanding ${NF0.format(cC)} bila anggaran dipotong tanpa redesain dan ${NF0.format(cCur)} bila dukungan saat ini sekadar berlanjut.`,
+      `In ${cityName(city)}, your scenario produces about <b>${NF0.format(cY)}</b> new infections per 10,000 MSM and transgender women over 2027 to 2032, compared with ${NF0.format(cC)} if the budget is cut without redesign and ${NF0.format(cCur)} if current support simply continues.`));
+    if (vsPlan > 5) parts.push(tr(`Pengaturan Anda kehilangan sekitar <b>${pct(lost)}</b> dari infeksi yang dapat dicegah rencana sesuai desain.`, `Your settings lose about <b>${pct(lost)}</b> of the infections the plan as designed could prevent.`));
+    else if (vsPlan < -5) parts.push(tr(`Pengaturan Anda mencegah <b>${NF0.format(-vsPlan)}</b> infeksi lebih banyak daripada rencana sesuai desain.`, `Your settings prevent <b>${NF0.format(-vsPlan)}</b> more infections than the plan as designed.`));
+    else parts.push(tr("Hasilnya setara dengan rencana sesuai desain.", "The result matches the plan as designed."));
+    if (S.safetyNet < 0.5) parts.push(tr("Jaring pengaman yang tipis membuat sebagian pengguna PrEP berhenti pada Januari 2029, terlihat sebagai penurunan tajam pada grafik pengguna PrEP.", "A thin safety net makes some PrEP users stop in January 2029, visible as a sharp drop in the PrEP users chart."));
+    if (S.shock >= 0.3) parts.push(tr("Guncangan lingkungan hukum memutus layanan penjangkauan daring tepat pada tahun perluasan program.", "The legal environment shock cuts online outreach exactly in the years the programme is scaling up."));
     $("lab_narr").innerHTML = parts.join(" ");
   }
 
   syncControls(); update();
+  document.addEventListener("charis:lang", e => { LANG = e.detail === "en" ? "en" : "id"; setFmt(); syncControls(); update(); });
   let rw; window.addEventListener("resize", () => { clearTimeout(rw); rw = setTimeout(update, 150); });
 })();
