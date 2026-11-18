@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-18",
-  "count": 1,
+  "count": 2,
   "items": [
     {
       "id": "CHARIS-2026-001",
@@ -48,6 +48,58 @@
         "repositori/2026-11-rtl-peta-jalan-2030-klinik-komunitas/auto-p3.jpg",
         "repositori/2026-11-rtl-peta-jalan-2030-klinik-komunitas/auto-p4.jpg",
         "repositori/2026-11-rtl-peta-jalan-2030-klinik-komunitas/auto-p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "request",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-002",
+      "slug": "2026-10-simulasi-pencegahan-hiv-jakarta-bali",
+      "url": "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/",
+      "type": "Presentasi interaktif",
+      "series": "",
+      "title_id": "Ketika Donor Mundur: Mampukah Respons HIV Indonesia Berdiri Sendiri?",
+      "title_en": "When the Donor Steps Back: Can Indonesia's HIV Response Stand on Its Own? An interactive microsimulation and agent-based model of HIV prevention for MSM and transgender women in Jakarta and Bali, 2027–2029",
+      "abstract_id": "Latar belakang: Pendanaan Global Fund untuk respons HIV Indonesia pada periode 2027 sampai 2029 lebih rendah 44% dibanding 2024 sampai 2026, sementara prevalensi HIV pada laki-laki yang berhubungan seks dengan laki-laki (LSL) dan transpuan terus meningkat. Pada awal 2029, PrEP oral, kondom, dan pelicin direncanakan beralih ke anggaran domestik dan pembelian mandiri. Karya ini menyediakan alat bantu perencanaan untuk menguji keputusan transisi tersebut. Metode: Mikrosimulasi dengan lapisan jaringan berbasis agen yang mengikuti 5.000 agen sintetis per jalan, bulanan dari Januari 2026 sampai Desember 2032. Karakteristik agen diambil dari distribusi agregat survei jaringan Jakarta 2026 dan Bali 2025; kemitraan tetap, kasual, sekali, dan luar kota dibentuk secara eksplisit, dan penularan disimulasikan per tindakan. Transmisi dan tes dikalibrasi per kota terhadap insidens 2026 sekitar 3,5 per 100 orang-tahun dan cakupan status 67%, lalu dibandingkan dengan model kompartemen deterministik. Model menjawab lima pertanyaan: tebing biaya mandiri 2029, lenacapavir, jangkauan versus retensi PrEP, penemuan kasus, dan risiko transisi berupa serapan domestik parsial serta lingkungan hukum yang tidak mendukung. Hasil: Pada pengaturan bawaan, rencana 2027 sampai 2029 sesuai desain mencegah sekitar 614 infeksi per 10.000 di Jakarta (43% dari skenario pemotongan tanpa redesain) dan 642 per 10.000 di Bali (40%). Tanpa jaring pengaman, infeksi 2029 sampai 2032 bertambah sekitar 126 per 10.000 di Jakarta dan 72 per 10.000 di Bali. Tes, tes berbasis jaringan, dan pengobatan merupakan pengungkit terbesar, disusul perluasan jangkauan PrEP. Kesimpulan: Rencana bekerja di atas kertas, tetapi retensi, jaring pengaman, dan keberhasilan transisi pendanaan menentukan apakah manfaatnya sampai kepada orang. Hasil merupakan proyeksi di bawah asumsi yang dinyatakan, bukan prakiraan.",
+      "abstract_en": "Background: Global Fund financing for Indonesia's HIV response in 2027 to 2029 is 44% lower than in 2024 to 2026, while HIV prevalence among men who have sex with men (MSM) and transgender women continues to rise. In early 2029, oral PrEP, condoms and lubricant are planned to move to domestic budgets and out-of-pocket purchase. This work provides a planning tool to test the decisions behind that transition. Methods: A microsimulation with an agent-based network layer follows 5,000 synthetic agents per run, monthly from January 2026 to December 2032. Agent traits are drawn from aggregate distributions of the Jakarta 2026 and Bali 2025 network surveys; main, casual, one-off and out-of-city partnerships are formed explicitly and HIV is transmitted act by act. Transmission and testing are calibrated by city to a 2026 incidence of about 3.5 per 100 person-years and 67% status awareness, and results are cross-checked against a deterministic compartmental model. The model addresses five questions: the 2029 out-of-pocket cliff, lenacapavir, PrEP reach versus retention, case finding, and transition risks from partial domestic absorption and a hostile legal environment. Results: Under default settings, the 2027 to 2029 plan as designed averts about 614 infections per 10,000 in Jakarta (43% of the cut-without-redesign scenario) and 642 per 10,000 in Bali (40%). Without a safety net, infections in 2029 to 2032 rise by about 126 per 10,000 in Jakarta and 72 per 10,000 in Bali. Testing, network testing and treatment form the largest lever, followed by PrEP reach. Conclusions: The plan works on paper, but retention, the safety net and a successful financing transition decide whether its benefits reach people. Results are projections under stated assumptions, not forecasts.",
+      "authors": [
+        {
+          "name": "Ngakan Putu Anom Harjana",
+          "affiliation": "CHARIS (Center for Health Analytics, Research and Integrated Services), Yayasan Peduli Insan Rentan, Gianyar, Bali, Indonesia"
+        }
+      ],
+      "date_published": "2026-10-04",
+      "uploaded": "2026-11-18",
+      "sort_date": "2026-10-04",
+      "language": "id",
+      "keywords": [
+        "HIV",
+        "PrEP",
+        "lenacapavir",
+        "LSL",
+        "transpuan",
+        "mikrosimulasi",
+        "model berbasis agen",
+        "transisi pendanaan donor",
+        "Global Fund",
+        "Jakarta",
+        "Bali"
+      ],
+      "service": "analytics",
+      "project_id": "",
+      "doi": "10.5281/zenodo.23140900",
+      "license": "CC BY 4.0",
+      "pages": 17,
+      "version": "1",
+      "cover": "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-cover.jpg",
+      "thumb": "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-thumb.jpg",
+      "preview": [
+        "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-p1.jpg",
+        "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-p2.jpg",
+        "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-p3.jpg",
+        "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-p4.jpg",
+        "repositori/2026-10-simulasi-pencegahan-hiv-jakarta-bali/auto-p5.jpg"
       ],
       "pdf_summary": "",
       "full_pdf": "request",
