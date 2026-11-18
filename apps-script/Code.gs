@@ -22,7 +22,7 @@ const SCHEMA = {
   projects:     ['id', 'disclosure', 'title_id', 'title_en', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role',
                  'summary_id', 'summary_en', 'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg',
                  'client', 'funder', 'partners', 'official_title', 'location_detail', 'image_url', 'related_publications', 'testimonial_id', 'testimonial_en', 'testimonial_by',
-                 'date', 'published'],
+                 'date', 'published', 'areas'],
   /* Internal project data: NEVER returned by the public API. */
   project_internal: ['id', 'contract_no', 'contract_date', 'contract_value', 'employer_contact', 'team', 'disclosure_basis', 'consent_link', 'last_review', 'notes'],
   /* new columns are appended at the end so existing sheets keep their data */
@@ -40,12 +40,12 @@ const SCHEMA = {
 const PUBLIC_TYPES = ['publications', 'news', 'team', 'projects', 'partners'];
 /* Columns of a project shown publicly, by disclosure level. Level D (or empty) is never shown. */
 const PROJECT_CORE = ['id', 'disclosure', 'title_id', 'title_en', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role',
-  'summary_id', 'summary_en', 'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'date'];
+  'summary_id', 'summary_en', 'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'date', 'areas'];
 const PROJECT_NAMED = ['client', 'funder', 'partners', 'official_title', 'location_detail', 'image_url', 'testimonial_id', 'testimonial_en', 'testimonial_by'];
 const PROJECT_PUBLIC = { A: PROJECT_CORE.concat(PROJECT_NAMED, ['related_publications']), B: PROJECT_CORE.concat(PROJECT_NAMED), C: PROJECT_CORE };
 /* Bump when Code.gs changes. The admin panel compares it with the version it expects, so a stale
    Web App deployment (Code.gs edited but no new deployment version) is reported on screen. */
-const API_VERSION = '2026-11-18';
+const API_VERSION = '2026-11-18b';
 const SESSION_HOURS = 6;
 const PROPS = PropertiesService.getScriptProperties();
 
@@ -153,6 +153,7 @@ function seedFirstPortfolio() {
     "service": "planning",
     "component": "financing",
     "region": "Nasional, 7 provinsi",
+    "areas": "Nasional",
     "year_start": "2026",
     "year_end": "",
     "duration_months": "",

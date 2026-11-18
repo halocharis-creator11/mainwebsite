@@ -30,7 +30,7 @@
         ["title_id", "Judul generik (ID), tanpa nama klien", "text"], ["title_en", "Generic title (EN)", "text"],
         ["client_type", "Jenis klien", "select", [["RSUD", "RSUD"], ["Rumah sakit swasta", "Rumah sakit swasta"], ["Puskesmas", "Puskesmas"], ["Klinik", "Klinik"], ["Dinas kesehatan provinsi", "Dinas kesehatan provinsi"], ["Dinas kesehatan kabupaten/kota", "Dinas kesehatan kabupaten/kota"], ["Pemerintah daerah", "Pemerintah daerah"], ["Kementerian/lembaga", "Kementerian/lembaga"], ["Lembaga donor", "Lembaga donor"], ["LSM/organisasi masyarakat", "LSM/organisasi masyarakat"], ["Universitas/lembaga riset", "Universitas/lembaga riset"], ["Perusahaan (CSR)", "Perusahaan (CSR)"], ["Kemitraan pemerintah dan LSM", "Kemitraan pemerintah dan LSM"]]],
         ["service", "Lini layanan CHARIS", "select", SERVICE_OPTS], ["component", "Komponen sistem kesehatan", "select", [["governance", "Tata kelola"], ["financing", "Pembiayaan"], ["workforce", "SDM kesehatan"], ["service", "Layanan dan mutu"], ["information", "Informasi"], ["evidence", "Bukti dan evaluasi"]]],
-        ["region", "Wilayah umum (provinsi/regional)", "text"], ["year_start", "Tahun mulai", "number"], ["year_end", "Tahun selesai", "number"],
+        ["region", "Wilayah umum (provinsi/regional)", "text"], ["areas", "Cakupan wilayah di peta (pisahkan dengan koma: nama provinsi, Nasional, atau nama negara, mis. Bali, Nusa Tenggara Timur, Timor-Leste)", "text"], ["year_start", "Tahun mulai", "number"], ["year_end", "Tahun selesai", "number"],
         ["duration_months", "Durasi (bulan)", "number"], ["status", "Status", "select", [["selesai", "Selesai"], ["berjalan", "Berjalan"]]],
         ["role", "Peran CHARIS", "select", [["Pelaksana utama", "Pelaksana utama"], ["Mitra pelaksana", "Mitra pelaksana"], ["Subkontraktor", "Subkontraktor"], ["Pendamping teknis", "Pendamping teknis"], ["Pengalaman tim (sebelum CHARIS)", "Pengalaman tim (sebelum CHARIS): dikerjakan anggota tim sebagai konsultan individu"]]],
         ["summary_id", "Ringkasan pekerjaan (ID): apa yang dikerjakan, bukan temuannya", "textarea"], ["summary_en", "Work summary (EN)", "textarea"],
@@ -208,7 +208,7 @@
   $("reloadBtn").addEventListener("click", () => { if (type) select(type); });
 
   /* Warn when the live Web App still runs an older Code.gs (edited, but no new deployment version) */
-  const EXPECTED_API = "2026-11-18";
+  const EXPECTED_API = "2026-11-18b";
   function checkApi() {
     if (DEMO) return;
     fetch(cfg.API_URL).then(r => r.json()).then(j => {

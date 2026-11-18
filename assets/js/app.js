@@ -497,61 +497,117 @@
     },
 
     async projects(focus, pid) {
-      app.innerHTML = pageTop(t("nav.projects"), t("projects.lead")) +
-        '<section class="sec"><div class="wrap"><div class="proj-filters"><div class="filters" id="projFilters" role="group" aria-label="' + esc(t("proj.f.service")) + '"></div>' +
-        '<label class="sort">' + esc(t("proj.f.client")) + ' <select id="projClient"><option value="">' + esc(t("filter.all")) + "</option></select></label></div>" +
-        '<p class="proj-count" id="projCount" role="status"></p><ul class="proj-list2" id="projList"></ul><p class="proj-note">' + esc(t("proj.note")) + "</p></div></section>" + newsletter();
-      bindNewsletter();
-      const [rows, repo, pcov] = await Promise.all([safeList("projects"), API.repo().catch(() => []), API.portfolioCovers().catch(() => ({}))]);
-      const list = document.getElementById("projList");
-      if (!rows) { list.innerHTML = errMsg(); return; }
+      app.innerHTML = '<header class="page-top pf-top"><div class="wrap"><h1>' + esc(t("nav.projects")) + "</h1><p>" + esc(t("pf.lead")) + "</p></div></header>" +
+        '<section class="sec pf-dash-sec"><div class="wrap"><div id="pfKpis">' + msg("loading") + "</div></div></section>" +
+        '<section class="sec pf-x-sec" id="pf-list"><div class="wrap">' + secHead(t("pf.x.t")) + '<p class="sec-lead">' + esc(t("pf.x.lead")) + '</p><div id="pfExplorer"></div><p class="proj-note">' + esc(t("proj.note")) + "</p></div></section>" +
+        '<section class="sec pf-charts-sec"><div class="wrap">' + secHead(t("pf.charts.t")) + '<div id="pfDash" class="pf-dash"></div></div></section>' +
+        '<section class="pf-cta"><div class="wrap pf-cta-in"><div><h2>' + esc(t("pf.cta.t")) + "</h2><p>" + esc(t("pf.cta.d")) + '</p></div><div class="pf-cta-act"><a class="btn btn-light" href="#/contact">' + esc(t("pf.cta.b1")) + '</a><a class="btn btn-outline-light" href="#/research">' + esc(t("pf.cta.b2")) + "</a></div></div></section>";
+      const [rows, repo, pcov, partners] = await Promise.all([safeList("projects"), API.repo().catch(() => []), API.portfolioCovers().catch(() => ({})), safeList("partners")]);
+      const dash = document.getElementById("pfDash"), kpiHost = document.getElementById("pfKpis");
+      if (!rows) { kpiHost.innerHTML = errMsg(); return; }
       rows.sort((a, b) => String(b.date || b.year_start || "").localeCompare(String(a.date || a.year_start || "")));
-      const keys = ["all"].concat(SV.map(s => s.key).filter(k => rows.some(r => r.service === k)));
-      const ctypes = [...new Set(rows.map(r => r.client_type).filter(Boolean))].sort();
-      const sel = document.getElementById("projClient");
-      sel.innerHTML += ctypes.map(c => '<option value="' + esc(c) + '">' + esc(c) + "</option>").join("");
-      const filt = document.getElementById("projFilters");
-      let svcK = focus && keys.includes(focus) ? focus : "all";
-      if (pid && !rows.some(r => r.id === pid)) pid = null;
+      const nowY = new Date().getFullYear();
+      const PCOL = { a: "#0E5A55", r: "#2D6A8E", s: "#5E8C4A", c: "#E8833A" };
+      const svcColor = k => { const s = svc(k); return s ? PCOL[s.pillar] : "#6E9C99"; };
       const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + (lang === "en" ? " to " : " sampai ") + r.year_end : (r.year_start || r.year_end || "");
       const roleLabel = v => { const k = "role." + v, x = t(k); return x === k ? v : x; };
-      const row = (label, val) => val ? "<div><dt>" + esc(label) + "</dt><dd>" + esc(val) + "</dd></div>" : "";
-      const item = r => {
-        const named = r.disclosure === "A" || r.disclosure === "B";
-        const pubs = String(r.related_publications || "").split(",").map(x => x.trim()).filter(Boolean).map(id => repo.find(p => p.id === id)).filter(Boolean);
-        const comp = t("comp." + (r.component || ""));
-        const cv = named && pcov[r.id];                       /* GitHub covers only for levels A and B */
-        return '<li class="pj" id="pj-' + esc(r.id) + '">' + (cv ? '<div class="pj-media pj-cover">' + coverBox(cv.thumb, cv.cover, f(r, "title"), r.id) + "</div>"
-          : named && r.image_url ? '<div class="pj-media">' + media(r.image_url, f(r, "title"), r.id, 800) + "</div>" : "") +
-          '<div class="pj-body"><p class="card-meta"><span class="card-cat">' + esc(serviceName(r.service)) + "</span>" + (r.component ? "<span>" + esc(comp) + "</span>" : "") +
-          '<span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span>" +
-          (/sebelum CHARIS/i.test(r.role || "") ? '<span class="pj-prior" title="' + esc(t("proj.prior.d")) + '">' + esc(t("proj.prior")) + "</span>" : "") + "</p>" +
-          "<h3>" + esc(f(r, "title")) + "</h3>" +
-          '<p class="pj-client">' + esc(named && r.client ? r.client : r.client_type || "") + (named && r.location_detail ? ", " + esc(r.location_detail) : "") + (r.region ? ", " + esc(r.region) : "") + (years(r) ? ", " + esc(years(r)) : "") + "</p>" +
-          "<p>" + esc(f(r, "summary")) + "</p>" +
-          '<dl class="pj-facts">' + row(t("proj.role"), roleLabel(r.role)) + row(t("proj.duration"), r.duration_months ? r.duration_months + " " + t("proj.months") : "") +
-          row(t("proj.methods"), f(r, "methods")) + row(t("proj.outputs"), f(r, "outputs")) + row(t("proj.capacity"), f(r, "capacity")) +
-          (named ? row(t("proj.funder"), r.funder) + row(t("proj.partners"), r.partners) : "") + row("SDG", r.sdg) + "</dl>" +
-          (named && f(r, "testimonial") ? '<blockquote class="pj-quote"><p>' + esc(f(r, "testimonial")) + "</p>" + (r.testimonial_by ? "<cite>" + esc(r.testimonial_by) + "</cite>" : "") + "</blockquote>" : "") +
-          (pubs.length ? '<p class="pj-pubs"><span>' + esc(t("proj.pubs")) + ":</span> " + pubs.map(p => '<a href="' + esc(p.url) + '">' + esc(f(p, "title")) + "</a>").join("; ") + "</p>" : "") +
-          (r.keywords ? '<p class="badges">' + String(r.keywords).split(",").map(k => k.trim()).filter(Boolean).map(k => '<span class="badge">' + esc(k) + "</span>").join("") + "</p>" : "") +
-          '<div class="pj-share">' + shareBox(r.id, absHash("#/projects/" + encodeURIComponent(r.id)), f(r, "title")) + "</div></div></li>";
-      };
-      const draw = () => {
-        filt.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === svcK)));
-        const out = rows.filter(r => (svcK === "all" || r.service === svcK) && (!sel.value || r.client_type === sel.value));
-        document.getElementById("projCount").textContent = out.length + " " + t("proj.count");
-        list.innerHTML = out.length ? out.map(item).join("") : msg("empty");
-        if (pid) {   /* opened from a shared link: bring that project into view */
-          const el = document.getElementById("pj-" + pid);
-          if (el) { app.dataset.keep = "1"; el.classList.add("pj-focus"); requestAnimationFrame(() => el.scrollIntoView({ block: "start" })); setTimeout(() => { delete app.dataset.keep; }, 800); }
-          pid = null;
-        }
-      };
-      filt.innerHTML = keys.map(k => '<button type="button" data-k="' + k + '">' + esc(k === "all" ? t("filter.all") : serviceName(k)) + "</button>").join("");
-      filt.addEventListener("click", e => { const b = e.target.closest("button"); if (b) { svcK = b.dataset.k; draw(); } });
-      sel.addEventListener("change", draw);
-      draw();
+      const nf = v => new Intl.NumberFormat(lang === "en" ? "en-GB" : "id-ID").format(v);
+
+      /* ---------- regions: free text mapped to island groups ---------- */
+      const GROUPS = [
+        ["sumatra", /aceh|sumatera|sumatra|riau|jambi|bengkulu|lampung|bangka|medan|padang|palembang/i],
+        ["jawa", /jawa|java|jakarta|dki|banten|yogyakarta|diy|bandung|surabaya|semarang|bogor/i],
+        ["nusa", /bali|nusa tenggara|ntb|ntt|lombok|sumba|flores|kupang|timor|denpasar|gianyar|badung/i],
+        ["kalimantan", /kalimantan|borneo|pontianak|samarinda|balikpapan|banjarmasin/i],
+        ["sulawesi", /sulawesi|makassar|manado|gorontalo|buton|kendari|palu/i],
+        ["maluku", /maluku|ambon|ternate/i],
+        ["papua", /papua|sorong|jayapura|manokwari|merauke/i]
+      ];
+      const regCount = {}; let national = 0;
+      rows.forEach(r => {
+        const txt = String(r.region || "") + " " + String(r.location_detail || "");
+        if (/nasional|national/i.test(txt)) national++;
+        GROUPS.forEach(([g, re]) => { if (re.test(txt)) regCount[g] = (regCount[g] || 0) + 1; });
+      });
+      const regionsHit = Object.keys(regCount).length;
+
+      /* ---------- KPI tiles ---------- */
+      const tim = (partners || []).filter(p => String(p.relation || "tim") === "tim");
+      const svcKeys = [...new Set(rows.map(r => r.service).filter(Boolean))];
+      const sdgs = {};
+      rows.forEach(r => String(r.sdg || "").split(/[,;]/).map(x => x.trim()).filter(Boolean).forEach(x => {
+        const m = /(\d{1,2})(?:\.(\w+))?/.exec(x); if (!m) return;
+        const g = Number(m[1]); (sdgs[g] = sdgs[g] || new Set()); if (m[2]) sdgs[g].add(m[1] + "." + m[2]);
+      }));
+      const kpi = (n, label, sub, href) => '<li class="pf-kpi">' + (href ? '<a href="' + href + '">' : "<div>") + '<b data-count="' + n + '">' + (typeof n === "number" ? nf(n) : esc(n)) + "</b><span>" + esc(label) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + (href ? "</a>" : "</div>") + "</li>";
+      const kpis = '<ul class="pf-kpis">' +
+        kpi(rows.length, t("pf.k.projects"), rows.some(r => /sebelum CHARIS/i.test(r.role || "")) ? t("pf.k.projects.s") : "") +
+        kpi(svcKeys.length, t("pf.k.services"), t("pf.k.services.s").replace("{n}", SV.length)) +
+        kpi(national ? t("pf.k.national") : regionsHit, t("pf.k.regions"), national ? t("pf.k.regions.n").replace("{n}", regionsHit) : t("pf.k.regions.s")) +
+        kpi(repo.length, t("pf.k.products"), t("pf.k.products.s"), "#/research") +
+        (tim.length ? kpi(tim.length, t("pf.k.partners"), t("pf.k.partners.s"), "#/about") : "") + "</ul>";
+
+      /* ---------- chart 1: projects by service line (bars, click to filter) ---------- */
+      const bySvc = SV.map(s => ({ k: s.key, n: rows.filter(r => r.service === s.key).length })).filter(x => x.n).sort((a, b) => b.n - a.n);
+      const maxS = Math.max(1, ...bySvc.map(x => x.n));
+      const chartSvc = '<div class="pf-card"><h3>' + esc(t("pf.c.svc")) + '</h3><ul class="pf-bars">' + bySvc.map(x =>
+        '<li><button type="button" data-pf-svc="' + x.k + '"><span class="pf-bar-l">' + svcIcon(x.k, "ic-mini") + "<span>" + esc(serviceName(x.k)) + '</span></span><span class="pf-bar-t"><i style="width:' + Math.max(8, x.n / maxS * 100) + "%;background:" + svcColor(x.k) + '"></i><b>' + x.n + "</b></span></button></li>").join("") +
+        '</ul><p class="pf-hint">' + esc(t("pf.c.svc.h")) + "</p></div>";
+
+      /* ---------- chart 2: timeline ---------- */
+      const ys = rows.map(r => Number(r.year_start)).filter(Boolean), ye = rows.map(r => Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start))).filter(Boolean);
+      const y0 = Math.min(nowY, ...ys), y1 = Math.max(nowY, ...ye, y0), span = y1 - y0 + 1;
+      const tl = rows.filter(r => r.year_start).slice().sort((a, b) => String(a.year_start).localeCompare(String(b.year_start)));
+      const shortT = s => { s = String(s); return s.length > 58 ? s.slice(0, s.lastIndexOf(" ", 56)) : s; };
+      const chartTl = '<div class="pf-card pf-card-wide"><h3>' + esc(t("pf.c.tl")) + '</h3><div class="pf-tl" style="--span:' + span + '">' +
+        '<div class="pf-tl-axis"><span></span>' + Array.from({ length: span }, (_, i) => "<span>" + (y0 + i) + "</span>").join("") + "</div>" +
+        tl.map(r => {
+          const a = Number(r.year_start), b = Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start));
+          const left = (a - y0) / span * 100, width = (b - a + 1) / span * 100;
+          return '<a class="pf-tl-row" href="#pj-' + esc(r.id) + '" data-pf-jump="' + esc(r.id) + '"><span class="pf-tl-name">' + esc(shortT(f(r, "title"))) + '</span><span class="pf-tl-track"><i class="' + (r.status === "berjalan" ? "on" : "") + '" style="left:' + left + "%;width:" + width + "%;background:" + svcColor(r.service) + '"><em>' + esc(years(r)) + "</em></i></span></a>";
+        }).join("") + '</div><p class="pf-legend"><span><i class="sw"></i>' + esc(t("proj.st.selesai")) + '</span><span><i class="sw on"></i>' + esc(t("proj.st.berjalan")) + "</span></p></div>";
+
+      /* ---------- chart 4: client types (donut) ---------- */
+      const ct = {}; rows.forEach(r => { const k = r.client_type || t("pf.other"); ct[k] = (ct[k] || 0) + 1; });
+      const ctl = Object.entries(ct).sort((a, b) => b[1] - a[1]);
+      const DC = ["#0E5A55", "#E8833A", "#2D6A8E", "#5E8C4A", "#8C6BB1", "#B4364A", "#6E9C99"];
+      let acc = 0; const C = 2 * Math.PI * 42;
+      const donut = '<div class="pf-card"><h3>' + esc(t("pf.c.client")) + '</h3><div class="pf-donut"><svg viewBox="0 0 120 120" role="img" aria-label="' + esc(t("pf.c.client")) + '"><circle cx="60" cy="60" r="42" fill="none" stroke="#EDF2F0" stroke-width="16"/>' +
+        ctl.map(([k, n], i) => { const len = n / rows.length * C; const s = '<circle cx="60" cy="60" r="42" fill="none" stroke="' + DC[i % DC.length] + '" stroke-width="16" stroke-dasharray="' + Math.max(0, len - (ctl.length > 1 ? 2 : 0)).toFixed(2) + " " + C.toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 60 60)"><title>' + esc(k) + ": " + n + "</title></circle>"; acc += len; return s; }).join("") +
+        '<text x="60" y="58" text-anchor="middle" class="d-n">' + rows.length + '</text><text x="60" y="74" text-anchor="middle" class="d-l">' + esc(t("proj.count")) + "</text></svg>" +
+        '<ul class="pf-dl">' + ctl.map(([k, n], i) => '<li><i style="background:' + DC[i % DC.length] + '"></i><span>' + esc(k) + "</span><b>" + n + "</b></li>").join("") + "</ul></div></div>";
+
+      /* ---------- chart 5: team experience by institution type ---------- */
+      const CATS = ["gov", "un", "intl", "ngo", "uni"], CC = { gov: "#0E5A55", un: "#2D6A8E", intl: "#E8833A", ngo: "#5E8C4A", uni: "#8C6BB1" };
+      const byCat = CATS.map(c => [c, tim.filter(p => p.category === c).length]).filter(x => x[1]);
+      const exp = tim.length ? '<div class="pf-card pf-card-wide"><h3>' + esc(t("pf.c.exp").replace("{n}", tim.length)) + '</h3><div class="pf-stack">' +
+        byCat.map(([c, n]) => '<i style="flex:' + n + ";background:" + CC[c] + '" title="' + esc(t("cat." + c)) + ": " + n + '"><b>' + n + "</b></i>").join("") + '</div><ul class="pf-dl pf-dl-row">' +
+        byCat.map(([c, n]) => '<li><i style="background:' + CC[c] + '"></i><span>' + esc(t("cat." + c)) + "</span><b>" + n + "</b></li>").join("") + '</ul><p class="pf-hint"><a href="#/about" data-pillar="exp">' + esc(t("pf.c.exp.l")) + "</a></p></div>" : "";
+
+      /* ---------- SDG targets ---------- */
+      const SDGC = { 1: "#E5243B", 2: "#DDA63A", 3: "#4C9F38", 4: "#C5192D", 5: "#FF3A21", 6: "#26BDE2", 7: "#FCC30B", 8: "#A21942", 9: "#FD6925", 10: "#DD1367", 11: "#FD9D24", 12: "#BF8B2E", 13: "#3F7E44", 14: "#0A97D9", 15: "#56C02B", 16: "#00689D", 17: "#19486A" };
+      const sdgKeys = Object.keys(sdgs).map(Number).sort((a, b) => a - b);
+      const sdgBox = sdgKeys.length ? '<div class="pf-card"><h3>' + esc(t("pf.c.sdg")) + '</h3><ul class="pf-sdg">' + sdgKeys.map(g =>
+        '<li style="--c:' + (SDGC[g] || "#52615E") + '"><b>' + g + "</b><span>" + esc(t("sdg." + g) !== "sdg." + g ? t("sdg." + g) : "SDG " + g) + "</span>" + (sdgs[g].size ? "<small>" + esc(t("pf.targets")) + " " + esc([...sdgs[g]].join(", ")) + "</small>" : "") + "</li>").join("") + "</ul></div>" : "";
+
+      kpiHost.innerHTML = kpis;
+      dash.innerHTML = '<div class="pf-grid">' + chartSvc + donut + chartTl + sdgBox + exp + "</div>";
+      const X = window.CharisPFExplorer ? window.CharisPFExplorer(document.getElementById("pfExplorer"), { rows, repo, pcov, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, SV, focus: focus && rows.some(r => r.service === focus) ? focus : "" }) : null;
+
+      dash.addEventListener("click", e => {
+        const b = e.target.closest("[data-pf-svc]");
+        if (b && X) { X.filterService(b.dataset.pfSvc); dash.querySelectorAll("[data-pf-svc]").forEach(x => x.setAttribute("aria-pressed", String(x === b && x.getAttribute("aria-pressed") !== "true"))); document.getElementById("pf-list").scrollIntoView({ behavior: smoothOK() ? "smooth" : "auto", block: "start" }); return; }
+        const j = e.target.closest("[data-pf-jump]");
+        if (j && X) { e.preventDefault(); X.select(j.dataset.pfJump, true); }
+      });
+      if (pid && X && rows.some(r => r.id === pid)) { app.dataset.keep = "1"; X.select(pid, true); setTimeout(() => { delete app.dataset.keep; }, 1500); }
+      /* count-up on the KPI numbers, once */
+      if (smoothOK()) kpiHost.querySelectorAll(".pf-kpi b[data-count]").forEach(b => {
+        const n = Number(b.dataset.count); if (!n || n < 2) return;
+        const t0 = performance.now(), dur = 900;
+        const step = ts => { const k = Math.min(1, (ts - t0) / dur); b.textContent = nf(Math.round(n * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+      });
     },
 
     async latest() {
