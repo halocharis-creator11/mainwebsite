@@ -695,10 +695,10 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
 
 /* ---------- partners & team experience ---------- */
 .orgs { list-style: none; margin: 0; padding: 0; }
-.org > a, .org > div { display: flex; align-items: center; justify-content: center; height: 132px; padding: 18px; border: 1px solid var(--rule); border-radius: 14px; background: #fff; color: inherit; text-decoration: none;
+.org > a, .org > div { display: flex; align-items: center; justify-content: center; height: 132px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 14px; background: #fff; color: inherit; text-decoration: none;
   transition: border-color .25s, box-shadow .3s, transform .3s cubic-bezier(.25,.1,.2,1); }
 .org:hover > a, .org:hover > div { border-color: var(--teal-60); box-shadow: 0 12px 28px rgba(20,40,38,.1); transform: translateY(-3px); }
-.org-img { display: block; width: auto; height: auto; max-width: 100%; max-height: 88px; object-fit: contain; transition: transform .35s cubic-bezier(.25,.1,.2,1); }
+.org-img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .35s cubic-bezier(.25,.1,.2,1); }
 .org:hover .org-img { transform: scale(1.05); }
 .org-short { font-size: 22px; font-weight: 700; letter-spacing: .01em; line-height: 1.15; text-align: center; color: var(--teal-60); transition: color .25s; overflow-wrap: anywhere; }
 .org:hover .org-short { color: var(--teal); }
@@ -723,11 +723,11 @@ dialog.zoom img { display: block; max-width: 100%; max-height: 88vh; border-radi
 .exp-note { margin: 22px 0 0; font-size: 13.5px; color: var(--muted); max-width: 80ch; }
 @media (max-width: 1100px) { .org-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 900px) { .org-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .org-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .orgs.marquee .org { width: 180px; } .org-short { font-size: 18px; } .org > a, .org > div { height: 112px; } }
+@media (max-width: 760px) { .org-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .orgs.marquee .org { width: 180px; } .org-short { font-size: 18px; } .org > a, .org > div { height: 116px; padding: 10px 12px; } }
 @media (max-width: 340px) { .org-grid { grid-template-columns: 1fr; } }
 #experience-all { scroll-margin-top: 90px; }
 
-.orgs .org-img, .orgs.marquee .org-img { filter: none; opacity: 1; max-height: 88px; }
+.orgs .org-img, .orgs.marquee .org-img { filter: none; opacity: 1; max-height: 100%; }
 
 /* ---------- photos ---------- */
 .page-photo { margin: 0; padding: 32px 0 0; }

@@ -196,16 +196,60 @@
     return '<li class="org' + (r.logo_url ? " has-logo" : "") + '" data-cat="' + esc(r.category || "") + '"' + (hide ? ' aria-hidden="true"' : "") + ">" +
       (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener"' + attrs + ">" + inner + "</a>" : "<div" + attrs + ">" + inner + "</div>") + "</li>";
   };
-  /* optical sizing: wide and square logos get the same visual weight (equal area, capped by the box) */
+  /* Partner logos fill their box. Built-in white or transparent margins in the logo file are trimmed in the browser
+     (when the image host allows it), then wide and square logos get a similar visual weight, capped by the box. */
+  const trimCache = new Map();
+  function trimLogo(src) {
+    if (trimCache.has(src)) return trimCache.get(src);
+    const job = new Promise(resolve => {
+      const im = new Image(); im.crossOrigin = "anonymous"; im.decoding = "async";
+      im.onerror = () => resolve(null);
+      im.onload = () => {
+        try {
+          const s = Math.min(1, 900 / Math.max(im.naturalWidth, im.naturalHeight)), W = Math.max(1, Math.round(im.naturalWidth * s)), H = Math.max(1, Math.round(im.naturalHeight * s));
+          const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+          const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(im, 0, 0, W, H);
+          const d = cx.getImageData(0, 0, W, H).data, px = (x, y) => (y * W + x) * 4;
+          const corners = [px(0, 0), px(W - 1, 0), px(0, H - 1), px(W - 1, H - 1)];
+          const transparent = corners.every(i => d[i + 3] < 20);
+          const bg = [0, 1, 2].map(c => corners.reduce((a, i) => a + d[i + c], 0) / 4);
+          const ink = i => transparent ? d[i + 3] > 24 : d[i + 3] > 24 && Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]) > 42;
+          let x0 = W, y0 = H, x1 = -1, y1 = -1;
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (ink(px(x, y))) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+          if (x1 < 0) return resolve(null);
+          const m = Math.round(Math.max(x1 - x0, y1 - y0) * 0.02);
+          x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(W - 1, x1 + m); y1 = Math.min(H - 1, y1 + m);
+          const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+          if (cw > W * 0.96 && ch > H * 0.96) return resolve(null);
+          const out = document.createElement("canvas"); out.width = cw; out.height = ch;
+          out.getContext("2d").drawImage(cv, x0, y0, cw, ch, 0, 0, cw, ch);
+          resolve(out.toDataURL("image/png"));
+        } catch (e) { resolve(null); }   /* image host does not allow reading pixels: keep the original */
+      };
+      im.src = src;
+    });
+    trimCache.set(src, job);
+    return job;
+  }
+  function sizeLogo(img) {
+    if (!img.naturalWidth || !img.parentElement) return;
+    const box = img.parentElement.getBoundingClientRect(); if (!box.width) return;
+    const cs = getComputedStyle(img.parentElement), padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const maxW = Math.max(60, box.width - padX), maxH = Math.max(40, box.height - padY), r = img.naturalWidth / img.naturalHeight, area = maxW * maxH * 0.6;
+    let w = Math.sqrt(area * r), h = Math.sqrt(area / r);
+    const k = Math.min(maxW / w, maxH / h, 1);
+    img.style.width = Math.round(w * k) + "px"; img.style.height = Math.round(h * k) + "px";
+  }
   document.addEventListener("load", e => {
     const img = e.target;
     if (!img.classList || !img.classList.contains("org-img") || !img.naturalWidth) return;
-    const r = img.naturalWidth / img.naturalHeight, area = 9600;
-    let w = Math.sqrt(area * r), h = Math.sqrt(area / r);
-    const box = img.parentElement.getBoundingClientRect(), maxW = Math.max(60, box.width - 36), maxH = Math.max(40, box.height - 30);
-    const k = Math.min(1, maxW / w, maxH / h);
-    img.style.width = Math.round(w * k) + "px"; img.style.height = Math.round(h * k) + "px";
+    sizeLogo(img);
+    if (img.dataset.trim) return;
+    img.dataset.trim = "1";
+    trimLogo(img.currentSrc || img.src).then(url => { if (url) img.src = url; });
   }, true);
+  let logoResize = 0;
+  addEventListener("resize", () => { clearTimeout(logoResize); logoResize = setTimeout(() => document.querySelectorAll(".org-img").forEach(sizeLogo), 150); });
   async function buildPartners() {
     const rows = (await safeList("partners") || []).slice().sort(ord);
     const mitra = rows.filter(r => r.relation === "mitra"), team = rows.filter(r => r.relation !== "mitra");
