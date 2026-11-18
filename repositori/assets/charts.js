@@ -186,18 +186,21 @@
     s += `<circle cx="${L}" cy="14" r="6" fill="${cfg.colors[0]}"/><text x="${L + 11}" y="18">${esc(T(cfg.names[0]))}</text>`;
     s += `<circle cx="${narrow ? L : L + 240}" cy="${narrow ? 30 : 14}" r="6" fill="${cfg.colors[1]}"/><text x="${(narrow ? L : L + 240) + 11}" y="${narrow ? 34 : 18}">${esc(T(cfg.names[1]))}</text>`;
     const top = narrow ? 50 : 38;
-    for (let v = 0; v <= cfg.max; v++) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top}" y2="${top + cfg.rows.length * rh - 8}" stroke="${RULE}"/><text x="${X(v)}" y="${top + cfg.rows.length * rh + 8}" text-anchor="middle">${v}</text>`;
+    const st = cfg.step || 1, vf = cfg.fmt || (v => String(v));
+    for (let v = 0; v <= cfg.max + 1e-9; v += st) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top}" y2="${top + cfg.rows.length * rh - 8}" stroke="${RULE}"/><text x="${X(v)}" y="${top + cfg.rows.length * rh + 8}" text-anchor="middle">${esc(vf(v))}</text>`;
     s += `<text x="${(L + W - R) / 2}" y="${top + cfg.rows.length * rh + 26}" text-anchor="middle">${esc(T(cfg.axis))}</text>`;
     cfg.rows.forEach((r, i) => {
       const y = top + i * rh + 12;
       s += `<text x="${L - 12}" y="${y + 4}" text-anchor="end">${esc(T(r.label))}</text>`;
       s += `<line x1="${X(r.b)}" x2="${X(r.a)}" y1="${y}" y2="${y}" stroke="#C9D8D6" stroke-width="7" stroke-linecap="round"/>`;
-      s += `<g class="pair" tabindex="0" data-i="${i}"><circle cx="${X(r.a)}" cy="${y}" r="10" fill="${cfg.colors[0]}"/><text x="${X(r.a)}" y="${y + 4}" text-anchor="middle" class="in" fill="#fff">${r.a}</text>` +
+      if (cfg.outside) s += `<g class="pair" tabindex="0" data-i="${i}"><circle cx="${X(r.a)}" cy="${y}" r="7" fill="${cfg.colors[0]}"/><circle cx="${X(r.b)}" cy="${y}" r="7" fill="${cfg.colors[1]}"/>` +
+        `<text x="${X(r.a) + (r.a >= r.b ? 11 : -11)}" y="${y + 4}" text-anchor="${r.a >= r.b ? "start" : "end"}" class="val">${esc(vf(r.a))}</text><text x="${X(r.b) + (r.a >= r.b ? -11 : 11)}" y="${y + 4}" text-anchor="${r.a >= r.b ? "end" : "start"}">${esc(vf(r.b))}</text></g>`;
+      else s += `<g class="pair" tabindex="0" data-i="${i}"><circle cx="${X(r.a)}" cy="${y}" r="10" fill="${cfg.colors[0]}"/><text x="${X(r.a)}" y="${y + 4}" text-anchor="middle" class="in" fill="#fff">${r.a}</text>` +
         `<circle cx="${X(r.b)}" cy="${y}" r="10" fill="${cfg.colors[1]}"/><text x="${X(r.b)}" y="${y + 4}" text-anchor="middle" class="in" fill="#fff">${r.b}</text></g>`;
     });
     el.innerHTML = s + "</svg>";
     bind(el.querySelector("svg"), ".pair", (k, n) => { const r = cfg.rows[+n.dataset.i];
-      return `<b>${esc(T(r.label))}</b><br>${esc(T(cfg.names[0]))}: <b>${r.a}</b><br>${esc(T(cfg.names[1]))}: <b>${r.b}</b><br><span class="rng">${esc(T(cfg.gapText))}: ${r.a - r.b}</span>`; });
+      return `<b>${esc(T(r.label))}</b><br>${esc(T(cfg.names[0]))}: <b>${esc(vf(r.a))}</b><br>${esc(T(cfg.names[1]))}: <b>${esc(vf(r.b))}</b><br><span class="rng">${esc(T(cfg.gapText))}: ${esc(vf(+(r.a - r.b).toFixed(1)))}</span>`; });
   }
 
   window.CharisCharts = { mount, line, hbar, vbar, stack2, matrix, dumbbell, toggles, T, fmt, lang };

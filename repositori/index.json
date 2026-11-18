@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-18",
-  "count": 3,
+  "count": 4,
   "items": [
     {
       "id": "CHARIS-2026-001",
@@ -154,6 +154,56 @@
       ],
       "pdf_summary": "",
       "full_pdf": "https://zenodo.org/records/19967181/files/Can%20Strategic%20Reallocation%20Alone%20Transform%20HIV%20Outcomes.pdf",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-004",
+      "slug": "2026-04-lenacapavir-kasus-investasi",
+      "url": "repositori/2026-04-lenacapavir-kasus-investasi/",
+      "type": "Kasus investasi",
+      "series": "",
+      "title_id": "Lenacapavir untuk Pencegahan HIV di Indonesia: Kasus Investasi Strategis untuk Global Fund Siklus 8",
+      "title_en": "Lenacapavir (LEN) for HIV Prevention in Indonesia: A Strategic Investment Case for GC8",
+      "abstract_id": "Latar belakang: Indonesia telah memperluas layanan HIV, tetapi dampak pencegahannya masih rendah. Hanya sekitar 25% orang dengan HIV yang tersupresi, dan dari 45.289 orang yang memulai PrEP oral pada 2025, hanya 1,1% yang masih memakainya pada bulan ke-12. Penularan makin terpusat pada jaringan seksual populasi kunci. Kasus investasi ini menilai lenacapavir (LEN), PrEP suntik dua kali setahun, sebagai strategi pencegahan terarah untuk permohonan pendanaan Global Fund Siklus 8 (2027 sampai 2029). Metode: Model kohort statis deterministik tingkat nasional untuk 1.000.000 orang dari populasi kunci dengan 26.500 infeksi baru per tahun membandingkan status quo, perluasan PrEP oral (cakupan 20%, efektivitas 55%), dan LEN terarah (cakupan 10% pada kelompok berisiko tertinggi yang menyumbang sekitar 35% infeksi, efektivitas 92%). Analisis ekonomi dari perspektif sistem kesehatan memakai biaya LEN USD 50 dan PrEP oral USD 100 per orang per tahun serta biaya ART seumur hidup USD 3.000. Mekanisme pembiayaan mandiri dimodelkan dari survei kesediaan membayar pada LSL di Bali. Hasil: LEN terarah mencegah sekitar 8.500 infeksi per tahun, kira-kira tiga kali dampak perluasan PrEP oral (2.900). Biaya per infeksi dicegah USD 588 untuk LEN dibanding USD 6.897 untuk PrEP oral, dan biaya program tahunan USD 5,0 juta dibanding USD 20,0 juta. Biaya ART seumur hidup yang terhindar (USD 25,5 juta) melebihi biaya program LEN, menghasilkan manfaat bersih sekitar USD 20,5 juta per kohort tahunan. Pembayaran pengguna hanya menutup sekitar 12% biaya, sehingga model pembiayaan campuran direkomendasikan. Kesimpulan: LEN yang diarahkan kepada orang berisiko tertinggi merupakan investasi berdampak tinggi dan hemat biaya, asalkan diperkenalkan bertahap melalui percontohan, didukung bukti lokal, dan dibiayai secara campuran yang menjaga akses.",
+      "abstract_en": "Background: Indonesia has expanded HIV services, but the impact of prevention remains low. Only about 25% of people living with HIV are virally suppressed, and of the 45,289 people who started oral PrEP in 2025, only 1.1% were still using it at month 12. Transmission is increasingly concentrated in the sexual networks of key populations. This investment case assesses lenacapavir (LEN), a twice-yearly PrEP injection, as a targeted prevention strategy for the Global Fund Grant Cycle 8 funding request (2027 to 2029). Methods: A deterministic national static cohort model of 1,000,000 people from key populations with 26,500 new infections a year compares the status quo, oral PrEP scale-up (20% coverage, 55% effectiveness) and targeted LEN (10% coverage of the highest-risk group, which accounts for about 35% of infections, 92% effectiveness). The economic analysis takes a health system perspective, with LEN at USD 50 and oral PrEP at USD 100 per person per year and a lifetime ART cost of USD 3,000. Out-of-pocket financing was modelled from a willingness-to-pay survey of MSM in Bali. Results: Targeted LEN averts about 8,500 infections a year, around three times the impact of oral PrEP scale-up (2,900). The cost per infection averted is USD 588 for LEN compared with USD 6,897 for oral PrEP, and the annual programme cost is USD 5.0 million compared with USD 20.0 million. Lifetime ART costs avoided (USD 25.5 million) exceed the LEN programme cost, giving a net benefit of about USD 20.5 million per annual cohort. User payments cover only about 12% of cost, so a blended financing model is recommended. Conclusions: LEN directed to the people at highest risk is a high-impact, cost-saving investment, provided it is introduced in phases through pilots, backed by local evidence, and financed through a blended model that protects access.",
+      "authors": [
+        {
+          "name": "Ngakan Putu Anom Harjana",
+          "affiliation": "Center for Public Health Innovation (CPHI), Fakultas Kedokteran, Universitas Udayana, Denpasar, Bali, Indonesia"
+        }
+      ],
+      "date_published": "2026-04-30",
+      "uploaded": "2026-11-18",
+      "sort_date": "2026-04-30",
+      "language": "id",
+      "keywords": [
+        "HIV",
+        "lenacapavir",
+        "PrEP",
+        "pencegahan presisi",
+        "efektivitas biaya",
+        "kasus investasi",
+        "pembiayaan mandiri",
+        "Global Fund",
+        "Indonesia"
+      ],
+      "service": "grants",
+      "project_id": "",
+      "doi": "10.5281/zenodo.19928903",
+      "license": "CC BY-NC 4.0",
+      "pages": 16,
+      "version": "1",
+      "cover": "repositori/2026-04-lenacapavir-kasus-investasi/auto-cover.jpg",
+      "thumb": "repositori/2026-04-lenacapavir-kasus-investasi/auto-thumb.jpg",
+      "preview": [
+        "repositori/2026-04-lenacapavir-kasus-investasi/auto-p1.jpg",
+        "repositori/2026-04-lenacapavir-kasus-investasi/auto-p2.jpg",
+        "repositori/2026-04-lenacapavir-kasus-investasi/auto-p3.jpg",
+        "repositori/2026-04-lenacapavir-kasus-investasi/auto-p4.jpg",
+        "repositori/2026-04-lenacapavir-kasus-investasi/auto-p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "https://zenodo.org/records/19928903/files/Draft%20CN%20LEN%2030%20April%202026.pdf",
       "featured": true
     }
   ]
