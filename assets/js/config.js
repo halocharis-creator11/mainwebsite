@@ -10,7 +10,7 @@ window.CHARIS_CONFIG = {
   DEFAULT_LANG: "id",          // "id" or "en"
   CONTACT_EMAIL: "[email]",    // shown in footer & contact page
   CONTACT_PHONE: "[telepon]",
-  ADDRESS: "Jalan Gunung Sari, Dusun Tojan, Pering, Blahbatuh, Gianyar, Bali 80581",
+  ADDRESS: "Kec. Blahbatuh, Kab. Gianyar, Bali 80581",
   NIB: "1103260087863",
   /* Main photos. Put the files in assets/img/foto/ (see the README there for free, legal sources),
      then fill src, a short description (alt), and the credit the licence asks for.
