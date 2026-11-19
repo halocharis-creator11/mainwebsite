@@ -507,3 +507,73 @@ select.in { appearance: none; background: #fff url("data:image/svg+xml,%3Csvg xm
   .sumgrid .panel { padding: 12px; }
   .sumgrid b { font-size: 18px; }
 }
+
+/* ---------- phase 5: keuangan ---------- */
+.money { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.atable th.r, .atable td.r { text-align: right; }
+.atable td.plus { color: #24613E; font-weight: 700; }
+.atable td.minus, .money.minus { color: var(--late); }
+.atable tr.dim td { color: var(--faint); }
+.atable tr.tot td { background: var(--teal-5); font-weight: 700; }
+.atable.mini { margin: 12px 0; font-size: 13px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.atable.mini td, .atable.mini th { padding: 7px 10px; }
+.due.done2 { background: #E7F0EE; color: var(--teal-deep); }
+.it-row { display: grid; grid-template-columns: minmax(0, 1.8fr) 70px minmax(0, 1fr) 32px; gap: 6px; align-items: center; }
+.it-row.it-h { margin: 6px 0 2px; }
+.it-row .in { min-width: 0; }
+.it-total { display: flex; justify-content: flex-end; gap: 10px; align-items: baseline; margin: 8px 40px 0 0; font-size: 14px; color: var(--muted); }
+.it-total b { font-size: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fin-h { font-size: 14px; margin: 18px 0 8px; }
+.req-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--teal-5); border-radius: 12px; margin-bottom: 14px; }
+.req-head > div { display: grid; gap: 2px; }
+.money.big { font-size: 26px; line-height: 1.15; color: var(--teal-deep); }
+.dl { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; margin: 0 0 6px; font-size: 14px; }
+.dl dt { color: var(--muted); font-weight: 700; font-size: 13px; }
+.dl dd { margin: 0; overflow-wrap: anywhere; }
+.steps { list-style: none; padding: 0; margin: 16px 0 4px; display: grid; gap: 0; }
+.steps li { position: relative; padding: 0 0 14px 26px; display: grid; gap: 1px; color: var(--faint); }
+.steps li::before { content: ""; position: absolute; left: 4px; top: 5px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); background: #fff; }
+.steps li:not(:last-child)::after { content: ""; position: absolute; left: 9px; top: 19px; bottom: 2px; width: 2px; background: var(--line); }
+.steps li.done { color: var(--ink); }
+.steps li.done::before { background: var(--teal); border-color: var(--teal); }
+.steps li b { font-size: 14px; }
+.absorb { display: grid; gap: 5px; padding: 10px 0; text-decoration: none; color: inherit; border-bottom: 1px solid var(--line); }
+.absorb:last-child { border-bottom: 0; }
+.absorb .t { font-weight: 700; font-size: 14px; }
+.absorb .bar { height: 8px; background: var(--teal-10); border-radius: 99px; overflow: hidden; }
+.absorb .bar i { display: block; height: 100%; background: var(--teal); border-radius: 99px; }
+.acc-card { text-align: left; cursor: pointer; font: inherit; color: inherit; display: grid; gap: 4px; }
+.acc-card[aria-pressed="true"] { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+.reps { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.rep h3 { font-size: 16px; margin: 0 0 6px; }
+.trow > b.money { margin-left: auto; font-size: 14px; }
+.kpi b.money { font-size: 22px; }
+@media (max-width: 860px) {
+  .it-row { grid-template-columns: minmax(0, 1fr) 56px 32px; }
+  .it-row > :nth-child(3) { grid-column: 1 / 3; }
+  .it-row > :nth-child(4) { grid-column: 3; grid-row: 1; }
+  .it-row.it-h { display: none; }
+  .it-total { margin-right: 0; }
+  .dl { grid-template-columns: 1fr; gap: 2px; }
+  .dl dd { margin-bottom: 8px; }
+  .reps { grid-template-columns: 1fr; }
+  .kpi b.money { font-size: 17px; }
+  .money.big { font-size: 22px; }
+  .atable td.r { text-align: right; }
+}
+@media (max-width: 860px) {
+  .atable tr.click:hover td { background: none; }
+  .atable tr.tot { background: var(--teal-5); }
+  .atable tr.tot td { background: none; }
+  .atable.budget tr { grid-template-columns: 1fr 1fr; }
+  .atable.budget td[data-l] { text-align: left; display: grid; }
+  .atable.budget td[data-l]::before { content: attr(data-l); font-size: 11.5px; color: var(--muted); font-weight: 500; }
+}
+@media (max-width: 860px) {
+  .reps { grid-template-columns: minmax(0, 1fr); }
+  .rep { min-width: 0; }
+  .rep .toolbar .in { min-width: 0; flex: 1 1 140px; }
+  .atable.mini thead { display: table-header-group; }
+  .atable.mini tr { display: table-row; padding: 0; }
+  .atable.mini td { display: table-cell; padding: 7px 8px; border-top: 1px solid var(--line); }
+}

@@ -196,6 +196,7 @@
     };
     if ($("aDel")) $("aDel").onclick = () => K.confirmBox(opts.delConfirm || "Hapus data ini?", opts.delLabel || "Hapus", opts.del);
   }
+  Object.assign(K, { formModal, field, readField });
   const saveReg = (reg, msg) => async row => { const j = await K.api("regSave", { reg, row }); K.toast(msg || "Tersimpan."); reload(); return j; };
   const delReg = (reg, id) => async () => { await K.api("regDelete", { reg, id }); K.toast("Dihapus."); reload(); };
   const header = (lead, btn) => '<div class="sec-h"><p class="muted" style="max-width:70ch">' + lead + "</p>" + (btn || "") + "</div>";

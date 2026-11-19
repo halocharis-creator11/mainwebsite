@@ -49,13 +49,14 @@
     trash: "M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14",
     edit: "M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z",
     alert: "M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z",
+    down: "M12 3v12M7 10l5 5 5-5M5 21h14",
     flag: "M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"
   };
   const ic = (n, cls) => '<svg class="' + (cls || "") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + P[n] + '"/></svg>';
 
   /* ---------- state ---------- */
   const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [], konten: [], hours: {}, summary: {} };
-  const EXPECTED = "2026-11-19-f34";
+  const EXPECTED = "2026-11-19-f5";
   const K = window.K = { S, esc, ic, ROLE, STATUS, STATUS_L, PRIO, PRIO_L, PSTATUS_L, MONTHS, MONTHS_L, views: {} };
 
   /* ---------- api ---------- */
@@ -239,20 +240,25 @@
     ];
     const more = [["administrasi", "Administrasi", "doc", r === "direktur" || r === "superadmin" ? S.summary.leave_pending : 0]];
     if (canSeeKonten()) more.unshift(["konten", "Alur konten", "flow", S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length]);
+    more.push(["keuangan", "Keuangan", "money", finCount()]);
     items.splice(3, 0, ...more);
-    const soon = [["Keuangan", "money"]];
+    const soon = [];
     const extra = [];
     if (r === "superadmin" || r === "direktur") extra.push(["pengguna", "Pengguna", "users"]);
     const a = (h, l, i, n) => '<a class="nav-a" href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>";
     $("railNav").innerHTML = items.map(x => a(...x)).join("") + soon.map(x => '<span class="nav-a soon">' + ic(x[1]) + "<span>" + x[0] + "</span><small>segera</small></span>").join("") + extra.map(x => a(...x)).join("");
     $("railFoot").innerHTML = (SEE_ALL.includes(r) ? '<a class="nav-a" href="../admin/">' + ic("web") + "<span>Konten website</span></a>" : "") +
       '<a class="nav-a" href="#/profil" data-r="profil">' + avatar(S.me.id, "sm") + "<span>" + esc(S.me.name) + "</span></a>";
-    const moreCnt = (canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0) + ((r === "direktur" || r === "superadmin") ? (S.summary.leave_pending || 0) : 0);
+    const moreCnt = finCount() + (canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0) + ((r === "direktur" || r === "superadmin") ? (S.summary.leave_pending || 0) : 0);
     $("tabbar").innerHTML = [["dasbor", "Dasbor", "dash"], ["proyek", "Proyek", "proj"], ["tugas", "Tugas", "task"], ["notifikasi", "Notifikasi", "bell", cnt], ["menu", "Menu", "list", moreCnt]]
       .map(([h, l, i, n]) => '<a href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>").join("");
     $("bellBtn").innerHTML = ic("bell") + '<span class="dot" id="bellCount"' + (cnt ? "" : " hidden") + ">" + cnt + "</span>";
     $("meBtn").outerHTML = '<a class="avatar me-av" id="meBtn" href="#/profil" aria-label="Profil" style="background:hsl(' + hue(S.me.id) + ' 32% 42%)">' + esc(initials(S.me.name)) + "</a>";
   }
+  /* finance items waiting for this person: requests to check, approve or pay, invoices due */
+  const finCount = () => { const s = S.summary || {}; return (s.req_check || 0) + (s.req_approve || 0) + (s.req_pay || 0) + (s.invoice_due || 0); };
+  const FIN_FULL = ["superadmin", "direktur", "bendahara"];
+  K.finFull = () => FIN_FULL.includes(S.me.role); K.finCount = finCount;
   const canSeeKonten = () => seesAll() || S.me.role === "peneliti" || S.konten.length > 0;
   const whoNow = k => (k.assignees || {})[k.stage] || k.owner_uid;
   Object.assign(K, { canSeeKonten, whoNow });
@@ -264,12 +270,12 @@
     v.innerHTML = '<a class="panel pad" href="#/profil" style="display:flex;gap:14px;align-items:center;margin-bottom:16px;text-decoration:none;color:inherit">' + avatar(S.me.id, "lg") + '<span style="flex:1;min-width:0"><b>' + esc(S.me.name) + '</b><br><span class="small muted">' + ROLE[r] + ", akun dan password</span></span></a>" +
       '<div class="panel">' + (canSeeKonten() ? row("#/konten", "flow", "Alur konten", "Repositori, berita, dan portofolio", konten) : "") +
       row("#/administrasi", "doc", "Administrasi", r === "konsultan" ? "Timesheet" : (SEE_ALL.includes(r) || r === "bendahara") ? "Surat, kontrak, rapat, cuti, timesheet, aset" : "Rapat, cuti, dan timesheet", (r === "direktur" || r === "superadmin") ? S.summary.leave_pending : 0) +
-      '<span class="trow" style="opacity:.55;cursor:default"><span class="nic">' + ic("money") + '</span><span><span class="t">Keuangan</span><span class="p">Segera hadir</span></span></span>' +
+      row("#/keuangan", "money", "Keuangan", FIN_FULL.includes(r) ? "Pengajuan dana, kas, anggaran, invoice, honorarium, laporan" : "Pengajuan dana dan honorarium Anda", finCount()) +
       (r === "superadmin" || r === "direktur" ? row("#/pengguna", "users", "Pengguna", "Akun dan peran tim") : "") +
       (SEE_ALL.includes(r) ? row("../admin/", "web", "Konten website", "Berita, portofolio, mitra, permintaan laporan") : "") + "</div>";
   }
   function setActive(r) {
-    if (["konten", "administrasi", "pengguna", "profil"].includes(r) && matchMedia("(max-width: 860px)").matches) r = "menu";
+    if (["konten", "administrasi", "keuangan", "pengguna", "profil"].includes(r) && matchMedia("(max-width: 860px)").matches) r = "menu";
     document.querySelectorAll("[data-r]").forEach(a => { if (a.dataset.r === r) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   }
   function setTop(title, back) {
@@ -293,6 +299,7 @@
     else if (parts[0] === "tugas") viewMine(v);
     else if (parts[0] === "konten" && K.pages.konten) K.pages.konten(v, q);
     else if (parts[0] === "administrasi" && K.pages.admin) K.pages.admin(v, parts[1] || "", q);
+    else if (parts[0] === "keuangan" && K.pages.keuangan) K.pages.keuangan(v, parts[1] || "", q);
     else if (parts[0] === "notifikasi") viewNotifications(v);
     else if (parts[0] === "pengguna") viewUsers(v);
     else if (parts[0] === "profil") viewProfile(v);
@@ -357,6 +364,11 @@
     if (s.leave_pending) rows.push(line("#/administrasi/cuti", "user", s.leave_pending + " pengajuan cuti menunggu persetujuan Anda", '<span class="due today">Tinjau</span>'));
     (s.contracts_ending || []).forEach(c => rows.push(line("#/administrasi/kontrak?id=" + c.id, "doc", esc(c.kind + ": " + c.title) + (c.party ? '<span class="p">' + esc(c.party) + "</span>" : ""), dueBadge(c.end, false))));
     S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).forEach(k => rows.push(line("#/konten?k=" + k.id, "flow", esc(k.title) + '<span class="p">Tahap: ' + esc(K.STAGE_L ? K.STAGE_L[k.stage] : k.stage) + "</span>", k.due ? dueBadge(k.due, false) : "")));
+    if (s.req_check) rows.push(line("#/keuangan/pengajuan?f=diajukan", "money", s.req_check + " pengajuan dana perlu diperiksa", '<span class="due today">Periksa</span>'));
+    if (s.req_approve) rows.push(line("#/keuangan/pengajuan?f=diperiksa", "money", s.req_approve + " pengajuan dana menunggu persetujuan Anda", '<span class="due today">Tinjau</span>'));
+    if (s.req_pay) rows.push(line("#/keuangan/pengajuan?f=disetujui", "money", s.req_pay + " pengajuan dana disetujui dan siap dibayar", '<span class="due today">Bayar</span>'));
+    if (s.invoice_due) rows.push(line("#/keuangan/invoice", "doc", s.invoice_due + " invoice jatuh tempo dalam 7 hari atau terlambat", '<span class="due soon">Cek</span>'));
+    if (s.my_req_open) rows.push(line("#/keuangan/pengajuan", "money", s.my_req_open + " pengajuan dana Anda sedang diproses", ""));
     if (s.my_leave_pending) rows.push(line("#/administrasi/cuti", "user", "Pengajuan cuti Anda sedang menunggu keputusan", ""));
     rows.push(line("#/administrasi/timesheet", "load", "Jam kerja tercatat minggu ini", '<span class="chip">' + fmtNum(s.week_hours || 0) + " jam</span>"));
     return '<section class="sec"><div class="sec-h"><h2>Perlu tindakan</h2></div><div class="panel todo">' + rows.join("") + "</div></section>";
@@ -765,6 +777,7 @@
       if (kind === "task") { const t = S.tasks.find(y => y.id === id); if (t) { location.hash = "#/proyek/" + t.project_id + "/papan?t=" + id; } else toast("Tugas ini sudah tidak tersedia.", true); }
       else if (kind === "project") location.hash = "#/proyek/" + id;
       else if (kind === "konten") { if (S.konten.find(y => y.id === id)) location.hash = "#/konten?k=" + id; else toast("Item ini sudah tidak tersedia.", true); }
+      else if (kind === "fin") location.hash = "#/keuangan/" + id + (x.link.split(":")[2] ? "?id=" + x.link.split(":")[2] : "");
       else if (kind === "admin") location.hash = "#/administrasi/" + id + (x.link.split(":")[2] ? "?id=" + x.link.split(":")[2] : "");
     }));
   }

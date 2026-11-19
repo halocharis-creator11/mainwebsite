@@ -14,7 +14,7 @@
  */
 
 /* Bump when this file changes; /kerja/ shows a notice when the Web App deployment is older. */
-const K_VERSION = '2026-11-19-f34';
+const K_VERSION = '2026-11-19-f5';
 const K_ROLES = ['superadmin', 'direktur', 'admin', 'bendahara', 'peneliti', 'konsultan'];
 const K_SEE_ALL = ['superadmin', 'direktur', 'admin'];          /* see every project */
 const K_SUPERADMIN_EMAIL = 'halo.charis@gmail.com';
@@ -119,6 +119,7 @@ function kerjaHarian() {
       });
     });
   });
+  try { kFinHarian_(today, have); } catch (e) { console.warn('kFinHarian_: ' + e.message); }
   /* tidy up: expired sessions and read notifications older than 90 days */
   const now = kNow_(), old = kAddDays_(today, -90);
   kDeleteWhere_('sessions', function (s) { return s.expires < now; });
@@ -160,6 +161,8 @@ function kerja_(b) {
     case 'regSave':        return kRegSave_(me, b.reg, b.row || {});
     case 'regDelete':      return kRegDelete_(me, b.reg, b.id);
     case 'leaveDecide':    return kLeaveDecide_(me, b.id, b.decision, b.note);
+    case 'finLoad': case 'finSave': case 'finDelete': case 'reqSave': case 'reqAction': case 'invoicePay': case 'honorPay':
+      return keuangan_(me, b);                                  /* Keuangan.gs */
     default:               return { ok: false, error: 'Perintah tidak dikenal.' };
   }
 }
@@ -538,7 +541,9 @@ function kSS_() {
   return SpreadsheetApp.openById(id);
 }
 function kSheet_(name) {
-  const ss = kSS_(), want = K_SCHEMA[name];
+  /* finance sheets (Keuangan.gs) live in their own spreadsheet */
+  const fin = typeof F_SCHEMA !== 'undefined' && F_SCHEMA[name];
+  const ss = fin ? kFinSS_() : kSS_(), want = K_SCHEMA[name] || F_SCHEMA[name];
   let sh = ss.getSheetByName(name);
   if (!sh) {
     sh = ss.insertSheet(name);
@@ -827,5 +832,6 @@ function kSummary_(me) {
     const monday = kAddDays_(today, -((new Date(today + 'T12:00:00Z').getUTCDay() + 6) % 7));
     out.week_hours = kRead_('timesheet').filter(function (h) { return h.uid === me.id && h.date >= monday && h.date <= today; }).reduce(function (a, h) { return a + (Number(h.hours) || 0); }, 0);
   } catch (e) { /* new sheets not ready yet */ }
+  try { Object.assign(out, kFinSummary_(me)); } catch (e) { /* finance not set up yet */ }
   return out;
 }
