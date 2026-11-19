@@ -224,3 +224,24 @@ Di panel admin, gunakan tombol **Muat ulang** untuk mengambil data terbaru. Perm
 - [ ] Unggah foto kegiatan asli untuk berita dan proyek (tanpa foto, website menampilkan tile motif balok)
 - [ ] Tambahkan profil tim, minimal 1 publikasi, dan logo mitra (dengan izin)
 - [ ] Uji formulir kontak dan pastikan email notifikasi masuk
+
+## Ruang Kerja (manajemen proyek internal)
+Alamat: `https://charisforhealth.org/kerja/` (tidak diindeks mesin pencari).
+
+**Pemasangan pertama**
+1. Di proyek Apps Script, klik tanda + di samping "Files", pilih "Script", beri nama `Kerja`, dan tempel isi `apps-script/Kerja.gs`. Perbarui juga `Code.gs`.
+2. Jalankan fungsi `siapkanRuangKerja` sekali. Fungsi ini membuat spreadsheet terpisah "CHARIS Ruang Kerja (internal)", pemicu harian pukul 06.00 WITA untuk pengingat tenggat, dan akun superadmin `halo.charis@gmail.com`. Password sementara tampil di log eksekusi.
+3. Terapkan > Kelola deployment > ikon pensil > Versi baru > Terapkan.
+4. Buka `/kerja/`, masuk dengan password sementara, lalu buat password baru.
+
+**Peran**
+- Superadmin: semua akses, kelola akun.
+- Direktur: semua proyek dan keuangan, menyetujui pengajuan.
+- Admin: semua proyek dan konten website.
+- Bendahara, peneliti: proyek yang diikuti.
+- Konsultan lepas: hanya proyeknya sendiri; hanya dapat memperbarui status, checklist, lampiran, dan komentar pada tugas miliknya.
+Akun dengan peran superadmin, direktur, atau admin juga dapat masuk ke panel konten website (`/admin/`) dengan email dan password yang sama.
+
+**Lupa password**: gunakan tautan "Lupa password?" (kode dikirim ke email). Superadmin dapat membuat password sementara baru dari menu Pengguna. Jika superadmin sendiri terkunci, jalankan `resetSuperadmin` di Apps Script.
+
+**Notifikasi** hanya tampil di aplikasi (lonceng), untuk penugasan, sebutan @nama di komentar, tenggat besok, dan tugas yang terlewat tenggat.

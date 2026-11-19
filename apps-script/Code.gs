@@ -45,7 +45,7 @@ const PROJECT_NAMED = ['client', 'funder', 'partners', 'official_title', 'locati
 const PROJECT_PUBLIC = { A: PROJECT_CORE.concat(PROJECT_NAMED, ['related_publications']), B: PROJECT_CORE.concat(PROJECT_NAMED), C: PROJECT_CORE };
 /* Bump when Code.gs changes. The admin panel compares it with the version it expects, so a stale
    Web App deployment (Code.gs edited but no new deployment version) is reported on screen. */
-const API_VERSION = '2026-11-19a';
+const API_VERSION = '2026-11-19b';
 
 /* Official CHARIS contact. Outgoing emails show the sender name CHARIS, set Reply-To to the main address,
    and end with this contact block, so every reply reaches the CHARIS inbox. */
@@ -287,6 +287,7 @@ function doPost(e) {
   try {
     const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     switch (body.action) {
+      case 'w':        return json_(kerja_(body));            /* Ruang Kerja, see Kerja.gs */
       case 'contact':  return json_(contact_(body));
       case 'subscribe': return json_(subscribe_(body));
       case 'authStatus': return json_(authStatus_());
@@ -441,6 +442,13 @@ function login_(email, password) {
   const cache = CacheService.getScriptCache();
   const fails = Number(cache.get('login_fails') || 0);
   if (fails >= 5) return { ok: false, error: 'Terlalu banyak percobaan. Coba lagi 15 menit lagi.' };
+  /* Ruang Kerja accounts with the superadmin, direktur or admin role may also manage website content */
+  try {
+    if (PROPS.getProperty('KERJA_SS_ID')) {
+      const wu = kCheckPassword_(email, password);
+      if (wu && K_SEE_ALL.indexOf(wu.role) >= 0) { cache.remove('login_fails'); return newSession_(); }
+    }
+  } catch (e) { /* workspace not reachable: fall back to the website superuser */ }
   const salt = PROPS.getProperty('ADMIN_SALT'), stored = PROPS.getProperty('ADMIN_HASH');
   if (!salt || !stored) return { ok: false, error: 'Akun superuser belum dibuat. Jalankan setup() di Apps Script, lalu buka halaman ini lagi.' };
   const adminEmail = String(PROPS.getProperty('ADMIN_EMAIL') || '').toLowerCase();

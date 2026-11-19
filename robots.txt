@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /kerja/
 
 Sitemap: https://charisforhealth.org/sitemap.xml
