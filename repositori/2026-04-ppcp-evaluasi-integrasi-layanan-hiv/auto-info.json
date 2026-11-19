@@ -1,8 +1,7 @@
 {
-  "source": "sampul.pdf",
-  "sha": "a5e7454f01c54f0a1e44f2c8eeed6608af1920c6",
-  "thumbOf": "auto-cover.jpg",
-  "thumbSha": "11ea18cd5c79c1a42bb5f37f7308e1a7696b21cd",
+  "v": 2,
+  "thumbOf": "sampul.jpg",
+  "thumbSha": "e91a8ad564e4249ee85b353b5f2f52eadcaac043",
   "previewOf": "pratinjau.pdf",
   "previewSha": "3289120bec85f5e710911e33995887d0eca4f0ac",
   "previewCount": 5
