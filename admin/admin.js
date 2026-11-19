@@ -5,7 +5,8 @@
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   let token = null;
-  try { token = sessionStorage.getItem("charis_token"); } catch (e) {}
+  /* one sign-in for the website admin and Ruang Kerja: a workspace session (localStorage) is reused here */
+  try { token = sessionStorage.getItem("charis_token") || localStorage.getItem("charis_ktoken"); } catch (e) {}
   let type = "inquiries", rows = [], editing = null;
 
   const SERVICE_OPTS = window.SERVICES.map(s => [s.key, s.id.t]);
@@ -155,7 +156,7 @@
     try {
       const r = await api({ action: setupMode ? "bootstrap" : "login", email: em, password: pw });
       if (!r.ok) throw new Error(r.error || "Gagal masuk");
-      token = r.token; try { sessionStorage.setItem("charis_token", token); } catch (err) {}
+      token = r.token; try { sessionStorage.setItem("charis_token", token); if (r.sso) localStorage.setItem("charis_ktoken", token); } catch (err) {}
       $("pw").value = ""; $("pw2").value = "";
       if (setupMode) toast("Akun superuser dibuat. Simpan password Anda di tempat aman.");
       setMode({ hasAdmin: true }); showApp(true); select("inquiries"); checkApi();
@@ -181,7 +182,9 @@
   });
   function logout(silent) {
     if (!silent && !DEMO) api({ action: "logout" }).catch(() => {});
-    token = null; try { sessionStorage.removeItem("charis_token"); } catch (e) {}
+    /* an explicit sign-out ends the shared session too; an expired or refused session only clears this page */
+    try { sessionStorage.removeItem("charis_token"); if (!silent) localStorage.removeItem("charis_ktoken"); } catch (e) {}
+    token = null;
     showApp(false);
   }
   $("logoutBtn").addEventListener("click", () => logout(false));
@@ -209,7 +212,7 @@
   $("reloadBtn").addEventListener("click", () => { if (type) select(type); });
 
   /* Warn when the live Web App still runs an older Code.gs (edited, but no new deployment version) */
-  const EXPECTED_API = "2026-11-19b";
+  const EXPECTED_API = "2026-11-19c";
   function checkApi() {
     if (DEMO) return;
     fetch(cfg.API_URL).then(r => r.json()).then(j => {

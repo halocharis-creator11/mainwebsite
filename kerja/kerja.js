@@ -142,7 +142,7 @@
   /* ============================================================
      GATE: sign in, first-time password, forgot password
      ============================================================ */
-  function signOutLocal() { token = null; try { localStorage.removeItem(TOKEN_KEY); } catch (e) {} clearInterval(pollT); }
+  function signOutLocal() { token = null; try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem("charis_token"); } catch (e) {} clearInterval(pollT); }
   function showGate(mode, msg) {
     $("app").hidden = true; $("gate").hidden = false; closeDrawer(true); closeModal();
     const b = $("gateBody"), note = msg ? '<p class="note warn">' + esc(msg) + "</p>" : "";
@@ -239,7 +239,7 @@
     if (r === "superadmin" || r === "direktur") extra.push(["pengguna", "Pengguna", "users"]);
     const a = (h, l, i, n) => '<a class="nav-a" href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>";
     $("railNav").innerHTML = items.map(x => a(...x)).join("") + soon.map(x => '<span class="nav-a soon">' + ic(x[1]) + "<span>" + x[0] + "</span><small>segera</small></span>").join("") + extra.map(x => a(...x)).join("");
-    $("railFoot").innerHTML = (SEE_ALL.includes(r) ? '<a class="nav-a" href="../admin/" target="_blank" rel="noopener">' + ic("web") + "<span>Konten website</span></a>" : "") +
+    $("railFoot").innerHTML = (SEE_ALL.includes(r) ? '<a class="nav-a" href="../admin/">' + ic("web") + "<span>Konten website</span></a>" : "") +
       '<a class="nav-a" href="#/profil" data-r="profil">' + avatar(S.me.id, "sm") + "<span>" + esc(S.me.name) + "</span></a>";
     $("tabbar").innerHTML = [["dasbor", "Dasbor", "dash"], ["proyek", "Proyek", "proj"], ["tugas", "Tugas", "task"], ["notifikasi", "Notifikasi", "bell", cnt], ["profil", "Akun", "user"]]
       .map(([h, l, i, n]) => '<a href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>").join("");
@@ -747,7 +747,7 @@
   function viewProfile(v) {
     setTop("Akun saya");
     v.innerHTML = '<div class="panel pad" style="display:flex;gap:16px;align-items:center;margin-bottom:20px;flex-wrap:wrap">' + avatar(S.me.id, "lg") + '<div style="flex:1;min-width:200px"><b style="font-size:17px">' + esc(S.me.name) + '</b><br><span class="muted">' + esc(S.me.email) + '</span></div><span class="role ' + S.me.role + '">' + ROLE[S.me.role] + "</span></div>" +
-      (SEE_ALL.includes(S.me.role) ? '<a class="panel pad" href="../admin/" target="_blank" rel="noopener" style="display:flex;gap:12px;align-items:center;margin-bottom:20px;text-decoration:none">' + ic("web") + "<span><b>Konten website</b><br><span class=\"small muted\">Berita, portofolio, mitra, permintaan laporan. Masuk dengan email dan password yang sama.</span></span></a>" : "") +
+      (SEE_ALL.includes(S.me.role) ? '<a class="panel pad" href="../admin/" style="display:flex;gap:12px;align-items:center;margin-bottom:20px;text-decoration:none">' + ic("web") + "<span><b>Konten website</b><br><span class=\"small muted\">Berita, portofolio, mitra, dan permintaan laporan. Terbuka langsung tanpa masuk ulang.</span></span></a>" : "") +
       '<section class="panel pad" style="margin-bottom:20px"><h2 style="font-size:16px;margin-bottom:14px">Ganti password</h2><form id="pwForm" style="display:grid;gap:12px;max-width:420px" novalidate>' +
       '<label class="field"><span>Password saat ini</span><input class="in" type="password" id="pCur" autocomplete="current-password"></label>' +
       '<label class="field"><span>Password baru</span><input class="in" type="password" id="pNew" autocomplete="new-password"><small class="muted">Minimal 10 karakter, berisi huruf dan angka.</small></label>' +

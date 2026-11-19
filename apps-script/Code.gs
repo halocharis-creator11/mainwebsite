@@ -45,7 +45,7 @@ const PROJECT_NAMED = ['client', 'funder', 'partners', 'official_title', 'locati
 const PROJECT_PUBLIC = { A: PROJECT_CORE.concat(PROJECT_NAMED, ['related_publications']), B: PROJECT_CORE.concat(PROJECT_NAMED), C: PROJECT_CORE };
 /* Bump when Code.gs changes. The admin panel compares it with the version it expects, so a stale
    Web App deployment (Code.gs edited but no new deployment version) is reported on screen. */
-const API_VERSION = '2026-11-19b';
+const API_VERSION = '2026-11-19c';
 
 /* Official CHARIS contact. Outgoing emails show the sender name CHARIS, set Reply-To to the main address,
    and end with this contact block, so every reply reaches the CHARIS inbox. */
@@ -293,8 +293,8 @@ function doPost(e) {
       case 'authStatus': return json_(authStatus_());
       case 'bootstrap': return json_(bootstrap_(body));
       case 'login':    return json_(login_(body.email, body.password));
-      case 'changePassword': requireAuth_(body.token); return json_(changePassword_(body));
-      case 'logout':   requireAuth_(body.token); CacheService.getScriptCache().remove('s_' + body.token); return json_({ ok: true });
+      case 'changePassword': requireAuth_(body.token); return json_(adminChangePassword_(body));
+      case 'logout':   requireAuth_(body.token); return json_(adminLogout_(body.token));
       case 'adminList': requireAuth_(body.token); return json_({ ok: true, data: readAll_(checkType_(body.type)).map(function (r) { delete r.code_hash; delete r.code_salt; return r; }) });
       case 'save':     requireAuth_(body.token); return json_({ ok: true, data: save_(checkType_(body.type), body.row) });
       case 'delete':   requireAuth_(body.token); remove_(checkType_(body.type), body.id); return json_({ ok: true });
@@ -417,7 +417,8 @@ function storePassword_(password) {
 
 /* tells the admin page whether to show "create superuser" or the normal login */
 function authStatus_() {
-  const exists = !!PROPS.getProperty('ADMIN_HASH');
+  /* Ruang Kerja accounts can also sign in here, so the normal login is shown once the workspace exists */
+  const exists = !!PROPS.getProperty('ADMIN_HASH') || !!PROPS.getProperty('KERJA_SS_ID');
   return { ok: true, hasAdmin: exists, setupOpen: !exists && setupOpen_() };
 }
 
@@ -446,7 +447,8 @@ function login_(email, password) {
   try {
     if (PROPS.getProperty('KERJA_SS_ID')) {
       const wu = kCheckPassword_(email, password);
-      if (wu && K_SEE_ALL.indexOf(wu.role) >= 0) { cache.remove('login_fails'); return newSession_(); }
+      /* one sign-in for both: the workspace session token also opens /kerja/ */
+      if (wu && K_SEE_ALL.indexOf(wu.role) >= 0) { cache.remove('login_fails'); kUpdate_('users', wu.id, { last_login: kNow_() }); return { ok: true, token: kNewSession_(wu.id), hours: K_SESSION_DAYS * 24, sso: true }; }
     }
   } catch (e) { /* workspace not reachable: fall back to the website superuser */ }
   const salt = PROPS.getProperty('ADMIN_SALT'), stored = PROPS.getProperty('ADMIN_HASH');
@@ -473,7 +475,24 @@ function changePassword_(b) {
 }
 
 function requireAuth_(token) {
-  if (!token || !CacheService.getScriptCache().get('s_' + token)) throw new Error('AUTH');
+  if (token && CacheService.getScriptCache().get('s_' + token)) return null;
+  const u = wsAdmin_(token);
+  if (u) return u;
+  throw new Error('AUTH');
+}
+/* a Ruang Kerja session of a superadmin, direktur or admin also opens the website admin panel */
+function wsAdmin_(token) {
+  if (!token || !PROPS.getProperty('KERJA_SS_ID')) return null;
+  try { kMemo_ = {}; const u = kAuth_(token); return u && K_SEE_ALL.indexOf(u.role) >= 0 ? u : null; } catch (e) { return null; }
+}
+function adminLogout_(token) {
+  CacheService.getScriptCache().remove('s_' + token);
+  if (wsAdmin_(token)) { kDeleteWhere_('sessions', function (s) { return s.id === hash_(String(token)); }); CacheService.getScriptCache().remove('k_' + hash_(String(token))); }
+  return { ok: true };
+}
+function adminChangePassword_(b) {
+  const u = wsAdmin_(b.token);
+  return u ? kChangePassword_(u, b) : changePassword_(b);
 }
 
 /* ============================================================

@@ -230,9 +230,10 @@ Alamat: `https://charisforhealth.org/kerja/` (tidak diindeks mesin pencari).
 
 **Pemasangan pertama**
 1. Di proyek Apps Script, klik tanda + di samping "Files", pilih "Script", beri nama `Kerja`, dan tempel isi `apps-script/Kerja.gs`. Perbarui juga `Code.gs`.
-2. Jalankan fungsi `siapkanRuangKerja` sekali. Fungsi ini membuat spreadsheet terpisah "CHARIS Ruang Kerja (internal)", pemicu harian pukul 06.00 WITA untuk pengingat tenggat, dan akun superadmin `halo.charis@gmail.com`. Password sementara tampil di log eksekusi.
-3. Terapkan > Kelola deployment > ikon pensil > Versi baru > Terapkan.
-4. Buka `/kerja/`, masuk dengan password sementara, lalu buat password baru.
+2. Ganti isi file manifes `appsscript.json` dengan `apps-script/appsscript.json` (Ruang Kerja butuh izin membuat spreadsheet dan pemicu harian).
+3. Jalankan fungsi `siapkanRuangKerja` sekali. Fungsi ini membuat spreadsheet terpisah "CHARIS Ruang Kerja (internal)", pemicu harian pukul 06.00 WITA untuk pengingat tenggat, dan akun superadmin `halo.charis@gmail.com`. Password sementara tampil di log eksekusi.
+4. Terapkan > Kelola deployment > ikon pensil > Versi baru > Terapkan.
+5. Buka `/kerja/`, masuk dengan password sementara, lalu buat password baru.
 
 **Peran**
 - Superadmin: semua akses, kelola akun.
