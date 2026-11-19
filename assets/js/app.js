@@ -4,7 +4,8 @@
   /* official contact: CONTACT_EMAILS / CONTACT_PHONE in config.js, with the CHARIS defaults as fallback */
   const CONTACT_DEFAULT = { emails: ["halo@charisforhealth.org", "halo.charis@gmail.com"], phone: "+62 859-3520-1571" };
   const isReal = v => typeof v === "string" && v.trim() && !/^\[/.test(v.trim());
-  const contactEmails = () => { const a = (Array.isArray(cfg.CONTACT_EMAILS) ? cfg.CONTACT_EMAILS : []).filter(isReal); return a.length ? a : CONTACT_DEFAULT.emails; };
+  /* the public site shows one address only; the second inbox stays for internal use */
+  const contactEmails = () => { const a = (Array.isArray(cfg.CONTACT_EMAILS) ? cfg.CONTACT_EMAILS : []).filter(isReal); return (a.length ? a : CONTACT_DEFAULT.emails).slice(0, 1); };
   const contactPhone = () => (Array.isArray(cfg.CONTACT_EMAILS) && isReal(cfg.CONTACT_PHONE) ? cfg.CONTACT_PHONE : CONTACT_DEFAULT.phone);
   const mailLinks = sep => contactEmails().map(e => '<a href="mailto:' + esc(e) + '">' + esc(e) + "</a>").join(sep || "<br>");
   const phoneLinks = () => { const p = contactPhone(), d = p.replace(/[^0-9+]/g, ""), w = d.replace(/^\+/, "");
@@ -46,7 +47,8 @@
   const byDate = (a, b) => addedKey(b).localeCompare(addedKey(a)) || String(b.date || "").localeCompare(String(a.date || ""));
   const isNew = it => { const d = new Date(addedKey(it)); return !isNaN(d) && Date.now() - d.getTime() < 30 * 864e5; };
   const isTrue = v => v === true || String(v).toUpperCase() === "TRUE";
-  const svc = key => SV.find(x => x.key === key);
+  const svcKey = k => (window.svcKey ? window.svcKey(k) : k);
+  const svc = key => SV.find(x => x.key === svcKey(key));
   const serviceName = key => { const s = svc(key); return s ? s[lang].t : (key || ""); };
   const shape = p => '<span class="shape sh-' + p + '" aria-hidden="true"></span>';
   const svgI = d => '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + "</svg>";
@@ -313,7 +315,13 @@
   }
 
   const steps = () => '<ol class="steps">' + [1, 2, 3, 4].map(i => "<li><h3>" + esc(t("step" + i + ".t")) + "</h3><p>" + esc(t("step" + i + ".d")) + "</p></li>").join("") + "</ol>";
-  const PILLARS = ["a", "r", "s", "c"];
+  const PILLARS = ["a", "r", "s"];
+  /* home page: the three fields side by side, each with its list of services (plain text, separated by rules) */
+  const fields = () => '<div class="fields">' + PILLARS.map(p => {
+    const list = SV.filter(s => s.pillar === p);
+    return '<section class="field-col" aria-labelledby="fh-' + p + '"><header class="field-h">' + shape(p) + '<h3 id="fh-' + p + '">' + esc(t("p." + p + ".t")) + '</h3></header><p class="field-d">' + esc(t("p." + p + ".d")) + "</p>" +
+      '<ol class="field-list">' + list.map(s => '<li><a href="#/services" data-pillar="' + s.key + '">' + esc(s[lang].t) + "</a></li>").join("") + "</ol></section>";
+  }).join("") + '</div><p class="fields-more"><a class="btn-text" href="#/services">' + esc(t("work.fields")) + "</a></p>";
   const pillars = (withLink, keys) => '<ul class="pillars' + ((keys || PILLARS).length === 4 ? " pillars-4" : "") + '">' + (keys || PILLARS).map(p => '<li class="pillar">' + (keys ? shape(p) : pillarIcon(p)) + "<h3>" + esc(t("p." + p + ".t")) + "</h3><p>" + esc(t("p." + p + ".d")) + "</p>" +
     (withLink ? '<ul class="pl-svcs">' + SV.filter(s => s.pillar === p).map(s => '<li class="hov"><a href="#/services" data-pillar="' + s.key + '">' + svcIcon(s.key) + "<span>" + esc(s[lang].t) + "</span></a></li>").join("") + "</ul>" +
       '<a href="#/services" data-pillar="' + p + '">' + esc(t("more")) + "</a>" : "") + "</li>").join("") + "</ul>";
@@ -323,10 +331,8 @@
     home() {
       app.innerHTML =
         '<section class="slider" id="slider" aria-roledescription="carousel" aria-label="CHARIS"></section>' +
-        '<section class="highlight"><div class="wrap hl-in"><div class="hl-media">' + (photo("highlight") ? '<figure><img src="' + esc(API.img(photo("highlight").src, 1400)) + '" alt="' + esc(photo("highlight").alt || "") + '" decoding="async">' + credit(photo("highlight")) + "</figure>" : tile("highlight", true)) + '</div><div class="hl-copy"><h2>' + esc(t("hl.t")) + "</h2><p>" + esc(t("hl.d")) + "</p>" +
-        '<div class="actions"><a class="btn" href="#/contact">' + esc(t("hl.cta")) + '</a><a class="btn-text" href="#/services" data-pillar="a">' + esc(t("hl.cta2")) + "</a></div></div></div></section>" +
         '<section class="sec"><div class="wrap">' + secHead(t("latest.t"), "#/latest") + '<div id="homeLatest"></div></div></section>' +
-        '<section class="sec sec-tint"><div class="wrap">' + secHead(t("work.t"), "#/work") + '<p class="sec-lead">' + esc(t("work.lead")) + "</p>" + pillars(true) + "</div></section>" +
+        '<section class="sec sec-tint"><div class="wrap">' + secHead(t("work.t"), "#/work") + '<p class="sec-lead">' + esc(t("work.lead")) + "</p>" + fields() + "</div></section>" +
         '<section class="sec"><div class="wrap team-sec"><div class="team-intro">' + secHead(t("team.t"), "#/team") + "<p>" + esc(t("team.lead")) + '</p></div><div id="homeTeam"></div></div></section>' +
         '<section class="sec partners-sec"><div class="wrap">' + secHead(t("partners.t")) + '<div id="partners" class="partners"></div></div></section>' +
         '<section class="sec exp-sec"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p></div><div id="experience" class="experience"></div><div class="wrap"><p class="exp-foot" id="expFoot"></p></div></section>' +
@@ -336,9 +342,13 @@
 
     about() {
       app.innerHTML = pageTop(t("about.t")) + banner("about") +
-        '<section class="sec"><div class="wrap about"><div class="prose"><p class="big">' + esc(t("about.lead")) + "</p><p>" + esc(t("about.p2")) + "</p><p>" + esc(t("about.p3")) + "</p></div>" +
-        '<aside class="vm"><h2>' + esc(t("about.vision")) + "</h2><p>" + esc(t("about.vision.d")) + "</p><h2>" + esc(t("about.mission")) + "</h2><ol>" +
-        [1, 2, 3].map(i => "<li>" + esc(t("mis" + i)) + "</li>").join("") + "</ol></aside></div></section>" +
+        '<section class="sec"><div class="wrap ab-profile"><p class="ab-k">' + esc(t("about.profile")) + '</p><div class="prose ab-prose"><p class="big">' + esc(t("about.lead")) + "</p><p>" + esc(t("about.p2")) + "</p><p>" + esc(t("about.p3")) + "</p><p>" + esc(t("about.p4")) + "</p>" +
+        '<p class="ab-home">' + esc(t("about.home")) + "</p></div></div></section>" +
+        '<section class="sec sec-tint"><div class="wrap ab-vision"><p class="ab-k">' + esc(t("about.vision")) + '</p><p class="ab-vision-t">' + esc(t("about.vision.d")) + "</p></div></section>" +
+        '<section class="sec"><div class="wrap"><div class="ab-row"><p class="ab-k">' + esc(t("about.mission")) + '</p><ol class="ab-mis">' +
+        [1, 2, 3, 4, 5, 6, 7].map(i => "<li><p><b>" + esc(t("mis" + i + ".b")) + "</b> " + esc(t("mis" + i)) + "</p></li>").join("") + "</ol></div></div></section>" +
+        '<section class="sec ab-vals-sec"><div class="wrap"><div class="ab-row"><p class="ab-k">' + esc(t("about.values")) + '</p><ul class="ab-vals">' +
+        [1, 2, 3, 4, 5, 6].map(i => '<li><h3 lang="en">' + esc(t("val" + i + ".t")) + "</h3><p>" + esc(t("val" + i + ".d")) + "</p></li>").join("") + "</ul></div></div></section>" +
         '<section class="sec sec-tint"><div class="wrap logo-mean"><img src="assets/img/logo-symbol.svg" alt="" width="160" height="160"><div><h2>' + esc(t("about.logo")) + "</h2>" + pillars(false, ["a", "r", "s"]) + "</div></div></section>" +
         '<section class="sec" id="experience-all"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p><div id="expGrid"></div><p class="exp-note">' + esc(t("exp.note")) + "</p></div></section>" +
         '<section class="sec sec-tint"><div class="wrap">' + secHead(t("steps.t")) + steps() + "</div></section>" + newsletter();
@@ -350,18 +360,19 @@
     },
 
     async services(focus) {
-      const jump = '<nav class="svc-jump" aria-label="' + esc(t("svc.jump")) + '"><div class="wrap"><ul>' + SV.map(s => '<li><a href="#/services" data-svc-jump="' + s.key + '">' + svcIcon(s.key, "ic-mini") + "<span>" + esc(s[lang].t) + "</span></a></li>").join("") + "</ul></div></nav>";
+      const jump = '<nav class="svc-jump" aria-label="' + esc(t("svc.jump")) + '"><div class="wrap"><ul>' + PILLARS.map(p => '<li class="sj-g">' + shape(p) + "<span>" + esc(t("p." + p + ".t")) + "</span></li>" +
+        SV.filter(s => s.pillar === p).map(s => '<li><a href="#/services" data-svc-jump="' + s.key + '"><span>' + esc(s[lang].t) + "</span></a></li>").join("")).join("") + "</ul></div></nav>";
       app.innerHTML = pageTop(t("work.t"), t("work.page.lead")) + banner("services") + jump +
         '<section class="sec svc-sec"><div class="wrap">' + PILLARS.map(p =>
-          '<section class="pgroup2" id="pillar-' + p + '"><header class="pgroup2-head">' + pillarIcon(p) + "<div><p class=\"pg-kicker\">" + esc(t("svc.pillar")) + '</p><h2>' + esc(t("p." + p + ".t")) + "</h2><p>" + esc(t("p." + p + ".d")) + "</p></div></header>" +
+          '<section class="pgroup2" id="pillar-' + p + '"><header class="pgroup2-head">' + shape(p) + "<div><p class=\"pg-kicker\">" + esc(t("svc.pillar")) + '</p><h2>' + esc(t("p." + p + ".t")) + "</h2><p>" + esc(t("p." + p + ".d")) + "</p></div></header>" +
           SV.filter(s => s.pillar === p).map(s =>
-            '<article class="svc" id="svc-' + s.key + '"><div class="svc-main"><div class="svc-head"><span class="ic-tile ic-tile-' + s.pillar + '">' + svcIcon(s.key) + "</span><h3>" + esc(s[lang].t) + "</h3></div><p>" + esc(s[lang].d) + '</p><p class="svc-label">' + esc(t("svc.scope")) + '</p><ul class="svc-scope">' + s[lang].items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
+            '<article class="svc" id="svc-' + s.key + '"><div class="svc-main"><div class="svc-head"><h3>' + esc(s[lang].t) + "</h3></div><p>" + esc(s[lang].d) + '</p><p class="svc-label">' + esc(t("svc.scope")) + '</p><ul class="svc-scope">' + s[lang].items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
             '<p class="svc-links"><a class="btn-text" href="#/research" data-svc-repo="' + s.key + '">' + esc(t("svc.allRepo")) + '</a><a class="btn-text" href="#/projects" data-svc-proj="' + s.key + '">' + esc(t("svc.projects")) + "</a></p></div>" +
             '<div class="svc-out"><p class="svc-label">' + esc(t("svc.outputs")) + '</p><ol class="out-list">' + (s[lang].outputs || []).map(o => "<li><span>" + esc(o[0]) + "</span>" + (o[1] ? "<small>" + esc(o[1]) + "</small>" : "") + "</li>").join("") + "</ol></div>" +
             '<div class="svc-ex" data-ex="' + s.key + '"><p class="svc-label">' + esc(t("svc.examples")) + '</p><div class="ex-row">' + msg("loading") + "</div></div></article>").join("") +
           "</section>").join("") + "</div></section>" +
         '<section class="sec sec-tint"><div class="wrap">' + secHead(t("steps.t")) + steps() + '<p class="cta-line"><a class="btn" href="#/contact">' + esc(t("svc.ask")) + "</a></p></div></section>";
-      const target = focus && (document.getElementById("svc-" + focus) || document.getElementById("pillar-" + focus));
+      const target = focus && (document.getElementById("svc-" + svcKey(focus)) || document.getElementById("pillar-" + focus));
       if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
       app.querySelector(".svc-jump").addEventListener("click", e => {
         const a = e.target.closest("[data-svc-jump]"); if (!a) return; e.preventDefault();
@@ -379,7 +390,7 @@
       let repo = [];
       try { repo = await API.repo(); } catch (e) { /* show empty states */ }
       app.querySelectorAll("[data-ex]").forEach(box => {
-        const items = repo.filter(r => r.service === box.dataset.ex).sort((a, b) => b.sort_date.localeCompare(a.sort_date)).slice(0, 3);
+        const items = repo.filter(r => svcKey(r.service) === box.dataset.ex).sort((a, b) => b.sort_date.localeCompare(a.sort_date)).slice(0, 3);
         box.querySelector(".ex-row").innerHTML = items.length ? items.map(r =>
           '<div class="ex">' + '<div class="ex-cover">' + coverBox(r.thumb || r.cover, r.cover, f(r, "title"), r.id, r) + '</div><div class="ex-body"><p class="card-meta"><span class="card-cat">' + esc(typeLabel(r)) + "</span><time>" + fmtDate(r.date_published) + "</time></p>" +
           '<h4><a href="' + esc(r.url) + '">' + esc(f(r, "title")) + '</a></h4><p class="ex-act">' + (hasFlip(r) ? '<button type="button" class="link-btn"' + flipAttrs(r) + ">" + esc(t("flip.open").replace("{n}", r.preview.length)) + "</button>" : "") + '<a href="' + esc(r.url) + '">' + esc(t("repo.read")) + "</a></p></div></div>").join("")
@@ -565,7 +576,7 @@
       if (!rows) { kpiHost.innerHTML = errMsg(); return; }
       rows.sort((a, b) => String(b.date || b.year_start || "").localeCompare(String(a.date || a.year_start || "")));
       const nowY = new Date().getFullYear();
-      const PCOL = { a: "#0E5A55", r: "#2D6A8E", s: "#5E8C4A", c: "#E8833A" };
+      const PCOL = { a: "#0E5A55", r: "#6E9C99", s: "#32736E" };
       const svcColor = k => { const s = svc(k); return s ? PCOL[s.pillar] : "#6E9C99"; };
       const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + (lang === "en" ? " to " : " sampai ") + r.year_end : (r.year_start || r.year_end || "");
       const roleLabel = v => { const k = "role." + v, x = t(k); return x === k ? v : x; };
@@ -589,7 +600,7 @@
       });
       const regionsHit = Object.keys(regCount).length;
 
-      /* ---------- KPI tiles ---------- */
+      /* ---------- summary line under the page title: plain figures separated by rules ---------- */
       const tim = (partners || []).filter(p => String(p.relation || "tim") === "tim");
       const svcKeys = [...new Set(rows.map(r => r.service).filter(Boolean))];
       const sdgs = {};
@@ -597,58 +608,60 @@
         const m = /(\d{1,2})(?:\.(\w+))?/.exec(x); if (!m) return;
         const g = Number(m[1]); (sdgs[g] = sdgs[g] || new Set()); if (m[2]) sdgs[g].add(m[1] + "." + m[2]);
       }));
-      const kpi = (n, label, sub, href) => '<li class="pf-kpi">' + (href ? '<a href="' + href + '">' : "<div>") + '<b data-count="' + n + '">' + (typeof n === "number" ? nf(n) : esc(n)) + "</b><span>" + esc(label) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + (href ? "</a>" : "</div>") + "</li>";
-      const kpis = '<ul class="pf-kpis">' +
-        kpi(rows.length, t("pf.k.projects"), rows.some(r => /sebelum CHARIS/i.test(r.role || "")) ? t("pf.k.projects.s") : "") +
-        kpi(svcKeys.length, t("pf.k.services"), t("pf.k.services.s").replace("{n}", SV.length)) +
-        kpi(national ? t("pf.k.national") : regionsHit, t("pf.k.regions"), national ? t("pf.k.regions.n").replace("{n}", regionsHit) : t("pf.k.regions.s")) +
-        kpi(repo.length, t("pf.k.products"), t("pf.k.products.s"), "#/research") +
-        (tim.length ? kpi(tim.length, t("pf.k.partners"), t("pf.k.partners.s"), "#/about") : "") + "</ul>";
+      const fig = (n, label, sub, href) => '<li class="lg">' + (href ? '<a href="' + href + '">' : "<div>") + "<b>" + (typeof n === "number" ? nf(n) : esc(n)) + "</b><span>" + esc(label) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + (href ? "</a>" : "</div>") + "</li>";
+      const regSub = national ? (regionsHit ? t("pf.k.regions.n").replace("{n}", regionsHit) : "") : t("pf.k.regions.s");
+      const kpis = '<ul class="pf-ledger">' +
+        fig(rows.length, t("pf.k.projects"), rows.some(r => /sebelum CHARIS/i.test(r.role || "")) ? t("pf.k.projects.s") : "") +
+        fig(svcKeys.length, t("pf.k.services"), t("pf.k.services.s").replace("{n}", SV.length)) +
+        fig(national ? t("pf.k.national") : regionsHit, t("pf.k.regions"), regSub) +
+        fig(repo.length, t("pf.k.products"), t("pf.k.products.s"), "#/research") +
+        (tim.length ? fig(tim.length, t("pf.k.partners"), t("pf.k.partners.s"), "#/about") : "") + "</ul>";
 
-      /* ---------- chart 1: projects by service line (bars, click to filter) ---------- */
-      const bySvc = SV.map(s => ({ k: s.key, n: rows.filter(r => r.service === s.key).length })).filter(x => x.n).sort((a, b) => b.n - a.n);
-      const maxS = Math.max(1, ...bySvc.map(x => x.n));
-      const chartSvc = '<div class="pf-card"><h3>' + esc(t("pf.c.svc")) + '</h3><ul class="pf-bars">' + bySvc.map(x =>
-        '<li><button type="button" data-pf-svc="' + x.k + '"><span class="pf-bar-l">' + svcIcon(x.k, "ic-mini") + "<span>" + esc(serviceName(x.k)) + '</span></span><span class="pf-bar-t"><i style="width:' + Math.max(8, x.n / maxS * 100) + "%;background:" + svcColor(x.k) + '"></i><b>' + x.n + "</b></span></button></li>").join("") +
-        '</ul><p class="pf-hint">' + esc(t("pf.c.svc.h")) + "</p></div>";
+      /* ---------- projects by field and service line (rows, click to filter) ---------- */
+      const PC = { a: "#0E5A55", r: "#6E9C99", s: "#32736E" };
+      const total = Math.max(1, rows.length);
+      const bar = (n, max, col) => '<span class="pd-bar"><i style="width:' + Math.max(3, n / max * 100).toFixed(1) + "%;background:" + col + '"></i></span>';
+      const maxS = Math.max(1, ...SV.map(s => rows.filter(r => r.service === s.key).length));
+      const bySvc = PILLARS.map(p => {
+        const list = SV.filter(s => s.pillar === p).map(s => ({ k: s.key, n: rows.filter(r => r.service === s.key).length })).filter(x => x.n).sort((a, b) => b.n - a.n);
+        if (!list.length) return "";
+        return '<div class="pd-group"><p class="pd-gh">' + shape(p) + "<span>" + esc(t("p." + p + ".t")) + "</span><b>" + list.reduce((a, x) => a + x.n, 0) + "</b></p><ul>" +
+          list.map(x => '<li><button type="button" data-pf-svc="' + x.k + '"><span class="pd-name">' + esc(serviceName(x.k)) + "</span>" + bar(x.n, maxS, PC[p]) + '<b class="pd-n">' + x.n + "</b></button></li>").join("") + "</ul></div>";
+      }).join("");
+      const chartSvc = '<section class="pd-block"><h3>' + esc(t("pf.c.svc")) + "</h3>" + bySvc + '<p class="pf-hint">' + esc(t("pf.c.svc.h")) + "</p></section>";
 
-      /* ---------- chart 2: timeline ---------- */
+      /* ---------- client types: ranked rows instead of a donut ---------- */
+      const ct = {}; rows.forEach(r => { const k = r.client_type || t("pf.other"); ct[k] = (ct[k] || 0) + 1; });
+      const ctl = Object.entries(ct).sort((a, b) => b[1] - a[1]), maxC = Math.max(1, ...ctl.map(x => x[1]));
+      const chartClient = '<section class="pd-block"><h3>' + esc(t("pf.c.client")) + '</h3><ul class="pd-rows">' +
+        ctl.map(([k, n]) => '<li><span class="pd-name">' + esc(k) + "</span>" + bar(n, maxC, "#0E5A55") + '<b class="pd-n">' + n + '</b><small class="pd-pc">' + Math.round(n / total * 100) + "%</small></li>").join("") + "</ul></section>";
+
+      /* ---------- timeline: one thin line per project on a year ruler ---------- */
       const ys = rows.map(r => Number(r.year_start)).filter(Boolean), ye = rows.map(r => Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start))).filter(Boolean);
       const y0 = Math.min(nowY, ...ys), y1 = Math.max(nowY, ...ye, y0), span = y1 - y0 + 1;
       const tl = rows.filter(r => r.year_start).slice().sort((a, b) => String(a.year_start).localeCompare(String(b.year_start)));
-      const chartTl = '<div class="pf-card pf-card-wide"><h3>' + esc(t("pf.c.tl")) + '</h3><div class="pf-tl" style="--span:' + span + '">' +
-        '<div class="pf-tl-axis"><span></span>' + Array.from({ length: span }, (_, i) => "<span>" + (y0 + i) + "</span>").join("") + "</div>" +
+      const chartTl = '<section class="pd-block pd-wide"><h3>' + esc(t("pf.c.tl")) + '</h3><div class="pd-tl" style="--span:' + span + '">' +
+        '<div class="pd-tl-axis"><span></span><span class="pd-tl-years">' + Array.from({ length: span }, (_, i) => "<span>" + (y0 + i) + "</span>").join("") + "</span></div>" +
         tl.map(r => {
           const a = Number(r.year_start), b = Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start));
-          const left = (a - y0) / span * 100, width = (b - a + 1) / span * 100;
-          return '<a class="pf-tl-row" href="#pj-' + esc(r.id) + '" data-pf-jump="' + esc(r.id) + '"><span class="pf-tl-name">' + esc(f(r, "title")) + '</span><span class="pf-tl-track"><i class="' + (r.status === "berjalan" ? "on" : "") + '" style="left:' + left + "%;width:" + width + "%;background:" + svcColor(r.service) + '"><em>' + esc(years(r)) + "</em></i></span></a>";
-        }).join("") + '</div><p class="pf-legend"><span><i class="sw"></i>' + esc(t("proj.st.selesai")) + '</span><span><i class="sw on"></i>' + esc(t("proj.st.berjalan")) + "</span></p></div>";
+          const left = (a - y0) / span * 100, width = (b - a + 1) / span * 100, s = svc(r.service);
+          return '<a class="pd-tl-row" href="#pj-' + esc(r.id) + '" data-pf-jump="' + esc(r.id) + '"><span class="pd-tl-name">' + esc(f(r, "title")) + '<small>' + esc(years(r)) + (r.status === "berjalan" ? ", " + esc(t("proj.st.berjalan")).toLowerCase() : "") + '</small></span><span class="pd-tl-track"><i class="' + (r.status === "berjalan" ? "on" : "") + '" style="left:' + left + "%;width:" + width + "%;--c:" + (s ? PC[s.pillar] : "#6E9C99") + '"></i></span></a>';
+        }).join("") + "</div></section>";
 
-      /* ---------- chart 4: client types (donut) ---------- */
-      const ct = {}; rows.forEach(r => { const k = r.client_type || t("pf.other"); ct[k] = (ct[k] || 0) + 1; });
-      const ctl = Object.entries(ct).sort((a, b) => b[1] - a[1]);
-      const DC = ["#0E5A55", "#E8833A", "#2D6A8E", "#5E8C4A", "#8C6BB1", "#B4364A", "#6E9C99"];
-      let acc = 0; const C = 2 * Math.PI * 42;
-      const donut = '<div class="pf-card"><h3>' + esc(t("pf.c.client")) + '</h3><div class="pf-donut"><svg viewBox="0 0 120 120" role="img" aria-label="' + esc(t("pf.c.client")) + '"><circle cx="60" cy="60" r="42" fill="none" stroke="#EDF2F0" stroke-width="16"/>' +
-        ctl.map(([k, n], i) => { const len = n / rows.length * C; const s = '<circle cx="60" cy="60" r="42" fill="none" stroke="' + DC[i % DC.length] + '" stroke-width="16" stroke-dasharray="' + Math.max(0, len - (ctl.length > 1 ? 2 : 0)).toFixed(2) + " " + C.toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 60 60)"><title>' + esc(k) + ": " + n + "</title></circle>"; acc += len; return s; }).join("") +
-        '<text x="60" y="58" text-anchor="middle" class="d-n">' + rows.length + '</text><text x="60" y="74" text-anchor="middle" class="d-l">' + esc(t("proj.count")) + "</text></svg>" +
-        '<ul class="pf-dl">' + ctl.map(([k, n], i) => '<li><i style="background:' + DC[i % DC.length] + '"></i><span>' + esc(k) + "</span><b>" + n + "</b></li>").join("") + "</ul></div></div>";
+      /* ---------- team experience by institution type ---------- */
+      const CATS = ["gov", "un", "intl", "ngo", "uni"];
+      const byCat = CATS.map(c => [c, tim.filter(p => p.category === c).length]).filter(x => x[1]), maxE = Math.max(1, ...byCat.map(x => x[1]));
+      const exp = tim.length ? '<section class="pd-block"><h3>' + esc(t("pf.c.exp").replace("{n}", tim.length)) + '</h3><ul class="pd-rows">' +
+        byCat.map(([c, n]) => '<li><span class="pd-name">' + esc(t("cat." + c)) + "</span>" + bar(n, maxE, "#32736E") + '<b class="pd-n">' + n + "</b></li>").join("") + '</ul><p class="pf-hint"><a href="#/about" data-pillar="exp">' + esc(t("pf.c.exp.l")) + "</a></p></section>" : "";
 
-      /* ---------- chart 5: team experience by institution type ---------- */
-      const CATS = ["gov", "un", "intl", "ngo", "uni"], CC = { gov: "#0E5A55", un: "#2D6A8E", intl: "#E8833A", ngo: "#5E8C4A", uni: "#8C6BB1" };
-      const byCat = CATS.map(c => [c, tim.filter(p => p.category === c).length]).filter(x => x[1]);
-      const exp = tim.length ? '<div class="pf-card pf-card-wide"><h3>' + esc(t("pf.c.exp").replace("{n}", tim.length)) + '</h3><div class="pf-stack">' +
-        byCat.map(([c, n]) => '<i style="flex:' + n + ";background:" + CC[c] + '" title="' + esc(t("cat." + c)) + ": " + n + '"><b>' + n + "</b></i>").join("") + '</div><ul class="pf-dl pf-dl-row">' +
-        byCat.map(([c, n]) => '<li><i style="background:' + CC[c] + '"></i><span>' + esc(t("cat." + c)) + "</span><b>" + n + "</b></li>").join("") + '</ul><p class="pf-hint"><a href="#/about" data-pillar="exp">' + esc(t("pf.c.exp.l")) + "</a></p></div>" : "";
-
-      /* ---------- SDG targets ---------- */
+      /* ---------- SDG goals and targets ---------- */
       const SDGC = { 1: "#E5243B", 2: "#DDA63A", 3: "#4C9F38", 4: "#C5192D", 5: "#FF3A21", 6: "#26BDE2", 7: "#FCC30B", 8: "#A21942", 9: "#FD6925", 10: "#DD1367", 11: "#FD9D24", 12: "#BF8B2E", 13: "#3F7E44", 14: "#0A97D9", 15: "#56C02B", 16: "#00689D", 17: "#19486A" };
       const sdgKeys = Object.keys(sdgs).map(Number).sort((a, b) => a - b);
-      const sdgBox = sdgKeys.length ? '<div class="pf-card"><h3>' + esc(t("pf.c.sdg")) + '</h3><ul class="pf-sdg">' + sdgKeys.map(g =>
-        '<li style="--c:' + (SDGC[g] || "#52615E") + '"><b>' + g + "</b><span>" + esc(t("sdg." + g) !== "sdg." + g ? t("sdg." + g) : "SDG " + g) + "</span>" + (sdgs[g].size ? "<small>" + esc(t("pf.targets")) + " " + esc([...sdgs[g]].join(", ")) + "</small>" : "") + "</li>").join("") + "</ul></div>" : "";
+      const sdgBox = sdgKeys.length ? '<section class="pd-block"><h3>' + esc(t("pf.c.sdg")) + '</h3><ul class="pd-sdg">' + sdgKeys.map(g =>
+        '<li><span class="pd-sdg-n" style="background:' + (SDGC[g] || "#52615E") + '">' + g + "</span><span>" + esc(t("sdg." + g) !== "sdg." + g ? t("sdg." + g) : "SDG " + g) + (sdgs[g].size ? "<small>" + esc(t("pf.targets")) + " " + esc([...sdgs[g]].join(", ")) + "</small>" : "") + "</span></li>").join("") + "</ul></section>" : "";
 
       kpiHost.innerHTML = kpis;
-      dash.innerHTML = '<div class="pf-grid">' + chartSvc + donut + chartTl + sdgBox + exp + "</div>";
+      dash.innerHTML = '<div class="pd">' + chartSvc + chartClient + chartTl + sdgBox + exp + "</div>";
       const X = window.CharisPFExplorer ? window.CharisPFExplorer(document.getElementById("pfExplorer"), { rows, repo, pcov, t, f, esc, lang, serviceName, svcIcon, svcColor, years, roleLabel, coverBox, shareBox, absHash, SV, img: (u, w) => API.img(u, w), profileHost: document.getElementById("pfProfile"), focus: focus && rows.some(r => r.service === focus) ? focus : "" }) : null;
 
       dash.addEventListener("click", e => {
@@ -658,13 +671,6 @@
         if (j && X) { e.preventDefault(); X.select(j.dataset.pfJump); }
       });
       if (pid && X && rows.some(r => r.id === pid)) { app.dataset.keep = "1"; X.select(pid, "jump"); setTimeout(() => { delete app.dataset.keep; }, 1500); }
-      /* count-up on the KPI numbers, once */
-      if (smoothOK()) kpiHost.querySelectorAll(".pf-kpi b[data-count]").forEach(b => {
-        const n = Number(b.dataset.count); if (!n || n < 2) return;
-        const t0 = performance.now(), dur = 900;
-        const step = ts => { const k = Math.min(1, (ts - t0) / dur); b.textContent = nf(Math.round(n * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
-        requestAnimationFrame(step);
-      });
     },
 
     async latest() {
@@ -694,7 +700,7 @@
     },
 
     contact() {
-      const opts = SV.map(s => '<option value="' + s.key + '">' + esc(s[lang].t) + "</option>").join("") + '<option value="other">' + esc(t("form.other")) + "</option>";
+      const opts = PILLARS.map(p => '<optgroup label="' + esc(t("p." + p + ".t")) + '">' + SV.filter(s => s.pillar === p).map(s => '<option value="' + s.key + '">' + esc(s[lang].t) + "</option>").join("") + "</optgroup>").join("") + '<option value="other">' + esc(t("form.other")) + "</option>";
       const L = lang === "id" ? ["Alamat", "Email", "Telepon"] : ["Address", "Email", "Phone"];
       app.innerHTML = pageTop(t("nav.contact"), t("contact.lead")) +
         '<section class="sec"><div class="wrap contact"><form class="form" id="contactForm" novalidate>' +

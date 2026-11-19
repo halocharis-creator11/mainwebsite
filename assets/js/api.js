@@ -15,7 +15,8 @@ window.CharisAPI = (function () {
     try { const r = await fetch("repositori/index.json", { cache: "no-cache" }); if (r.ok) data = await r.json(); } catch (e) { /* offline preview */ }
     if (!data && window.REPO_INDEX) data = window.REPO_INDEX;
     if (!data) throw new Error("repository index not found");
-    cache._repo = data.items || [];
+    const key = k => (window.svcKey ? window.svcKey(k) : k);       /* older service keys map to the current list */
+    cache._repo = (data.items || []).map(i => (i.service ? Object.assign({}, i, { service: key(i.service) }) : i));
     return cache._repo;
   }
 
@@ -40,17 +41,18 @@ window.CharisAPI = (function () {
       let rows = (window.DEMO_DATA[type] || []).filter(r => r.published !== false);
       if (type === "projects") rows = rows.filter(r => ["A", "B", "C"].includes(r.disclosure)).map(publicProject);   /* mirrors Code.gs */
       if (type === "partners") rows = rows.map(r => Object.assign({}, r, { logo_url: r.logo_ok === true || r.logo_ok === "TRUE" ? r.logo_url : "" }));
-      cache[type] = rows;
+      cache[type] = type === "projects" ? rows.map(normSvc) : rows;
       return cache[type];
     }
     const res = await fetch(cfg.API_URL + "?action=list&type=" + encodeURIComponent(type));
     if (!res.ok) throw new Error("HTTP " + res.status);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || "API error");
-    cache[type] = json.data;
-    return json.data;
+    cache[type] = type === "projects" ? (json.data || []).map(normSvc) : json.data;
+    return cache[type];
   }
 
+  const normSvc = r => (r && r.service && window.svcKey ? Object.assign({}, r, { service: window.svcKey(r.service) }) : r);
   /* same whitelist as PROJECT_PUBLIC in Code.gs (used in demo mode only; the live API filters server-side) */
   const P_NAMED = ["client", "funder", "partners", "official_title", "location_detail", "image_url", "testimonial_id", "testimonial_en", "testimonial_by"];
   function publicProject(r) {

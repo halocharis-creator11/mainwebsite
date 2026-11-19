@@ -829,3 +829,28 @@ function withLock_(fn) {
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
+
+/** Run once from the editor after the November 2026 service list update (3 fields, 20 services).
+    Portfolio entries saved with an older service key get the key of the service that replaced it.
+    The website already shows old keys correctly; this keeps the spreadsheet tidy. */
+function migrasiLayanan() {
+  const MAP = { workforce: 'resources', promotion: 'programs', media: 'programs' };
+  let n = 0;
+  withLock_(function () {
+    const sh = sheet_('projects'), values = sh.getDataRange().getValues(), col = values[0].indexOf('service');
+    if (col < 0) return;
+    for (let i = 1; i < values.length; i++) {
+      const v = String(values[i][col]).trim();
+      if (MAP[v]) { sh.getRange(i + 1, col + 1).setValue(MAP[v]); n++; }
+    }
+    CacheService.getScriptCache().remove('pub_projects');
+  });
+  try {
+    if (PROPS.getProperty('KERJA_SS_ID')) {
+      const ks = kSheet_('naskah'), kv = ks.getDataRange().getValues(), kc = kv[0].indexOf('service');
+      for (let i = 1; kc >= 0 && i < kv.length; i++) { const v = String(kv[i][kc]).trim(); if (MAP[v]) { ks.getRange(i + 1, kc + 1).setValue(MAP[v]); n++; } }
+      if (typeof kosongkanCache === 'function') kosongkanCache();
+    }
+  } catch (e) { /* Ruang Kerja not set up */ }
+  Logger.log('Kode layanan diperbarui: ' + n + ' baris.');
+}

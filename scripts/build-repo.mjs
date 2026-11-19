@@ -16,20 +16,23 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync, execFileSync } from "node:child_process";
 import crypto from "node:crypto";
+import vm from "node:vm";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const REPO = path.join(ROOT, "repositori");
 const site = JSON.parse(fs.readFileSync(path.join(REPO, "site.json"), "utf8"));
 const BASE = site.base_url.replace(/\/+$/, "");
 
-const SERVICES = {
-  financing: ["Pembiayaan kesehatan", "Health financing"], analytics: ["Data dan analitik", "Data and analytics"],
-  evaluation: ["Riset, monitoring, dan evaluasi", "Research, monitoring, and evaluation"], planning: ["Perencanaan dan tata kelola", "Planning and governance"],
-  workforce: ["SDM kesehatan", "Health workforce"], quality: ["Mutu dan akreditasi", "Quality and accreditation"],
-  facility_tools: ["Tools operasional fasilitas kesehatan", "Facility operations tools"], grants: ["Kolaborasi penyusunan proposal hibah", "Grant proposal collaboration"],
-  promotion: ["Promosi program dan layanan kesehatan", "Health program and service promotion"], media: ["Media dan tools pendukung upaya kesehatan", "Media and tools for health programs"],
-  training: ["Pelatihan dan pengembangan kompetensi", "Training and competency development"]
-};
+/* service labels come from the website's own list (assets/js/i18n.js), so both always match;
+   older keys saved in metadata map to their current service */
+const SERVICES = (() => {
+  const sandbox = { window: {} };
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, "assets/js/i18n.js"), "utf8"), sandbox);
+  const out = {};
+  (sandbox.window.SERVICES || []).forEach(s => { out[s.key] = [s.id.t, s.en.t]; });
+  Object.entries(sandbox.window.SERVICE_ALIAS || {}).forEach(([k, v]) => { if (out[v]) out[k] = out[v]; });
+  return out;
+})();
 const MONTHS_ID = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
