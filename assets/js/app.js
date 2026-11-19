@@ -87,9 +87,11 @@
       : '<button type="button" class="cover-btn" data-zoom="' + esc(full || thumb) + '" data-alt="' + esc(alt) + '" aria-label="' + esc(t("cover.zoom")) + ': ' + esc(alt) + '"><img src="' + esc(thumb) + '"' + (full && full !== thumb ? ' srcset="' + esc(thumb) + " 720w, " + esc(full) + ' 1800w" sizes="(max-width: 600px) 140px, 200px"' : "") + ' alt="" loading="lazy" decoding="async"></button>')
     : tile(seed);
   /* configured photos (config.js PHOTOS) with their licence credit */
-  const photo = k => { const p = (cfg.PHOTOS || {})[k] || {}; return p.src ? p : (k === "highlight" && cfg.HIGHLIGHT_IMAGE ? { src: cfg.HIGHLIGHT_IMAGE } : null); };
+  /* local paths are URL-encoded so file names with spaces (such as WhatsApp exports) load everywhere */
+  const safeSrc = s => { s = String(s || "").trim(); if (!s || /^(https?:|data:)/i.test(s) || /%[0-9a-f]{2}/i.test(s)) return s; return encodeURI(s.replace(/[\u00a0\u202f]/g, " ")); };
+  const photo = k => { const p = (cfg.PHOTOS || {})[k] || {}; const src = p.src || (k === "highlight" ? cfg.HIGHLIGHT_IMAGE : ""); return src ? Object.assign({}, p, { src: safeSrc(src) }) : null; };
   const credit = p => p && p.credit ? '<figcaption class="photo-credit">' + esc(t("photo.by")) + " " + (p.credit_url ? '<a href="' + esc(p.credit_url) + '" target="_blank" rel="noopener">' + esc(p.credit) + "</a>" : esc(p.credit)) + "</figcaption>" : "";
-  const banner = k => { const p = photo(k); return p ? '<figure class="page-photo"><div class="wrap"><div class="pp-frame"><img src="' + esc(API.img(p.src, 2000)) + '" alt="' + esc(p.alt || "") + '" decoding="async"></div>' + credit(p) + "</div></figure>" : ""; };
+  const banner = k => { const p = photo(k); return p ? '<figure class="page-photo"><div class="wrap"><div class="pp-frame"><img onerror="this.closest(\'figure\').remove()" src="' + esc(API.img(p.src, 2000)) + '" alt="' + esc(p.alt || "") + '" decoding="async"></div>' + credit(p) + "</div></figure>" : ""; };
   const pageTop = (title, lead) => '<header class="page-top"><div class="wrap"><h1>' + esc(title) + "</h1>" + (lead ? "<p>" + esc(lead) + "</p>" : "") + "</div></header>";
   const secHead = (title, link) => '<div class="sec-head"><h2>' + esc(title) + "</h2>" + (link ? '<a class="see-all" href="' + link + '">' + esc(t("all")) + "</a>" : "") + "</div>";
   const msg = k => '<p class="state">' + esc(t(k)) + "</p>";
@@ -119,7 +121,7 @@
     const slides = [{ mission: true, cat: t("slide.mission.cat"), title: t("slide.mission.t"), text: t("slide.mission.d"), href: "#/about", id: "mission", img: hero ? hero.src : "", credit: hero }].concat(feat.slice(0, 4));
     host.innerHTML = '<div class="slides">' + slides.map((s, i) =>
       '<article class="slide' + (s.img ? " has-img" : "") + (i ? "" : " on") + '" aria-roledescription="slide" aria-label="' + (i + 1) + " / " + slides.length + '"' + (i ? ' aria-hidden="true" inert' : "") + ">" +
-      (s.img ? '<img class="slide-bg" src="' + esc(API.img(s.img, 1800)) + '" alt="">' : '<div class="slide-art" aria-hidden="true">' + (s.mission ? '<span class="sa sa0"></span><span class="sa sa1"></span><span class="sa sa2"></span>' : s.cover ? '<span class="slide-cover"><img src="' + esc(API.img(s.cover, 900)) + '" alt="" loading="lazy" decoding="async"></span>' : tile(s.id, true)) + "</div>") +
+      (s.img ? '<img onerror="this.remove()" class="slide-bg" src="' + esc(API.img(s.img, 1800)) + '" alt="">' : '<div class="slide-art" aria-hidden="true">' + (s.mission ? '<span class="sa sa0"></span><span class="sa sa1"></span><span class="sa sa2"></span>' : s.cover ? '<span class="slide-cover"><img src="' + esc(API.img(s.cover, 900)) + '" alt="" loading="lazy" decoding="async"></span>' : tile(s.id, true)) + "</div>") +
       '<div class="wrap slide-in"><div class="slide-copy"><p class="slide-cat">' + esc(s.cat) + "</p><h2>" + esc(s.title) + "</h2><p>" + esc(s.text) + '</p><a class="btn btn-light" href="' + esc(s.href) + '">' + esc(t("more")) + "</a></div></div>" + (s.credit && s.credit.credit ? '<p class="slide-credit">' + esc(t("photo.by")) + " " + esc(s.credit.credit) + "</p>" : "") + "</article>").join("") + "</div>" +
       '<div class="wrap slider-ctrl"><button type="button" class="sc-btn" id="scPrev" aria-label="' + esc(t("prev")) + '">' + svgI('<path d="m15 6-6 6 6 6"/>') + "</button>" +
       '<div class="dots" role="group">' + slides.map((s, i) => '<button type="button" class="dot" data-i="' + i + '" aria-label="' + (i + 1) + '" aria-current="' + (i === 0) + '"></button>').join("") + "</div>" +
@@ -359,7 +361,7 @@
     '<circle cx="250" cy="70" r="44"/><rect x="760" y="430" width="90" height="90" rx="20"/></g></svg>';
   const missionCards = () => '<ol class="mcards">' + [1, 2, 3, 4, 5, 6, 7].map(i => '<li class="mcard"><span class="gl-tile">' + glyph(MIS_G[i - 1]) + '</span><p class="mc-n">' + esc(t("vm.mis")) + " " + i + '</p><h3>' + esc(t("mis" + i + ".b")) + "</h3><p>" + esc(t("mis" + i)) + "</p></li>").join("") + "</ol>";
   const visionBand = (withLink, tag) => { const ph = photo("vision");
-    return '<section class="vm-band" aria-labelledby="vmT">' + (ph ? '<img class="vm-photo" src="' + esc(API.img(ph.src, 2000)) + '" alt="" decoding="async">' : "") + motif() +
+    return '<section class="vm-band" aria-labelledby="vmT">' + (ph ? '<img onerror="this.remove()" class="vm-photo" src="' + esc(API.img(ph.src, 2000)) + '" alt="" decoding="async">' : "") + motif() +
       '<div class="wrap"><' + (tag || "h2") + ' class="vm-k" id="vmT">' + esc(t("vm.vision")) + "</" + (tag || "h2") + '><p class="vm-text">' + visionHtml() + "</p>" +
       '<h3 class="vm-sub">' + esc(t("about.mission")) + "</h3>" + missionCards() + '<p class="vm-swipe" aria-hidden="true">' + "<i></i>".repeat(7) + "</p>" + (withLink ? '<p class="vm-more"><a class="btn btn-light" href="#/about">' + esc(t("vm.more")) + "</a></p>" : "") + "</div>" + (ph ? credit(ph) : "") + "</section>"; };
   const valueCards = () => '<ul class="vcards">' + [1, 2, 3, 4, 5, 6].map(i => '<li class="vcard"><span class="gl-tile gl-warm">' + glyph(VAL_G[i - 1]) + '</span><div><h3 lang="en">' + esc(t("val" + i + ".t")) + "</h3><p>" + esc(t("val" + i + ".d")) + "</p></div></li>").join("") + "</ul>";
@@ -407,10 +409,10 @@
       app.innerHTML = pageTop(t("work.t"), t("work.page.lead")) + banner("services") + jump +
         PILLARS.map(p => { const list = SV.filter(s => s.pillar === p), ph = photo("svc_" + p);
           return '<section class="psec psec-' + p + (ph ? " has-photo" : "") + '" id="pillar-' + p + '" aria-labelledby="ph-' + p + '"><div class="psec-bg" aria-hidden="true">' +
-            (ph ? '<img src="' + esc(API.img(ph.src, 2000)) + '" alt="" decoding="async" style="object-position:' + esc(ph.pos || "center") + '">' : motif()) + "</div>" +
+            (ph ? '<img onerror="this.parentNode.classList.add(\'no-photo\');this.remove()" src="' + esc(API.img(ph.src, 2000)) + '" alt="" decoding="async" style="object-position:' + esc(ph.pos || "center") + '">' : motif()) + "</div>" +
             '<div class="wrap"><header class="psec-head">' + pillarIcon(p) + '<div><p class="psec-k">' + list.length + " " + esc(t("svc.count")) + '</p><h2 id="ph-' + p + '">' + esc(t("p." + p + ".t")) + "</h2><p>" + esc(t("p." + p + ".d")) + "</p></div>" + (ph ? credit(ph) : "") + "</header>" +
-            '<div class="svc-cards">' + list.map(s => { const sp = (cfg.SERVICE_PHOTOS || {})[s.key];
-              return '<article class="svc svc-card' + (sp && sp.src ? " has-photo" : "") + '" id="svc-' + s.key + '"><header class="svc-top">' + (sp && sp.src ? '<img class="svc-ph" src="' + esc(API.img(sp.src, 1400)) + '" alt="" loading="lazy" decoding="async" style="object-position:' + esc(sp.pos || "center") + '">' : "") +
+            '<div class="svc-cards">' + list.map(s => { const sp0 = (cfg.SERVICE_PHOTOS || {})[s.key], sp = sp0 && sp0.src ? Object.assign({}, sp0, { src: safeSrc(sp0.src) }) : null;
+              return '<article class="svc svc-card' + (sp && sp.src ? " has-photo" : "") + '" id="svc-' + s.key + '"><header class="svc-top">' + (sp && sp.src ? '<img class="svc-ph" onerror="this.closest(\'.svc-card\').classList.remove(\'has-photo\');this.remove()" src="' + esc(API.img(sp.src, 1400)) + '" alt="" loading="lazy" decoding="async" style="object-position:' + esc(sp.pos || "center") + '">' : "") +
                 '<span class="ic-tile">' + svcIcon(s.key) + "</span><h3>" + esc(s[lang].t) + "</h3></header>" +
                 '<div class="svc-main"><p>' + esc(s[lang].d) + '</p><p class="svc-label">' + esc(t("svc.scope")) + '</p><ul class="svc-scope">' + s[lang].items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
                 '<p class="svc-links"><a class="btn-text" href="#/research" data-svc-repo="' + s.key + '">' + esc(t("svc.allRepo")) + '</a><a class="btn-text" href="#/projects" data-svc-proj="' + s.key + '">' + esc(t("svc.projects")) + "</a></p></div>" +
