@@ -1268,3 +1268,142 @@ label .req, .field .req { display: inline; gap: 0; }
 .pgroup2-head { align-items: flex-start; gap: 16px; }
 .pgroup2-head .shape { width: 16px; height: 16px; border-radius: 4px; margin-top: 5px; }
 @media (max-width: 860px) { .pgroup2-head { padding: 22px 0 14px; gap: 12px; } .pgroup2-head .shape { width: 14px; height: 14px; margin-top: 4px; } }
+
+/* ============================================================
+   Visi, misi, nilai, dan langkah kerja: kartu kontras dengan ikon datar
+   ============================================================ */
+/* glyph tile: solid colour, white line work over a soft fill */
+.gl-tile { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px; background: var(--teal); flex: none; transition: transform .4s cubic-bezier(.3,1.5,.5,1), background .3s; }
+.gl-warm { background: #C9621C; }
+.gl-line { background: var(--teal-deep); }
+.gl { width: 30px; height: 30px; overflow: visible; }
+.gl [class] { transform-box: fill-box; transform-origin: center; }
+.gl-l { stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+.gl-f { fill: rgba(255,255,255,.22); }
+.gl-dot { fill: #FFD9B8; }
+.gl-ring { fill: none; stroke: #FFD9B8; stroke-width: 1.6; }
+.gl-warm .gl-dot { fill: #fff; }
+/* first view: fill settles, lines draw, accent pops */
+.rv .gl .gl-f { opacity: 0; transform: scale(.6); }
+.rv .gl .gl-l { stroke-dashoffset: 1; }
+.rv.in .gl .gl-f { animation: glFill .55s cubic-bezier(.3,1.4,.5,1) .15s both; }
+.rv.in .gl .gl-l { animation: picDraw .9s cubic-bezier(.55,.1,.25,1) .3s both; }
+@keyframes glFill { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+/* hover: tile lifts and the glyph's motion part plays */
+.mcard:hover .gl-tile, .vcard:hover .gl-tile, .scard:hover .gl-tile { transform: translateY(-3px) rotate(-4deg); }
+.mcard:hover .gm.bob, .vcard:hover .gm.bob, .scard:hover .gm.bob { animation: icBob 1.2s ease-in-out infinite; }
+.mcard:hover .gm.grow, .vcard:hover .gm.grow { transform-origin: 50% 100%; animation: icGrow 1.4s ease-in-out infinite; }
+.mcard:hover .gm.g2 { animation-delay: .12s; } .mcard:hover .gm.g3 { animation-delay: .24s; }
+.mcard:hover .gm.spin, .vcard:hover .gm.spin, .scard:hover .gm.spin { animation: icSpin 3.2s linear infinite; }
+.mcard:hover .gm.stamp, .vcard:hover .gm.stamp, .scard:hover .gm.stamp { animation: icStamp 1.6s cubic-bezier(.3,1.5,.5,1) infinite; }
+.mcard:hover .gm.pulse, .vcard:hover .gm.pulse { animation: icPulse 1.3s ease-in-out infinite; }
+.mcard:hover .gm.wave1 { animation: glRing 1.4s ease-out infinite; }
+.vcard:hover .gm.slide { animation: icSlide 1.6s ease-in-out infinite; }
+.scard:hover .gm.rise { animation: icRise 1.3s ease-in-out infinite; }
+.mcard:hover .gm.draw, .vcard:hover .gm.draw { animation: icDraw 1.6s ease-in-out infinite; }
+@keyframes glRing { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
+
+/* vision band: deep teal with the CHARIS block shapes, white mission cards */
+.vm-band { position: relative; overflow: hidden; background: var(--teal-night); color: #fff; padding: 88px 0 92px; isolation: isolate; }
+.vm-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(.9); opacity: .16; z-index: -2; }
+.vm-motif { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.vm-motif rect, .vm-motif circle, .vm-motif path { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 2; }
+.vm-motif circle:first-of-type { fill: rgba(232,131,58,.08); stroke: none; }
+.vm-motif rect:first-of-type { fill: rgba(255,255,255,.04); stroke: none; }
+.vm-drift { animation: vmDrift 28s ease-in-out infinite alternate; transform-origin: center; }
+@keyframes vmDrift { to { transform: translate(-24px, 14px) rotate(1.2deg); } }
+.vm-band .photo-credit { position: absolute; right: 16px; bottom: 10px; color: rgba(255,255,255,.6); font-size: 12px; }
+.vm-band .photo-credit a { color: inherit; }
+.vm-k { font-size: 17px; font-weight: 700; color: #F6B47F; margin: 0 0 14px; letter-spacing: 0; }
+.vm-text { font-size: clamp(24px, 2.7vw, 36px); line-height: 1.32; font-weight: 700; letter-spacing: -0.015em; max-width: 30ch; margin: 0 0 56px; color: #fff; text-wrap: balance; }
+.vm-hl { font-style: normal; color: #F6A465; }
+.vm-sub { font-size: 17px; font-weight: 700; color: rgba(255,255,255,.75); margin: 0 0 18px; }
+.mcards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.mcard { background: #fff; color: var(--ink); border-radius: 14px; padding: 26px 24px 26px; box-shadow: 0 18px 40px rgba(0,0,0,.22); display: flex; flex-direction: column; min-width: 0; transition: transform .35s cubic-bezier(.25,.1,.2,1), box-shadow .35s; }
+.mcard:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(0,0,0,.3); }
+.mcard .gl-tile { margin-bottom: 22px; }
+.mc-n { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--accent); }
+.mcard h3 { font-size: 17px; line-height: 1.35; font-weight: 700; color: var(--teal-deep); margin: 0 0 8px; }
+.mcard p:last-child { margin: 0; font-size: 15px; line-height: 1.55; color: var(--muted); }
+/* seven cards: the last row of three is centred under the four */
+.mcards .mcard:nth-child(5) { grid-column: 1 / span 1; }
+@media (min-width: 1101px) {
+  .mcards { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .mcards .mcard { grid-column: span 2; }
+  .mcards .mcard:nth-child(5) { grid-column: 2 / span 2; }
+}
+.vm-more { margin: 40px 0 0; }
+
+/* values: white cards with a warm tile on the mist background */
+.vals-sec { background: var(--mist); }
+.vcards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.vcard { display: flex; gap: 18px; align-items: flex-start; background: #fff; border-radius: 14px; padding: 24px; border: 1px solid #DCE6E3; box-shadow: 0 2px 0 #CFDCD8; transition: transform .3s, box-shadow .3s, border-color .3s; }
+.vcard:hover { transform: translateY(-3px); border-color: #F0C8A8; box-shadow: 0 14px 30px rgba(20,40,38,.1); }
+.vcard h3 { font-size: 18px; font-weight: 700; color: var(--ink); margin: 2px 0 6px; }
+.vcard p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--muted); }
+
+/* the three fields on the home page as cards */
+.fields-sec .fields { gap: 20px; border-top: 0; }
+.fields-sec .field-col { background: #fff; border: 0; border-top: 5px solid var(--teal); border-radius: 14px; padding: 28px 28px 10px; box-shadow: 0 2px 0 #CFDCD8; }
+.fields-sec .field-col:first-child { padding-left: 28px; }
+.fields-sec .field-col:last-child { padding-right: 28px; }
+.fields-sec .fc-r { border-top-color: var(--teal-85); }
+.fields-sec .fc-s { border-top-color: var(--accent); }
+.fields-sec .field-h { display: block; margin-bottom: 18px; }
+.fields-sec .field-h .pic { margin-bottom: 18px; }
+.fields-sec .field-h h3 { margin-bottom: 8px; }
+.fields-sec .field-d { margin: 0; font-size: 15.5px; }
+
+/* working steps as numbered cards (the content is a sequence) */
+.steps-sec { background: var(--mist); }
+.scards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.scard { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 2px 0 #CFDCD8; transition: transform .3s, box-shadow .3s; }
+.scard:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(20,40,38,.1); }
+.sc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.sc-n { font-size: 40px; line-height: 1; font-weight: 700; color: #DCE6E3; font-variant-numeric: tabular-nums; }
+.scard h3 { font-size: 18px; font-weight: 700; color: var(--teal-deep); margin: 0 0 6px; }
+.scard p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+
+@media (max-width: 1100px) {
+  .mcards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mcards .mcard:nth-child(5) { grid-column: auto; }
+  .mcards .mcard:last-child { grid-column: 1 / -1; }
+  .vcards, .scards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) { .fields-sec .fields { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+  .vm-band { padding: 60px 0 64px; }
+  .vm-text { margin-bottom: 36px; }
+  .mcards, .vcards, .scards { grid-template-columns: 1fr; gap: 12px; }
+  .mcards .mcard:last-child { grid-column: auto; }
+  .mcard { padding: 20px; display: grid; grid-template-columns: 48px minmax(0, 1fr); column-gap: 16px; align-items: start; }
+  .mcard .gl-tile { width: 48px; height: 48px; margin: 0; grid-row: 1 / span 3; }
+  .mcard .gl { width: 27px; height: 27px; }
+  .vcard, .scard { padding: 20px; }
+  .fields-sec .field-col, .fields-sec .field-col:first-child, .fields-sec .field-col:last-child { padding: 22px 20px 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vm-drift, .gl *, .gl-tile, .mcard, .vcard, .scard { animation: none !important; transition: none !important; }
+  .rv .gl .gl-f { opacity: 1; transform: none; } .rv .gl .gl-l { stroke-dashoffset: 0; }
+}
+.gl-tile { width: 60px; height: 60px; border-radius: 16px; }
+.gl { width: 34px; height: 34px; }
+.vm-text { max-width: 36ch; }
+.vcard:hover .gm.tiltl { transform-origin: 0 100%; animation: icTilt 1.6s ease-in-out infinite; }
+@media (max-width: 640px) {
+  /* missions become a swipeable row so the page stays short; the next card peeks in */
+  .vm-band .wrap { padding-right: 0; }
+  .mcards { display: grid; grid-auto-flow: column; grid-auto-columns: 84%; grid-template-columns: none; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 20px 18px 0; scrollbar-width: none; }
+  .mcards::-webkit-scrollbar { display: none; }
+  .mcards .mcard, .mcards .mcard:last-child { grid-column: auto; scroll-snap-align: start; display: flex; flex-direction: column; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+  .mcard .gl-tile { width: 52px; height: 52px; margin: 0 0 16px; grid-row: auto; }
+  .mcard .gl { width: 30px; height: 30px; }
+  .vm-swipe { display: flex; gap: 6px; margin: 4px 0 0; }
+  .vm-swipe i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.3); transition: background .2s, width .2s; }
+  .vm-swipe i.on { background: #F6A465; width: 20px; border-radius: 4px; }
+}
+@media (min-width: 641px) { .vm-swipe { display: none; } }
+@media (max-width: 640px) {
+  .vm-band .wrap { padding-right: 0; }
+  .mcards { margin-right: -18px; padding-right: 18px; scroll-padding-left: 0; }
+}

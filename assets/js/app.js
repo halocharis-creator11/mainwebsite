@@ -319,40 +319,82 @@
   /* home page: the three fields side by side, each with its list of services (plain text, separated by rules) */
   const fields = () => '<div class="fields">' + PILLARS.map(p => {
     const list = SV.filter(s => s.pillar === p);
-    return '<section class="field-col" aria-labelledby="fh-' + p + '"><header class="field-h">' + shape(p) + '<h3 id="fh-' + p + '">' + esc(t("p." + p + ".t")) + '</h3></header><p class="field-d">' + esc(t("p." + p + ".d")) + "</p>" +
+    return '<section class="field-col fc-' + p + '" aria-labelledby="fh-' + p + '"><header class="field-h">' + pillarIcon(p) + '<h3 id="fh-' + p + '">' + esc(t("p." + p + ".t")) + '</h3><p class="field-d">' + esc(t("p." + p + ".d")) + "</p></header>" +
       '<ol class="field-list">' + list.map(s => '<li><a href="#/services" data-pillar="' + s.key + '">' + esc(s[lang].t) + "</a></li>").join("") + "</ol></section>";
   }).join("") + '</div><p class="fields-more"><a class="btn-text" href="#/services">' + esc(t("work.fields")) + "</a></p>";
   const pillars = (withLink, keys) => '<ul class="pillars' + ((keys || PILLARS).length === 4 ? " pillars-4" : "") + '">' + (keys || PILLARS).map(p => '<li class="pillar">' + (keys ? shape(p) : pillarIcon(p)) + "<h3>" + esc(t("p." + p + ".t")) + "</h3><p>" + esc(t("p." + p + ".d")) + "</p>" +
     (withLink ? '<ul class="pl-svcs">' + SV.filter(s => s.pillar === p).map(s => '<li class="hov"><a href="#/services" data-pillar="' + s.key + '">' + svcIcon(s.key) + "<span>" + esc(s[lang].t) + "</span></a></li>").join("") + "</ul>" +
       '<a href="#/services" data-pillar="' + p + '">' + esc(t("more")) + "</a>" : "") + "</li>").join("") + "</ul>";
 
+  /* ---------- flat two-tone glyphs for mission, values, and steps ----------
+     white line work (drawn in when the card first appears) over a soft filled shape; one motion part per glyph on hover */
+  const L = (d, cls) => '<path class="gl-l' + (cls ? " " + cls : "") + '" pathLength="1" d="' + d + '"/>';
+  const F = (d, cls) => '<path class="gl-f' + (cls ? " " + cls : "") + '" d="' + d + '"/>';
+  const GLYPH = {
+    data: F("M3 20h18v1.5H3z") + F("M5 13h3v6H5z", "gm grow") + F("M10.5 9h3v10h-3z", "gm grow g2") + F("M16 5h3v14h-3z", "gm grow g3") + L("M4 11l6-4 4 3 6-6") + L("M17 4h3v3"),
+    flask: F("M7.5 15h9l2.5 5H5z") + L("M9.5 3h5M10.5 3v6L5 20h14L13.5 9V3") + '<circle class="gl-f gm bob" cx="11" cy="17" r="1.3"/><circle class="gl-f gm bob g2" cx="14" cy="14.5" r="1"/>',
+    mentor: F("M3 4h18v11H3z") + L("M3 4h18v11H3zM12 15v3M8 21l4-3 4 3") + '<g class="gm bob">' + L("M7 11l3-3 2.5 2L17 7") + "</g>",
+    digital: F("M6 6h12v9H6z") + L("M3 4h18v13H3zM8 21h8M12 17v4") + L("M8.5 12.5l2-3 2 2 3-4", "gm draw"),
+    partner: '<circle class="gl-f" cx="12" cy="5.5" r="2.8"/><circle class="gl-f" cx="5" cy="17.5" r="2.8"/><circle class="gl-f" cx="19" cy="17.5" r="2.8"/>' + L("M12 2.7a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 1 0 0-5.6zM5 14.7a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 1 0 0-5.6zM19 14.7a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 1 0 0-5.6zM10.6 8L6.4 15M13.4 8l4.2 7M7.8 17.5h8.4") + '<circle class="gm pulse gl-dot" cx="12" cy="13.5" r="1.7"/>',
+    policy: F("M5 3h10l4 4v14H5z") + L("M5 3h10l4 4v14H5zM15 3v4h4M8 11h8M8 14.5h5") + '<g class="gm stamp">' + L("M14 18.5l1.8 1.8 3.7-3.8") + "</g>",
+    access: F("M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z") + L("M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 7v5M9.5 9.5h5") + '<circle class="gm wave1 gl-ring" cx="12" cy="21" r="1"/>',
+    evidence: F("M6 4h12v17H6z") + L("M9 4h6v2.5H9zM6 4h12v17H6zM9 11l1.5 1.5L13 10M9 16l1.5 1.5L13 15", "draw gm") + L("M15 11.5h0M15 16.5h0"),
+    bulb: F("M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z") + L("M9 19h6M10 21.5h4M8.5 16h7v-2.1a6 6 0 1 0-7 0z") + '<g class="gm pulse">' + L("M12 7.5v3M10.5 9h3") + "</g>",
+    people: '<circle class="gl-f" cx="9" cy="8" r="3.5"/>' + F("M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5z") + L("M9 4.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 1 0 0-7zM2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5") + '<g class="gm bob g2">' + L("M16 4.8a3.2 3.2 0 0 1 0 6.2M18 13.8c2 .8 3.5 3 3.5 5.7") + "</g>",
+    shield: F("M12 2.5l8 3v6c0 5-3.5 8.6-8 10-4.5-1.4-8-5-8-10v-6z") + L("M12 2.5l8 3v6c0 5-3.5 8.6-8 10-4.5-1.4-8-5-8-10v-6z") + '<g class="gm stamp">' + L("M8.5 12l2.5 2.5 4.5-5") + "</g>",
+    target: '<circle class="gl-f" cx="11" cy="13" r="8"/>' + L("M11 5a8 8 0 1 0 8 8M11 9a4 4 0 1 0 4 4") + '<circle class="gl-dot" cx="11" cy="13" r="1.4"/><g class="gm slide">' + L("M11 13l9-9M16.5 3.5H20.5V7.5") + "</g>",
+    cycle: F("M5 19C5 10 10 4.5 20 4c.3 9.5-5 15-15 15z") + L("M5 19C5 10 10 4.5 20 4c.3 9.5-5 15-15 15z") + '<g class="gm tiltl">' + L("M5 19L14 10M10 14.5h-3M12.5 12V9") + "</g>",
+    talk: F("M3 4h13v9H8l-5 4z") + L("M3 4h13v9H8l-5 4zM7 8h5") + '<g class="gm bob">' + L("M18 8h3v9l-3-2.5h-6v-1.5") + "</g>",
+    plan: F("M4 4h16v16H4z") + L("M4 4h16v16H4zM4 9h16M9 4v16") + '<g class="gm stamp">' + L("M12 14l1.6 1.6L17 12.2") + "</g>",
+    gear: '<g class="gm spin">' + F("M12 3l1.5 2.4 2.8-.6.6 2.8L19.3 9l-1 2.6 1.8 2.3-2.4 1.5.2 2.9-2.9-.1-1.4 2.5L12 19.3 9.6 20.8 8.2 18.3l-2.9.1.2-2.9L3 14l1.8-2.3-1-2.6 2.4-1.5.6-2.8 2.8.6z") + L("M12 3l1.5 2.4 2.8-.6.6 2.8L19.3 9l-1 2.6 1.8 2.3-2.4 1.5.2 2.9-2.9-.1-1.4 2.5L12 19.3 9.6 20.8 8.2 18.3l-2.9.1.2-2.9L3 14l1.8-2.3-1-2.6 2.4-1.5.6-2.8 2.8.6z") + "</g>" + '<circle class="gl-dot" cx="12" cy="12" r="2.6"/>',
+    growth: F("M3 21h18v-1H3z") + F("M6 15h3v5H6zM11 11h3v9h-3zM16 7h3v13h-3z") + '<g class="gm rise">' + L("M4 12l5-4 4 2 7-6M16.5 4H20v3.5") + "</g>"
+  };
+  const glyph = k => '<svg class="gl" viewBox="0 0 24 24" aria-hidden="true" fill="none">' + GLYPH[k] + "</svg>";
+  const MIS_G = ["data", "flask", "mentor", "digital", "partner", "policy", "access"], VAL_G = ["evidence", "bulb", "people", "shield", "target", "cycle"], STEP_G = ["talk", "plan", "gear", "growth"];
+  /* vision sentence with its key phrase picked out in the accent colour */
+  const visionHtml = () => { const v = t("about.vision.d"), h = t("about.vision.hl"), i = h ? v.indexOf(h) : -1;
+    return i < 0 ? esc(v) : esc(v.slice(0, i)) + '<em class="vm-hl">' + esc(h) + "</em>" + esc(v.slice(i + h.length)); };
+  const motif = () => '<svg class="vm-motif" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="vm-drift">' +
+    '<rect x="40" y="300" width="190" height="190" rx="34"/><circle cx="1080" cy="90" r="120"/><path d="M930 360h170a50 50 0 0 1 50 50v110H980a50 50 0 0 1-50-50z"/><rect x="520" y="-60" width="130" height="130" rx="26" transform="rotate(14 585 5)"/>' +
+    '<circle cx="250" cy="70" r="44"/><rect x="760" y="430" width="90" height="90" rx="20"/></g></svg>';
+  const missionCards = () => '<ol class="mcards">' + [1, 2, 3, 4, 5, 6, 7].map(i => '<li class="mcard"><span class="gl-tile">' + glyph(MIS_G[i - 1]) + '</span><p class="mc-n">' + esc(t("vm.mis")) + " " + i + '</p><h3>' + esc(t("mis" + i + ".b")) + "</h3><p>" + esc(t("mis" + i)) + "</p></li>").join("") + "</ol>";
+  const visionBand = (withLink, tag) => { const ph = photo("vision");
+    return '<section class="vm-band" aria-labelledby="vmT">' + (ph ? '<img class="vm-photo" src="' + esc(API.img(ph.src, 2000)) + '" alt="" decoding="async">' : "") + motif() +
+      '<div class="wrap"><' + (tag || "h2") + ' class="vm-k" id="vmT">' + esc(t("vm.vision")) + "</" + (tag || "h2") + '><p class="vm-text">' + visionHtml() + "</p>" +
+      '<h3 class="vm-sub">' + esc(t("about.mission")) + "</h3>" + missionCards() + '<p class="vm-swipe" aria-hidden="true">' + "<i></i>".repeat(7) + "</p>" + (withLink ? '<p class="vm-more"><a class="btn btn-light" href="#/about">' + esc(t("vm.more")) + "</a></p>" : "") + "</div>" + (ph ? credit(ph) : "") + "</section>"; };
+  const valueCards = () => '<ul class="vcards">' + [1, 2, 3, 4, 5, 6].map(i => '<li class="vcard"><span class="gl-tile gl-warm">' + glyph(VAL_G[i - 1]) + '</span><div><h3 lang="en">' + esc(t("val" + i + ".t")) + "</h3><p>" + esc(t("val" + i + ".d")) + "</p></div></li>").join("") + "</ul>";
+  const valuesSec = () => '<section class="sec vals-sec"><div class="wrap">' + secHead(t("about.values")) + '<p class="sec-lead">' + esc(t("vals.lead")) + "</p>" + valueCards() + "</div></section>";
+  const stepCards = () => '<ol class="scards">' + [1, 2, 3, 4].map(i => '<li class="scard"><div class="sc-top"><span class="gl-tile gl-line">' + glyph(STEP_G[i - 1]) + '</span><span class="sc-n">' + i + "</span></div><h3>" + esc(t("step" + i + ".t")) + "</h3><p>" + esc(t("step" + i + ".d")) + "</p></li>").join("") + "</ol>";
+
+  function bindSwipe() {
+    const row = app.querySelector(".mcards"), dots = app.querySelectorAll(".vm-swipe i"); if (!row || !dots.length) return;
+    const paint = () => { const w = row.firstElementChild ? row.firstElementChild.offsetWidth + 12 : 1, i = Math.min(dots.length - 1, Math.round(row.scrollLeft / w)); dots.forEach((d, k) => d.classList.toggle("on", k === i)); };
+    row.addEventListener("scroll", () => requestAnimationFrame(paint), { passive: true }); paint();
+  }
   /* ---------- views ---------- */
   const views = {
     home() {
       app.innerHTML =
         '<section class="slider" id="slider" aria-roledescription="carousel" aria-label="CHARIS"></section>' +
         '<section class="sec"><div class="wrap">' + secHead(t("latest.t"), "#/latest") + '<div id="homeLatest"></div></div></section>' +
-        '<section class="sec sec-tint"><div class="wrap">' + secHead(t("work.t"), "#/work") + '<p class="sec-lead">' + esc(t("work.lead")) + "</p>" + fields() + "</div></section>" +
+        visionBand(true) +
+        '<section class="sec sec-tint fields-sec"><div class="wrap">' + secHead(t("work.t"), "#/work") + '<p class="sec-lead">' + esc(t("work.lead")) + "</p>" + fields() + "</div></section>" + valuesSec() +
         '<section class="sec"><div class="wrap team-sec"><div class="team-intro">' + secHead(t("team.t"), "#/team") + "<p>" + esc(t("team.lead")) + '</p></div><div id="homeTeam"></div></div></section>' +
         '<section class="sec partners-sec"><div class="wrap">' + secHead(t("partners.t")) + '<div id="partners" class="partners"></div></div></section>' +
         '<section class="sec exp-sec"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p></div><div id="experience" class="experience"></div><div class="wrap"><p class="exp-foot" id="expFoot"></p></div></section>' +
         newsletter();
-      buildSlider(); buildLatest("homeLatest", 6); buildTeam("homeTeam"); buildPartners(); bindNewsletter();
+      bindSwipe(); buildSlider(); buildLatest("homeLatest", 6); buildTeam("homeTeam"); buildPartners(); bindNewsletter();
     },
 
     about() {
       app.innerHTML = pageTop(t("about.t")) + banner("about") +
         '<section class="sec"><div class="wrap ab-profile"><p class="ab-k">' + esc(t("about.profile")) + '</p><div class="prose ab-prose"><p class="big">' + esc(t("about.lead")) + "</p><p>" + esc(t("about.p2")) + "</p><p>" + esc(t("about.p3")) + "</p><p>" + esc(t("about.p4")) + "</p>" +
         '<p class="ab-home">' + esc(t("about.home")) + "</p></div></div></section>" +
-        '<section class="sec sec-tint"><div class="wrap ab-vision"><p class="ab-k">' + esc(t("about.vision")) + '</p><p class="ab-vision-t">' + esc(t("about.vision.d")) + "</p></div></section>" +
-        '<section class="sec"><div class="wrap"><div class="ab-row"><p class="ab-k">' + esc(t("about.mission")) + '</p><ol class="ab-mis">' +
-        [1, 2, 3, 4, 5, 6, 7].map(i => "<li><p><b>" + esc(t("mis" + i + ".b")) + "</b> " + esc(t("mis" + i)) + "</p></li>").join("") + "</ol></div></div></section>" +
-        '<section class="sec ab-vals-sec"><div class="wrap"><div class="ab-row"><p class="ab-k">' + esc(t("about.values")) + '</p><ul class="ab-vals">' +
-        [1, 2, 3, 4, 5, 6].map(i => '<li><h3 lang="en">' + esc(t("val" + i + ".t")) + "</h3><p>" + esc(t("val" + i + ".d")) + "</p></li>").join("") + "</ul></div></div></section>" +
-        '<section class="sec sec-tint"><div class="wrap logo-mean"><img src="assets/img/logo-symbol.svg" alt="" width="160" height="160"><div><h2>' + esc(t("about.logo")) + "</h2>" + pillars(false, ["a", "r", "s"]) + "</div></div></section>" +
+        visionBand(false) + valuesSec() +
+        '<section class="sec"><div class="wrap logo-mean"><img src="assets/img/logo-symbol.svg" alt="" width="160" height="160"><div><h2>' + esc(t("about.logo")) + "</h2>" + pillars(false, ["a", "r", "s"]) + "</div></div></section>" +
         '<section class="sec" id="experience-all"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p><div id="expGrid"></div><p class="exp-note">' + esc(t("exp.note")) + "</p></div></section>" +
-        '<section class="sec sec-tint"><div class="wrap">' + secHead(t("steps.t")) + steps() + "</div></section>" + newsletter();
-      bindNewsletter();
+        '<section class="sec steps-sec"><div class="wrap">' + secHead(t("steps.t")) + stepCards() + "</div></section>" + newsletter();
+      bindNewsletter(); bindSwipe();
       const toExp = pendingPillar === "exp";
       buildExperienceGrid(document.getElementById("expGrid")).then(() => {
         if (toExp) requestAnimationFrame(() => document.getElementById("experience-all").scrollIntoView({ block: "start" }));
@@ -828,7 +870,7 @@
   const io = "IntersectionObserver" in window && smoothOK() ? new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -8% 0px" }) : null;
   function reveal() {
     if (!io) return;
-    app.querySelectorAll(".sec .wrap > *:not(.rv), .card:not(.rv), .ritem:not(.rv), .pj:not(.rv), .svc:not(.rv), .pillar:not(.rv), .member:not(.rv)").forEach((el, i) => {
+    app.querySelectorAll(".sec .wrap > *:not(.rv), .card:not(.rv), .ritem:not(.rv), .pj:not(.rv), .svc:not(.rv), .pillar:not(.rv), .member:not(.rv), .mcard:not(.rv), .vcard:not(.rv), .scard:not(.rv), .field-col:not(.rv)").forEach((el, i) => {
       el.classList.add("rv");
       if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("in");   /* already on screen: show at once */
       else { el.style.transitionDelay = (i % 3) * 60 + "ms"; io.observe(el); }
