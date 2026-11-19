@@ -161,11 +161,44 @@
   $("logoutBtn").addEventListener("click", () => logout(false));
 
   /* ---------- list ---------- */
-  $("sideNav").addEventListener("click", e => { const b = e.target.closest("button[data-type]"); if (b) select(b.dataset.type); });
+  /* ---------- navigation, same pattern as Ruang Kerja: side rail on wide screens,
+     bottom tab bar plus a full-screen menu on phones and tablets ---------- */
+  const IC = {
+    inquiries: "M4 6h16v12H4zM4 7l8 6 8-6", requests: "M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h4", subscribers: "M6 16v-5a6 6 0 0112 0v5l2 2H4zM10 21h4",
+    news: "M5 4h11v16H6a1 1 0 01-1-1zM16 8h3v11a1 1 0 01-1 1h-2M8 8h5M8 12h5M8 16h3", projects: "M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z",
+    team: "M12 12a4 4 0 100-8 4 4 0 000 8zM5 21a7 7 0 0114 0", partners: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7zM8.5 12l2.5 2.5 4.5-4.5",
+    reports: "M6 3h9l4 4v14H6zM9 12h7M9 16h7M9 8h3", members: "M16 20v-2a4 4 0 00-8 0v2M12 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM20 20v-1.5a3.5 3.5 0 00-3-3.4M4 20v-1.5a3.5 3.5 0 013-3.4",
+    downloads: "M12 4v11M7 10l5 5 5-5M5 20h14", stats: "M5 20V10M12 20V4M19 20v-7", project_internal: "M6 11h12v9H6zM9 11V8a3 3 0 016 0v3",
+    menu: "M4 6h16M4 12h16M4 18h16", work: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z", web: "M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20",
+    key: "M14 10a4 4 0 10-3.9 4H12v2h2v2h2v-2.5l-2.6-2.6A4 4 0 0014 10z", out: "M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10", close: "M6 6l12 12M18 6L6 18"
+  };
+  const svg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (IC[k] || "") + '"/></svg>';
+  document.querySelectorAll("#sideNav button[data-type]").forEach(b => { b.insertAdjacentHTML("afterbegin", '<span class="nic">' + svg(b.dataset.type) + "</span>"); const sub = b.dataset.sub;
+    const label = [...b.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()); if (label) { const s = document.createElement("span"); s.className = "nav-l"; s.innerHTML = esc(label.textContent.trim()) + (sub ? "<small>" + esc(sub) + "</small>" : ""); label.replaceWith(s); } });
+  document.querySelectorAll("[data-ic]").forEach(el => el.insertAdjacentHTML("afterbegin", svg(el.dataset.ic)));
+  $("sheetClose").innerHTML = svg("close");
+  const TABS = [["inquiries", "Pesan"], ["requests", "Permintaan"], ["news", "Berita"], ["projects", "Portofolio"]];
+  $("tabbar").innerHTML = TABS.map(([k, l]) => '<button type="button" data-tab="' + k + '">' + svg(k) + "<span>" + l + '</span><b class="tcount" data-for="' + k + '" hidden></b></button>').join("") +
+    '<button type="button" data-tab="menu" aria-controls="side" aria-expanded="false">' + svg("menu") + "<span>Menu</span></button>";
+  function setMenu(on) {
+    $("side").classList.toggle("open", on); document.body.classList.toggle("menu-open", on);
+    const m = $("tabbar").querySelector('[data-tab="menu"]'); m.setAttribute("aria-expanded", String(on)); paintTabs();
+    if (on) { const cur = $("sideNav").querySelector('[aria-current="page"]'); if (cur) cur.scrollIntoView({ block: "nearest" }); }
+  }
+  function paintTabs() {
+    const open = $("side").classList.contains("open"), inTabs = TABS.some(x => x[0] === type);
+    $("tabbar").querySelectorAll("[data-tab]").forEach(b => { const on = open ? b.dataset.tab === "menu" : (b.dataset.tab === type || (b.dataset.tab === "menu" && !inTabs)); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    [["inquiries", "newCount"], ["requests", "reqCount"]].forEach(([k, id]) => { const src = $(id), dst = $("tabbar").querySelector('[data-for="' + k + '"]'); if (dst) { dst.hidden = src.hidden; dst.textContent = src.textContent; } });
+  }
+  $("tabbar").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; if (b.dataset.tab === "menu") setMenu(!$("side").classList.contains("open")); else { setMenu(false); select(b.dataset.tab); scrollTo(0, 0); } });
+  $("sheetClose").addEventListener("click", () => setMenu(false));
+  new MutationObserver(paintTabs).observe($("sideNav"), { subtree: true, attributes: true, childList: true, characterData: true });
+  $("sideNav").addEventListener("click", e => { const b = e.target.closest("button[data-type]"); if (b) { select(b.dataset.type); setMenu(false); scrollTo(0, 0); } });
+  addEventListener("keydown", e => { if (e.key === "Escape" && $("side").classList.contains("open")) setMenu(false); });
   async function select(t) {
     type = t; const d = DEF[t];
     document.querySelectorAll("#sideNav button").forEach(b => b.setAttribute("aria-current", b.dataset.type === t ? "page" : "false"));
-    $("viewTitle").textContent = d.title; $("viewHint").textContent = d.hint;
+    $("viewTitle").textContent = d.title; $("viewHint").textContent = d.hint; $("topTitle").textContent = d.title; if (typeof paintTabs === "function") paintTabs();
     $("addBtn").hidden = !!d.readonlyAdd; $("q").value = "";
     $("table").querySelector("thead").innerHTML = "<tr>" + d.cols.map(c => "<th scope=\"col\">" + esc(c[1]) + "</th>").join("") + '<th scope="col"><span class="sr-only">Aksi</span></th></tr>';
     $("table").querySelector("tbody").innerHTML = ""; $("tableState").textContent = "Memuat";
@@ -211,7 +244,7 @@
   function draw() {
     const d = DEF[type], q = $("q").value.trim().toLowerCase();
     const sel = rows.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
-    $("table").querySelector("tbody").innerHTML = sel.map(r => "<tr>" + d.cols.map((c, i) => (i === 0 ? '<th scope="row">' : "<td>") + cell(c[0], r[c[0]]) + (i === 0 ? "</th>" : "</td>")).join("") +
+    $("table").querySelector("tbody").innerHTML = sel.map(r => "<tr>" + d.cols.map((c, i) => (i === 0 ? '<th scope="row">' : '<td data-label="' + esc(c[1]) + '">') + cell(c[0], r[c[0]]) + (i === 0 ? "</th>" : "</td>")).join("") +
       '<td class="act"><button type="button" class="btn btn-outline sm" data-edit="' + esc(r.id) + '">' + (["inquiries", "requests", "members", "downloads", "subscribers", "stats"].includes(type) ? "Buka" : "Edit") + "</button></td></tr>").join("");
     $("tableState").textContent = sel.length ? "" : "Belum ada data.";
   }
