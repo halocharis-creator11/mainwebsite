@@ -56,7 +56,7 @@
 
   /* ---------- state ---------- */
   const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [], konten: [], hours: {}, summary: {} };
-  const EXPECTED = "2026-11-19-f5";
+  const EXPECTED = "2026-11-19-f6";
   const K = window.K = { S, esc, ic, ROLE, STATUS, STATUS_L, PRIO, PRIO_L, PSTATUS_L, MONTHS, MONTHS_L, views: {} };
 
   /* ---------- api ---------- */
@@ -144,7 +144,7 @@
   /* ============================================================
      GATE: sign in, first-time password, forgot password
      ============================================================ */
-  function signOutLocal() { token = null; try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem("charis_token"); } catch (e) {} clearInterval(pollT); }
+  function signOutLocal() { token = null; try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(SNAP_KEY); sessionStorage.removeItem("charis_token"); } catch (e) {} clearInterval(pollT); }
   function showGate(mode, msg) {
     $("app").hidden = true; $("gate").hidden = false; closeDrawer(true); closeModal();
     const b = $("gateBody"), note = msg ? '<p class="note warn">' + esc(msg) + "</p>" : "";
@@ -203,29 +203,61 @@
   /* ============================================================
      DATA LOAD AND POLLING
      ============================================================ */
-  let pollT = 0, loadedOnce = false;
+  /* The last data set is kept on this device so the app opens instantly; the server is then asked
+     every 20 seconds (cheap) whether anything changed, and only then is everything reloaded. */
+  const SNAP_KEY = "charis_ksnap", POLL_MS = 20000;
+  let pollT = 0, loadedOnce = false, checking = false;
+  const stamp = () => sync("Tersinkron " + new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":"));
+  function readSnap() { try { const s = JSON.parse(localStorage.getItem(SNAP_KEY) || "null"); return s && s.t === (token || "").slice(0, 12) ? s.j : null; } catch (e) { return null; } }
+  function saveSnap(j) { try { localStorage.setItem(SNAP_KEY, JSON.stringify({ t: (token || "").slice(0, 12), j })); } catch (e) { /* storage full: skip */ } }
   async function load(quiet) {
     if (!quiet) sync("Memuat data");
     const j = await api("load");
+    apply(j); saveSnap(j); stamp();
+    loadedOnce = true;
+  }
+  function apply(j) {
+    S.rev = j.rev || "";
     Object.assign(S, { me: j.me, today: j.today, users: j.users, projects: j.projects, milestones: j.milestones, tasks: j.tasks, ccount: j.comment_counts || {}, notifications: j.notifications, portfolio: j.portfolio || [],
       konten: j.konten || [], hours: j.hours_by_task || {}, summary: j.summary || {} });
     S.stale = j.version !== EXPECTED;
-    sync("Tersinkron " + new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":"));
-    loadedOnce = true;
+  }
+  /* ask the server whether anything changed since our copy; reload only if so */
+  let lastCheck = 0;
+  async function check(force, nav) {
+    if (checking || !token || !S.me) return;
+    if (nav && Date.now() - lastCheck < 4000) return;          /* page switches: at most one check every few seconds */
+    lastCheck = Date.now();
+    if (!force && (document.hidden || !$("drawer").hidden || !$("modal").hidden)) return;
+    checking = true;
+    try {
+      const j = await api("sync", { rev: S.rev || "" });
+      if (j.changed) { await load(true); if ($("drawer").hidden && $("modal").hidden) { buildNav(); route(true); } }
+      else stamp();
+    } catch (e) { sync("Offline, mencoba lagi"); } finally { checking = false; }
   }
   async function start() {
     $("gate").hidden = true;
-    try { await load(); } catch (e) { if (!token) return; toast(e.message, true); return; }
-    $("app").hidden = false;
-    buildNav();
-    route();
+    const snap = readSnap();
+    if (snap) {
+      /* show the last known data right away, then refresh in the background */
+      apply(snap); $("app").hidden = false; buildNav(); route(); sync("Memperbarui");
+      const before = S.rev;
+      try { await load(true); if (S.rev !== before || S.stale) { buildNav(); route(true); } }
+      catch (e) { if (!token) return; sync("Offline, menampilkan data terakhir"); }
+    } else {
+      try { await load(); } catch (e) { if (!token) return; toast(e.message, true); return; }
+      $("app").hidden = false;
+      buildNav();
+      route();
+    }
     fetch("../repositori/index.json").then(r => r.json()).then(j => { S.repo = (j.items || []).map(i => ({ id: i.id, title: i.title_id, url: "../" + i.url })); }).catch(() => {});
     clearInterval(pollT);
-    pollT = setInterval(async () => {
-      if (document.hidden || !$("drawer").hidden || !$("modal").hidden) return;
-      try { await load(true); buildNav(); route(true); } catch (e) { /* offline: try again next round */ }
-    }, 60000);
+    pollT = setInterval(() => check(false), POLL_MS);
   }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) check(false); });
+  addEventListener("online", () => check(false));
+  addEventListener("focus", () => check(false));
   K.reload = async () => { await load(true); buildNav(); route(true); };
 
   /* ============================================================
@@ -312,7 +344,7 @@
     if (kk && !refresh && $("drawer").hidden && K.openKonten) K.openKonten(kk);
     staleNotice();
   }
-  addEventListener("hashchange", () => route());
+  addEventListener("hashchange", () => { route(); check(false, true); });
   K.pages = {};
   K.route = route; K.setTop = (a, b) => setTop(a, b); K.buildNav = () => buildNav();
   /* the Web App still runs an older Kerja.gs: say so once per page */

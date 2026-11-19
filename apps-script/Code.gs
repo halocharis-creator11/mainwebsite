@@ -483,7 +483,7 @@ function requireAuth_(token) {
 /* a Ruang Kerja session of a superadmin, direktur or admin also opens the website admin panel */
 function wsAdmin_(token) {
   if (!token || !PROPS.getProperty('KERJA_SS_ID')) return null;
-  try { kMemo_ = {}; const u = kAuth_(token); return u && K_SEE_ALL.indexOf(u.role) >= 0 ? u : null; } catch (e) { return null; }
+  try { kResetMemo_(); const u = kAuth_(token); return u && K_SEE_ALL.indexOf(u.role) >= 0 ? u : null; } catch (e) { return null; }
 }
 function adminLogout_(token) {
   CacheService.getScriptCache().remove('s_' + token);
@@ -814,10 +814,17 @@ function hash_(s) {
   return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8)
     .map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
 }
+let lockDepth_ = 0;
 function withLock_(fn) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
-  try { return fn(); } finally { lock.releaseLock(); }
+  lockDepth_++;
+  /* Ruang Kerja cache: read fresh version tokens once we hold the lock, publish ours before releasing it */
+  if (lockDepth_ === 1 && typeof kLockEnter_ === 'function') kLockEnter_();
+  try { return fn(); } finally {
+    lockDepth_--;
+    if (!lockDepth_) { try { if (typeof kFlush_ === 'function') kFlush_(); } finally { lock.releaseLock(); } }
+  }
 }
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);

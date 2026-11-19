@@ -155,12 +155,15 @@
     K.setTop("Administrasi");
     v.innerHTML = '<nav class="tabs" aria-label="Administrasi">' + tabs.map(([k, l]) => '<a href="#/administrasi/' + k + '"' + (k === tab ? ' aria-current="page"' : "") + ">" + l +
       (k === "cuti" && approver() && S.summary.leave_pending ? '<span class="cnt">' + S.summary.leave_pending + "</span>" : "") + "</a>").join("") + '</nav><div id="aBody"><p class="muted">Memuat data</p></div>';
+    /* show the copy we already have, ask the server only when something changed */
+    const c = cache[tab], hash = location.hash;
+    if (c && c.me === S.me.id) { RENDER[tab]($("aBody"), c.rows, q); if (c.rev === S.rev) return; q = new URLSearchParams(q); q.delete("id"); }
     try {
-      const j = await K.api("regList", { reg: tab });
-      cache[tab] = j.rows;
-      if (!$("aBody")) return;
+      const rev = S.rev, j = await K.api("regList", { reg: tab });
+      cache[tab] = { rows: j.rows, rev, me: S.me.id };
+      if (!$("aBody") || location.hash !== hash) return;
       RENDER[tab]($("aBody"), j.rows, q);
-    } catch (e) { if ($("aBody")) $("aBody").innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; }
+    } catch (e) { if ($("aBody") && !c) $("aBody").innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; else K.toast(e.message, true); }
   };
   const reload = () => K.route(true);
 

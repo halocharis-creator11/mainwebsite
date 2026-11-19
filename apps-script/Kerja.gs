@@ -14,7 +14,7 @@
  */
 
 /* Bump when this file changes; /kerja/ shows a notice when the Web App deployment is older. */
-const K_VERSION = '2026-11-19-f5';
+const K_VERSION = '2026-11-19-f6';
 const K_ROLES = ['superadmin', 'direktur', 'admin', 'bendahara', 'peneliti', 'konsultan'];
 const K_SEE_ALL = ['superadmin', 'direktur', 'admin'];          /* see every project */
 const K_SUPERADMIN_EMAIL = 'halo.charis@gmail.com';
@@ -80,8 +80,8 @@ function resetSuperadmin() {
 }
 
 /** Runs every morning: in-app reminders one day before a deadline and when a task is overdue. */
-function kerjaHarian() {
-  kMemo_ = {};
+function kerjaHarian() { kResetMemo_(); return kBatched_(kerjaHarianRun_); }
+function kerjaHarianRun_() {
   const today = kToday_(), tomorrow = kAddDays_(today, 1);
   const have = {}; kRead_('notifications').forEach(function (n) { have[n.id] = 1; });
   const projects = {}; kRead_('wprojects').forEach(function (p) { projects[p.id] = p; });
@@ -130,7 +130,10 @@ function kerjaHarian() {
    ENTRY: doPost routes { action: 'w', op: ... } here
    ============================================================ */
 function kerja_(b) {
-  kMemo_ = {};
+  kResetMemo_();
+  return kBatched_(function () { return kerjaRun_(b); });
+}
+function kerjaRun_(b) {
   const op = String(b.op || '');
   /* no session needed */
   if (op === 'login') return kLogin_(b);
@@ -144,6 +147,7 @@ function kerja_(b) {
     case 'logout':         kDeleteWhere_('sessions', function (s) { return s.id === hash_(String(b.ktoken)); }); CacheService.getScriptCache().remove('k_' + hash_(String(b.ktoken))); return { ok: true };
     case 'changePassword': return kChangePassword_(me, b);
     case 'load':           return kLoad_(me);
+    case 'sync':           return { ok: true, rev: kRev_(), changed: String(b.rev || '') !== kRev_(), version: K_VERSION };
     case 'userSave':       return kUserSave_(me, b.row || {});
     case 'userResetPw':    return kUserResetPw_(me, b.id);
     case 'projectSave':    return kProjectSave_(me, b.row || {});
@@ -284,6 +288,8 @@ function kDeny_() { throw new Error('Anda tidak memiliki akses untuk tindakan in
    LOAD: everything the signed-in person may see, in one call
    ============================================================ */
 function kLoad_(me) {
+  const rev = kRev_();
+  kCacheGet_(['wprojects', 'tasks', 'comments', 'notifications', 'milestones', 'konten', 'timesheet', 'cuti', 'kontrak'].concat(kProps_()['FIN_SS_ID'] ? ['pengajuan', 'invoice', 'transaksi'] : []));
   const projects = kRead_('wprojects').filter(function (p) { return kCanSeeProject_(me, p); });
   const pids = {}; projects.forEach(function (p) { pids[p.id] = 1; });
   const tasks = kRead_('tasks').filter(function (t) { return pids[t.project_id]; }).map(kTaskOut_);
@@ -298,9 +304,13 @@ function kLoad_(me) {
     return o;
   });
   let portfolio = [];
-  try { portfolio = readAll_('projects').map(function (r) { return { id: r.id, title: r.title_id }; }); } catch (e) { /* website sheet not reachable */ }
+  try {
+    const pc = CacheService.getScriptCache(), hit = pc.get('k_portfolio');
+    if (hit) portfolio = JSON.parse(hit);
+    else { portfolio = readAll_('projects').map(function (r) { return { id: r.id, title: r.title_id }; }); pc.put('k_portfolio', JSON.stringify(portfolio), 600); }
+  } catch (e) { /* website sheet not reachable */ }
   const hours = {}; kRead_('timesheet').forEach(function (h) { if (tids[h.task_id]) hours[h.task_id] = (hours[h.task_id] || 0) + (Number(h.hours) || 0); });
-  return { ok: true, version: K_VERSION, me: kPublicUser_(me, true), today: kToday_(), users: users, projects: projects.map(kProjectOut_),
+  return { ok: true, version: K_VERSION, rev: rev, me: kPublicUser_(me, true), today: kToday_(), users: users, projects: projects.map(kProjectOut_),
     konten: kRead_('konten').filter(function (k) { return kCanSeeKonten_(me, k); }).map(kKontenOut_), hours_by_task: hours, summary: kSummary_(me),
     milestones: kRead_('milestones').filter(function (m) { return pids[m.project_id]; }).map(kMilestoneOut_),
     tasks: tasks, comment_counts: ccount, notifications: notes, portfolio: portfolio };
@@ -521,9 +531,9 @@ function kNotifRead_(me, ids) {
     const sh = kSheet_('notifications'), values = sh.getDataRange().getValues(), h = values[0];
     const cu = h.indexOf('uid'), cr = h.indexOf('read'), ci = h.indexOf('id');
     for (let i = 1; i < values.length; i++) {
-      if (values[i][cu] === me.id && !isTrue_(values[i][cr]) && (all || want[values[i][ci]])) sh.getRange(i + 1, cr + 1).setValue(true);
+      if (values[i][cu] === me.id && !isTrue_(values[i][cr]) && (all || want[values[i][ci]])) { sh.getRange(i + 1, cr + 1).setValue(true); kTouch_('notifications'); }
     }
-    kMemo_ = {};
+    delete kMemo_.notifications;
     return { ok: true };
   });
 }
@@ -535,12 +545,21 @@ function kLog_(uid, action, entity, id, detail) {
    STORAGE HELPERS (separate spreadsheet, plain-text cells)
    ============================================================ */
 let kMemo_ = {};
+/* per-request handles: opening a spreadsheet is the slowest call in Apps Script, so do it once */
+let kSSMemo_ = null, kShMemo_ = {};
+function kResetMemo_() { kMemo_ = {}; kShMemo_ = {}; kSSMemo_ = null; kPropsMemo_ = null; kDirty_ = {}; if (typeof kFinMemo_ !== 'undefined') kFinMemo_ = null; }
+function kLockEnter_() { kPropsMemo_ = null; kMemo_ = {}; }
 function kSS_() {
+  if (kSSMemo_) return kSSMemo_;
   const id = PROPS.getProperty('KERJA_SS_ID');
   if (!id) throw new Error('Ruang Kerja belum disiapkan. Jalankan siapkanRuangKerja() di Apps Script.');
-  return SpreadsheetApp.openById(id);
+  return (kSSMemo_ = SpreadsheetApp.openById(id));
 }
 function kSheet_(name) {
+  if (kShMemo_[name]) return kShMemo_[name];
+  return (kShMemo_[name] = kSheetOpen_(name));
+}
+function kSheetOpen_(name) {
   /* finance sheets (Keuangan.gs) live in their own spreadsheet */
   const fin = typeof F_SCHEMA !== 'undefined' && F_SCHEMA[name];
   const ss = fin ? kFinSS_() : kSS_(), want = K_SCHEMA[name] || F_SCHEMA[name];
@@ -557,7 +576,57 @@ function kSheet_(name) {
   if (missing.length) sh.getRange(1, have.length + 1, 1, missing.length).setValues([missing]).setFontWeight('bold').setBackground('#E8F0EF');
   return sh;
 }
+/* ============================================================
+   SERVER CACHE
+   Each sheet is cached in CacheService under a version token. Every write sets a new random
+   token for that sheet (after the write), so a cached copy is only used while nothing changed.
+   KREV changes on any write and lets the browser ask "anything new?" without reading sheets.
+   ============================================================ */
+const K_CACHE_TTL = 21600, K_CHUNK = 30000;
+let kPropsMemo_ = null, kDirty_ = {}, kBatch_ = false;
+function kProps_() { return kPropsMemo_ || (kPropsMemo_ = PROPS.getProperties()); }
+function kVer_(name) { return kProps_()['KV_' + name] || '0'; }
+function kRev_() { return kProps_()['KREV'] || '0'; }
+function kTouch_(name) { kDirty_[name] = 1; delete kMemo_[name]; if (!kBatch_) kFlush_(); }
+function kFlush_() {
+  const names = Object.keys(kDirty_); if (!names.length) return;
+  const set = { KREV: Utilities.getUuid().slice(0, 13) };
+  names.forEach(function (n) { set['KV_' + n] = Utilities.getUuid().slice(0, 13); });
+  PROPS.setProperties(set);
+  kDirty_ = {}; kPropsMemo_ = null;
+}
+/* run a block of work with one property write at the end instead of one per changed row */
+function kBatched_(fn) {
+  const outer = kBatch_; kBatch_ = true;
+  try { return fn(); } finally { if (!outer) { kBatch_ = false; kFlush_(); } }
+}
+function kCacheKey_(name) { return 'kc_' + name + '_' + kVer_(name); }
+function kCacheGet_(names) {
+  const want = names.filter(function (n) { return !kMemo_[n] && !kDirty_[n]; });
+  if (!want.length) return;
+  const cache = CacheService.getScriptCache();
+  let heads = {}; try { heads = cache.getAll(want.map(kCacheKey_)); } catch (e) { return; }
+  const parts = [];
+  want.forEach(function (n) { const c = Number(heads[kCacheKey_(n)] || 0); for (let i = 0; i < c; i++) parts.push(kCacheKey_(n) + '_' + i); });
+  let body = {}; if (parts.length) { try { body = cache.getAll(parts); } catch (e) { return; } }
+  want.forEach(function (n) {
+    const k = kCacheKey_(n), c = Number(heads[k] || 0); if (!c) return;
+    let s = ''; for (let i = 0; i < c; i++) { const p = body[k + '_' + i]; if (p == null) return; s += p; }
+    try { kMemo_[n] = JSON.parse(s); } catch (e) { /* ignore a broken entry */ }
+  });
+}
+function kCachePut_(name, rows) {
+  if (kDirty_[name]) return;
+  try {
+    const s = JSON.stringify(rows), k = kCacheKey_(name), put = {};
+    if (s.length > K_CHUNK * 60) return;                         /* very large sheet: read it directly */
+    let n = 0; for (let i = 0; i < s.length; i += K_CHUNK) put[k + '_' + (n++)] = s.slice(i, i + K_CHUNK);
+    put[k] = String(n);
+    CacheService.getScriptCache().putAll(put, K_CACHE_TTL);
+  } catch (e) { /* cache is optional */ }
+}
 function kRead_(name) {
+  if (!kMemo_[name]) kCacheGet_([name]);
   if (kMemo_[name]) return kMemo_[name].map(function (o) { return Object.assign({}, o); });
   const values = kSheet_(name).getDataRange().getValues();
   const head = values[0] || [];
@@ -566,13 +635,16 @@ function kRead_(name) {
     head.forEach(function (h, i) { let v = r[i]; if (v instanceof Date) v = Utilities.formatDate(v, K_TZ, 'yyyy-MM-dd'); o[h] = v === null || v === undefined ? '' : (typeof v === 'boolean' ? v : String(v)); });
     return o;
   });
+  const want = K_SCHEMA[name] || (typeof F_SCHEMA !== 'undefined' && F_SCHEMA[name]) || [];
+  rows.forEach(function (o) { want.forEach(function (h) { if (!(h in o)) o[h] = ''; }); });
   kMemo_[name] = rows;
+  kCachePut_(name, rows);
   return rows.map(function (o) { return Object.assign({}, o); });
 }
 function kInsert_(name, obj) {
   const sh = kSheet_(name), head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
   sh.appendRow(head.map(function (h) { return obj[h] === undefined ? '' : kCell_(obj[h]); }));
-  delete kMemo_[name];
+  kTouch_(name);
 }
 function kUpdate_(name, id, patch) {
   const sh = kSheet_(name), values = sh.getDataRange().getValues(), head = values[0], ci = head.indexOf('id');
@@ -581,7 +653,7 @@ function kUpdate_(name, id, patch) {
       const row = values[i].slice();
       Object.keys(patch).forEach(function (k) { const c = head.indexOf(k); if (c >= 0) row[c] = kCell_(patch[k]); });
       sh.getRange(i + 1, 1, 1, head.length).setValues([row]);
-      delete kMemo_[name];
+      kTouch_(name);
       return true;
     }
   }
@@ -591,7 +663,7 @@ function kDeleteWhere_(name, test) {
   const sh = kSheet_(name), values = sh.getDataRange().getValues(), head = values[0];
   for (let i = values.length - 1; i >= 1; i--) {
     const o = {}; head.forEach(function (h, k) { o[h] = values[i][k] instanceof Date ? Utilities.formatDate(values[i][k], K_TZ, 'yyyy-MM-dd') : String(values[i][k]); });
-    if (test(o)) sh.deleteRow(i + 1);
+    if (test(o)) { sh.deleteRow(i + 1); kTouch_(name); }
   }
   delete kMemo_[name];
 }
@@ -834,4 +906,13 @@ function kSummary_(me) {
   } catch (e) { /* new sheets not ready yet */ }
   try { Object.assign(out, kFinSummary_(me)); } catch (e) { /* finance not set up yet */ }
   return out;
+}
+
+/** Run from the editor after editing the spreadsheet by hand: forces every tab to be read fresh. */
+function kosongkanCache() {
+  const set = { KREV: Utilities.getUuid().slice(0, 13) };
+  Object.keys(K_SCHEMA).concat(typeof F_SCHEMA !== 'undefined' ? Object.keys(F_SCHEMA) : []).forEach(function (n) { set['KV_' + n] = Utilities.getUuid().slice(0, 13); });
+  PROPS.setProperties(set);
+  CacheService.getScriptCache().remove('k_portfolio');
+  Logger.log('Cache Ruang Kerja dikosongkan. Semua tab akan dibaca ulang dari spreadsheet.');
 }

@@ -31,14 +31,16 @@ const F_POS_DEFAULT = [
 const F_REQ_KINDS = ['uang muka', 'reimbursement', 'pembayaran pihak ketiga'];
 const F_TAX_KINDS = ['', 'PPh 21', 'PPh 23', 'PPh 4(2)', 'PPN'];
 
+let kFinMemo_ = null;
 function kFinSS_() {
+  if (kFinMemo_) return kFinMemo_;
   let id = PROPS.getProperty('FIN_SS_ID'), ss = null;
   if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) { ss = null; } }
   if (!ss) {
     ss = SpreadsheetApp.create('CHARIS Keuangan (rahasia)');
     PROPS.setProperty('FIN_SS_ID', ss.getId());
   }
-  return ss;
+  return (kFinMemo_ = ss);
 }
 const fFull_ = function (u) { return F_FULL.indexOf(u.role) >= 0; };
 function fDeny_() { throw new Error('Anda tidak memiliki akses ke data keuangan ini.'); }
@@ -319,7 +321,7 @@ function fHonorPay_(me, b) {
    ============================================================ */
 function kFinSummary_(me) {
   const out = { req_check: 0, req_approve: 0, req_pay: 0, my_req_open: 0, invoice_due: 0 };
-  if (!PROPS.getProperty('FIN_SS_ID')) return out;
+  if (!kProps_()['FIN_SS_ID']) return out;
   const req = kRead_('pengajuan');
   out.my_req_open = req.filter(function (r) { return r.uid === me.id && ['diajukan', 'diperiksa', 'disetujui', 'revisi'].indexOf(r.status) >= 0; }).length;
   if (me.role === 'bendahara' || me.role === 'superadmin') { out.req_check = req.filter(function (r) { return r.status === 'diajukan'; }).length; out.req_pay = req.filter(function (r) { return r.status === 'disetujui'; }).length; }

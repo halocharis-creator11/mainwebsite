@@ -62,7 +62,7 @@
   async function loadFin() {
     const j = await K.api("finLoad");
     Object.assign(F, { loaded: true, full: j.full, pos: j.pos || [], pengajuan: j.pengajuan || [], honorarium: j.honorarium || [], akun_kas: j.akun_kas || [], anggaran: j.anggaran || [],
-      transaksi: j.transaksi || [], invoice: j.invoice || [], projects: j.projects || [] });
+      transaksi: j.transaksi || [], invoice: j.invoice || [], projects: j.projects || [], rev: S.rev });
   }
   const reload = () => K.reload();
 
@@ -74,11 +74,14 @@
     const s = S.summary || {}, cnt = { pengajuan: (s.req_check || 0) + (s.req_approve || 0) + (s.req_pay || 0), invoice: s.invoice_due || 0 };
     v.innerHTML = '<nav class="tabs" aria-label="Keuangan">' + tabs.map(([k, l]) => '<a href="#/keuangan/' + k + '"' + (k === tab ? ' aria-current="page"' : "") + ">" + l + (cnt[k] ? '<span class="cnt">' + cnt[k] + "</span>" : "") + "</a>").join("") +
       '</nav><div id="fBody">' + (F.loaded ? "" : '<p class="muted">Memuat data keuangan</p>') + "</div>";
+    const draw = () => { if ($("fBody") && location.hash.indexOf("#/keuangan") === 0) RENDER[tab]($("fBody"), q); };
+    /* finance data stays in memory (never on disk); refetch only when the server reports changes */
+    if (F.loaded && F.me === S.me.id) { draw(); if (F.rev === S.rev) return; q = new URLSearchParams(q); ["id", "tx"].forEach(k => q.delete(k)); }
+    const hash = location.hash;
     try {
-      await loadFin();
-      if (!$("fBody")) return;
-      RENDER[tab]($("fBody"), q);
-    } catch (e) { if ($("fBody")) $("fBody").innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; }
+      await loadFin(); F.me = S.me.id;
+      if (location.hash === hash) draw();
+    } catch (e) { if ($("fBody") && !F.loaded) $("fBody").innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; else K.toast(e.message, true); }
   };
   const RENDER = {};
   const header = (lead, btn) => '<div class="sec-h"><p class="muted" style="max-width:72ch">' + lead + "</p>" + (btn || "") + "</div>";
