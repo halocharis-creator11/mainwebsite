@@ -11,6 +11,74 @@
     '<rect x="' + (cx - 2.2) + '" y="' + (cy - r - 4) + '" width="4.4" height="6" rx="1.2" fill="' + O + '" transform="rotate(' + k * 45 + " " + cx + " " + cy + ')"/>').join("");
 
   const ICONS = {
+    /* a performance gauge with a needle */
+    policy:
+      p(1, '<path d="M8 44 A24 24 0 0 1 56 44" fill="none" stroke="' + T6 + '" stroke-width="8" stroke-linecap="round"/>') +
+      p(2, '<path d="M8 44 A24 24 0 0 1 32 20" fill="none" stroke="' + T + '" stroke-width="8" stroke-linecap="round"/>') +
+      p(3, '<path d="M44 23.2 A24 24 0 0 1 56 44" fill="none" stroke="' + O + '" stroke-width="8" stroke-linecap="round"/>') +
+      p(4, '<g class="tilt"><path d="M31 46 L44 27 L35 48 Z" fill="' + T + '"/></g><circle cx="33" cy="46" r="5" fill="' + T + '"/><circle cx="33" cy="46" r="2" fill="' + W + '"/>') +
+      p(5, '<rect x="14" y="52" width="36" height="4" rx="2" fill="' + T6 + '" opacity=".6"/>'),
+    /* an epidemic curve under watch */
+    epidemiology:
+      p(1, '<rect x="6" y="52" width="52" height="3.5" rx="1.75" fill="' + T6 + '"/>') +
+      p(2, '<path d="M6 52 C16 52 18 20 28 20 S40 50 58 50 V52 Z" fill="' + T6 + '" opacity=".55"/>') +
+      p(3, '<path class="draw" d="M6 52 C16 52 18 20 28 20 S40 50 58 50" fill="none" stroke="' + T + '" stroke-width="3.5" stroke-linecap="round" pathLength="1"/>') +
+      p(4, '<g class="pulse"><circle cx="28" cy="20" r="6" fill="' + O + '"/><circle cx="28" cy="20" r="2.4" fill="' + W + '"/></g>') +
+      p(5, '<g fill="' + T8 + '"><circle cx="44" cy="12" r="3"/><circle cx="51" cy="18" r="2.4"/><circle cx="13" cy="34" r="2.4"/></g>'),
+    /* a shield holding a pulse line */
+    resilience:
+      p(1, '<path d="M32 5 L55 13 V31 C55 45 45 55 32 60 C19 55 9 45 9 31 V13 Z" fill="' + T + '"/>') +
+      p(2, '<path d="M32 5 L55 13 V31 C55 45 45 55 32 60 Z" fill="' + T8 + '"/>') +
+      p(3, '<path class="draw" d="M15 33 H24 L28 24 L34 42 L38 33 H49" fill="none" stroke="' + O + '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>'),
+    /* a device feeding a supply box */
+    digital:
+      p(1, '<rect x="6" y="9" width="34" height="26" rx="4" fill="' + T + '"/>') +
+      p(2, '<rect x="10" y="13" width="26" height="18" rx="2" fill="' + T6 + '"/><rect x="18" y="35" width="10" height="5" fill="' + T8 + '"/><rect x="12" y="40" width="22" height="3.5" rx="1.75" fill="' + T8 + '"/>') +
+      p(3, '<path class="flow" d="M36 46 C44 46 44 38 50 38" fill="none" stroke="' + T6 + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 5"/>') +
+      p(4, '<g class="bob"><path d="M42 40 L52 35 L62 40 V54 L52 59 L42 54 Z" fill="' + O + '"/><path d="M42 40 L52 45 L62 40 M52 45 V59" fill="none" stroke="' + O2 + '" stroke-width="2.4" stroke-linejoin="round"/></g>') +
+      p(5, '<path d="M14 26 L19 21 L24 24 L31 17" fill="none" stroke="' + W + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'),
+    /* a community under one heart */
+    public_health:
+      p(1, '<g fill="' + T6 + '"><circle cx="13" cy="33" r="5.5"/><path d="M3 55 A10 10 0 0 1 23 55 Z"/></g>') +
+      p(2, '<g fill="' + T6 + '"><circle cx="51" cy="33" r="5.5"/><path d="M41 55 A10 10 0 0 1 61 55 Z"/></g>') +
+      p(3, '<g fill="' + T + '"><circle cx="32" cy="30" r="7"/><path d="M19 57 A13 13 0 0 1 45 57 Z"/></g>') +
+      p(4, '<g class="pulse"><path d="M32 19 C26 14 22 11 22 7 A4.6 4.6 0 0 1 32 5.5 A4.6 4.6 0 0 1 42 7 C42 11 38 14 32 19 Z" fill="' + O + '"/></g>'),
+    /* a system map: linked boxes with a moving flow */
+    hpsr:
+      p(1, '<rect x="23" y="5" width="18" height="13" rx="3" fill="' + T + '"/>') +
+      p(2, '<path class="flow" d="M32 18 V28 M12 28 H52 M12 28 V36 M52 28 V36 M32 28 V36" fill="none" stroke="' + T6 + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 4.5"/>') +
+      p(3, '<rect x="4" y="36" width="16" height="13" rx="3" fill="' + T8 + '"/><rect x="44" y="36" width="16" height="13" rx="3" fill="' + T8 + '"/>') +
+      p(4, '<g class="bob"><rect x="24" y="36" width="16" height="13" rx="3" fill="' + O + '"/></g>') +
+      p(5, '<rect x="9" y="53" width="46" height="4" rx="2" fill="' + T6 + '" opacity=".6"/>'),
+    /* an idea bulb with a working gear */
+    innovation:
+      p(1, '<path d="M26 4 A17 17 0 0 0 16 35 V43 H36 V35 A17 17 0 0 0 26 4 Z" fill="' + T8 + '"/>') +
+      p(2, '<rect x="17" y="46" width="18" height="4.5" rx="2.25" fill="' + T + '"/><rect x="19.5" y="53" width="13" height="4.5" rx="2.25" fill="' + T + '"/>') +
+      p(3, '<path d="M21 26 L26 31 L31 23" fill="none" stroke="' + W + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>') +
+      p(4, '<g class="spin">' + gearTeeth(48, 40, 9) + '<circle cx="48" cy="40" r="9" fill="' + O + '"/><circle cx="48" cy="40" r="3.6" fill="' + W + '"/></g>'),
+    /* a guideline book with a ribbon */
+    standards:
+      p(1, '<path d="M10 8 H44 A4 4 0 0 1 48 12 V56 H14 A4 4 0 0 1 10 52 Z" fill="' + T + '"/>') +
+      p(2, '<path d="M10 50 A4 4 0 0 1 14 46 H48 V56 H14 A4 4 0 0 1 10 52 Z" fill="' + T6 + '"/>') +
+      p(3, '<g fill="none" stroke="' + W + '" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 19 L20 22 L25 16"/><path d="M17 31 L20 34 L25 28"/><path d="M29 19 H40 M29 31 H38"/></g>') +
+      p(4, '<g class="stamp"><path d="M46 4 H58 V24 L52 19.5 L46 24 Z" fill="' + O + '"/></g>'),
+    /* a briefcase with a rising chart */
+    management:
+      p(1, '<rect x="5" y="20" width="40" height="32" rx="5" fill="' + T + '"/>') +
+      p(2, '<path d="M17 20 V15 A3 3 0 0 1 20 12 H30 A3 3 0 0 1 33 15 V20" fill="none" stroke="' + T8 + '" stroke-width="4"/><rect x="5" y="31" width="40" height="4" fill="' + T8 + '"/><rect x="21" y="29" width="8" height="8" rx="2" fill="' + O + '"/>') +
+      p(3, '<rect class="grow" x="46" y="40" width="6" height="14" rx="2" fill="' + T6 + '"/>') +
+      p(4, '<rect class="grow g2" x="54" y="30" width="6" height="24" rx="2" fill="' + O + '"/>'),
+    /* two pieces that fit together */
+    integration:
+      p(1, '<path d="M6 14 H24 A6 6 0 1 1 36 14 H38 V30 A6 6 0 1 0 38 42 V52 H6 Z" fill="' + T + '"/>') +
+      p(2, '<g class="slide"><path d="M42 26 A6 6 0 1 1 42 38 V52 H58 V14 H42 Z" fill="' + O + '"/></g>') +
+      p(3, '<rect x="13" y="25" width="16" height="3.5" rx="1.75" fill="' + W + '" opacity=".7"/><rect x="13" y="33" width="11" height="3.5" rx="1.75" fill="' + W + '" opacity=".7"/>'),
+    /* partners joined around a shared programme */
+    programs:
+      p(1, '<path class="flow" d="M14 46 L32 14 L50 46 Z" fill="none" stroke="' + T6 + '" stroke-width="3" stroke-linejoin="round" stroke-dasharray="1 5"/>') +
+      p(2, '<circle cx="32" cy="14" r="8" fill="' + T + '"/><circle cx="14" cy="46" r="8" fill="' + T8 + '"/><circle cx="50" cy="46" r="8" fill="' + T8 + '"/>') +
+      p(3, '<g class="pulse"><circle cx="32" cy="36" r="6" fill="' + O + '"/></g>') +
+      p(4, '<g fill="' + W + '"><circle cx="32" cy="14" r="2.6"/><circle cx="14" cy="46" r="2.6"/><circle cx="50" cy="46" r="2.6"/></g>'),
     /* coins stacking up, with a rising trend */
     financing:
       p(1, '<rect x="8" y="41" width="28" height="10" rx="5" fill="' + T + '"/>') +
@@ -113,6 +181,7 @@
       '<path class="pl-ln" d="M18 17 H38 A4 4 0 0 1 42 21 V31 A4 4 0 0 1 38 35 H27 L20 41 V35 H18 A4 4 0 0 1 14 31 V21 A4 4 0 0 1 18 17 Z" fill="none" stroke="' + W + '" stroke-width="3" stroke-linejoin="round" pathLength="1"/>' +
       '<circle class="pl-dot pl-type" style="--i:1" cx="21.5" cy="26" r="2.4" fill="' + W + '"/><circle class="pl-dot pl-type" style="--i:2" cx="28" cy="26" r="2.4" fill="' + W + '"/><circle class="pl-dot pl-type pl-acc2" style="--i:3" cx="34.5" cy="26" r="2.4" fill="' + T + '"/>'
   };
+  ICONS.resources = ICONS.resources || ICONS.workforce;
   window.pillarIcon = function (p) {
     return PILLAR[p] ? '<svg class="pic pic-' + p + '" viewBox="0 0 56 56" aria-hidden="true" focusable="false">' + PILLAR[p] + "</svg>" : "";
   };

@@ -405,15 +405,19 @@
       const jump = '<nav class="svc-jump" aria-label="' + esc(t("svc.jump")) + '"><div class="wrap"><ul>' + PILLARS.map(p => '<li class="sj-g">' + shape(p) + "<span>" + esc(t("p." + p + ".t")) + "</span></li>" +
         SV.filter(s => s.pillar === p).map(s => '<li><a href="#/services" data-svc-jump="' + s.key + '"><span>' + esc(s[lang].t) + "</span></a></li>").join("")).join("") + "</ul></div></nav>";
       app.innerHTML = pageTop(t("work.t"), t("work.page.lead")) + banner("services") + jump +
-        '<section class="sec svc-sec"><div class="wrap">' + PILLARS.map(p =>
-          '<section class="pgroup2" id="pillar-' + p + '"><header class="pgroup2-head">' + shape(p) + "<div><p class=\"pg-kicker\">" + esc(t("svc.pillar")) + '</p><h2>' + esc(t("p." + p + ".t")) + "</h2><p>" + esc(t("p." + p + ".d")) + "</p></div></header>" +
-          SV.filter(s => s.pillar === p).map(s =>
-            '<article class="svc" id="svc-' + s.key + '"><div class="svc-main"><div class="svc-head"><h3>' + esc(s[lang].t) + "</h3></div><p>" + esc(s[lang].d) + '</p><p class="svc-label">' + esc(t("svc.scope")) + '</p><ul class="svc-scope">' + s[lang].items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
-            '<p class="svc-links"><a class="btn-text" href="#/research" data-svc-repo="' + s.key + '">' + esc(t("svc.allRepo")) + '</a><a class="btn-text" href="#/projects" data-svc-proj="' + s.key + '">' + esc(t("svc.projects")) + "</a></p></div>" +
-            '<div class="svc-out"><p class="svc-label">' + esc(t("svc.outputs")) + '</p><ol class="out-list">' + (s[lang].outputs || []).map(o => "<li><span>" + esc(o[0]) + "</span>" + (o[1] ? "<small>" + esc(o[1]) + "</small>" : "") + "</li>").join("") + "</ol></div>" +
-            '<div class="svc-ex" data-ex="' + s.key + '"><p class="svc-label">' + esc(t("svc.examples")) + '</p><div class="ex-row">' + msg("loading") + "</div></div></article>").join("") +
-          "</section>").join("") + "</div></section>" +
-        '<section class="sec sec-tint"><div class="wrap">' + secHead(t("steps.t")) + steps() + '<p class="cta-line"><a class="btn" href="#/contact">' + esc(t("svc.ask")) + "</a></p></div></section>";
+        PILLARS.map(p => { const list = SV.filter(s => s.pillar === p), ph = photo("svc_" + p);
+          return '<section class="psec psec-' + p + (ph ? " has-photo" : "") + '" id="pillar-' + p + '" aria-labelledby="ph-' + p + '"><div class="psec-bg" aria-hidden="true">' +
+            (ph ? '<img src="' + esc(API.img(ph.src, 2000)) + '" alt="" decoding="async" style="object-position:' + esc(ph.pos || "center") + '">' : motif()) + "</div>" +
+            '<div class="wrap"><header class="psec-head">' + pillarIcon(p) + '<div><p class="psec-k">' + list.length + " " + esc(t("svc.count")) + '</p><h2 id="ph-' + p + '">' + esc(t("p." + p + ".t")) + "</h2><p>" + esc(t("p." + p + ".d")) + "</p></div>" + (ph ? credit(ph) : "") + "</header>" +
+            '<div class="svc-cards">' + list.map(s => { const sp = (cfg.SERVICE_PHOTOS || {})[s.key];
+              return '<article class="svc svc-card' + (sp && sp.src ? " has-photo" : "") + '" id="svc-' + s.key + '"><header class="svc-top">' + (sp && sp.src ? '<img class="svc-ph" src="' + esc(API.img(sp.src, 1400)) + '" alt="" loading="lazy" decoding="async" style="object-position:' + esc(sp.pos || "center") + '">' : "") +
+                '<span class="ic-tile">' + svcIcon(s.key) + "</span><h3>" + esc(s[lang].t) + "</h3></header>" +
+                '<div class="svc-main"><p>' + esc(s[lang].d) + '</p><p class="svc-label">' + esc(t("svc.scope")) + '</p><ul class="svc-scope">' + s[lang].items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul>" +
+                '<p class="svc-links"><a class="btn-text" href="#/research" data-svc-repo="' + s.key + '">' + esc(t("svc.allRepo")) + '</a><a class="btn-text" href="#/projects" data-svc-proj="' + s.key + '">' + esc(t("svc.projects")) + "</a></p></div>" +
+                '<div class="svc-out"><p class="svc-label">' + esc(t("svc.outputs")) + '</p><ol class="out-list">' + (s[lang].outputs || []).map(o => "<li><span>" + esc(o[0]) + "</span>" + (o[1] ? "<small>" + esc(o[1]) + "</small>" : "") + "</li>").join("") + "</ol></div>" +
+                '<div class="svc-ex" data-ex="' + s.key + '"><p class="svc-label">' + esc(t("svc.examples")) + '</p><div class="ex-row">' + msg("loading") + "</div></div></article>"; }).join("") +
+            "</div></div></section>"; }).join("") +
+        '<section class="sec steps-sec"><div class="wrap">' + secHead(t("steps.t")) + stepCards() + '<p class="cta-line"><a class="btn" href="#/contact">' + esc(t("svc.ask")) + "</a></p></div></section>";
       const target = focus && (document.getElementById("svc-" + svcKey(focus)) || document.getElementById("pillar-" + focus));
       if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
       app.querySelector(".svc-jump").addEventListener("click", e => {

@@ -13,8 +13,23 @@ hero: { src: *assets/img/foto/posyandu.jpg*, alt: *Kader posyandu menimbang bali
 | `highlight` | Bagian *Pembiayaan kesehatan* di beranda | min. 1400 × 1050 px |
 | `about` | Banner halaman Tentang Kami | min. 2000 × 760 px |
 | `services` | Banner halaman Layanan Kami | min. 2000 × 760 px |
+| `vision` | Latar samar di belakang pita visi dan misi (beranda dan Tentang Kami), tampil hitam putih | lebar min. 2000 px |
+| `svc_a` | Latar bidang Analisis Kesehatan di halaman Layanan | lebar min. 2000 px, landscape |
+| `svc_r` | Latar bidang Penelitian dan Pengembangan | lebar min. 2000 px, landscape |
+| `svc_s` | Latar bidang Layanan Kesehatan Terintegrasi | lebar min. 2000 px, landscape |
 
-Kosongkan `src` untuk memakai motif balok CHARIS. Simpan sebagai JPG berkualitas 80 sampai 85%, idealnya di bawah 400 KB per foto.
+Kosongkan `src` untuk memakai motif balok CHARIS. Foto latar bidang (`svc_a`, `svc_r`, `svc_s`) diberi warna bidangnya dan dibuat transparan, jadi foto kegiatan biasa pun tetap tampak rapi. Bila bagian penting foto bukan di tengah, tambahkan `pos`, misalnya `pos: "center 30%"` (geser fokus ke atas).
+
+Foto juga bisa dipasang per layanan, tampil samar di kepala kartu layanan tersebut. Tambahkan di `config.js`, di luar `PHOTOS`:
+
+```js
+SERVICE_PHOTOS: {
+  financing: { src: "assets/img/foto/lokakarya-biaya-satuan.jpg", pos: "center" },
+  training:  { src: "assets/img/foto/pelatihan-nakes.jpg" }
+},
+```
+
+Kode layanan: analytics, financing, policy, resources, epidemiology, resilience, digital (Analisis Kesehatan); public_health, hpsr, evaluation, innovation, standards, grants (Penelitian dan Pengembangan); planning, management, quality, integration, facility_tools, training, programs (Layanan Kesehatan Terintegrasi). Simpan sebagai JPG berkualitas 80 sampai 85%, idealnya di bawah 400 KB per foto.
 
 ## Sumber foto yang aman dipakai
 
