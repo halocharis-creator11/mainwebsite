@@ -14,7 +14,7 @@
  */
 
 /* Bump when this file changes; /kerja/ shows a notice when the Web App deployment is older. */
-const K_VERSION = '2026-11-19-f6';
+const K_VERSION = '2026-11-19-f7';
 const K_ROLES = ['superadmin', 'direktur', 'admin', 'bendahara', 'peneliti', 'konsultan'];
 const K_SEE_ALL = ['superadmin', 'direktur', 'admin'];          /* see every project */
 const K_SUPERADMIN_EMAIL = 'halo.charis@gmail.com';
@@ -35,7 +35,13 @@ const K_SCHEMA = {
   notifications: ['id', 'uid', 'kind', 'text', 'link', 'read', 'created'],
   activity:      ['id', 'ts', 'uid', 'action', 'entity', 'entity_id', 'detail'],
   /* phase 3: content workflow (repository products, news, portfolio updates) */
-  konten:        ['id', 'type', 'title', 'ref_id', 'stage', 'owner_uid', 'assignees', 'due', 'priority', 'notes', 'link', 'doi', 'project_id', 'created_by', 'created', 'updated', 'done_at'],
+  konten:        ['id', 'type', 'title', 'ref_id', 'stage', 'owner_uid', 'assignees', 'due', 'priority', 'notes', 'link', 'doi', 'project_id', 'created_by', 'created', 'updated', 'done_at',
+                  'web_id', 'web_status', 'review', 'published_at', 'published_by', 'draft_sig', 'pub_sig'],
+  /* website text being written for a news item or portfolio entry (one row per content item) */
+  naskah:        ['id', 'web_type', 'updated', 'updated_by', 'category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured',
+                  'disclosure', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role', 'summary_id', 'summary_en',
+                  'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'client', 'funder', 'partners', 'official_title',
+                  'location_detail', 'related_publications', 'testimonial_id', 'testimonial_en', 'testimonial_by', 'areas', 'photo_public'],
   /* phase 4: administration */
   surat:         ['id', 'direction', 'number', 'seq', 'code', 'date', 'subject', 'party', 'ref_number', 'project_id', 'file_url', 'notes', 'created_by', 'created', 'updated'],
   kontrak:       ['id', 'kind', 'number', 'title', 'party', 'project_id', 'value', 'start', 'end', 'file_url', 'notes', 'created_by', 'created', 'updated'],
@@ -161,6 +167,15 @@ function kerjaRun_(b) {
     case 'notifRead':      return kNotifRead_(me, b.ids);
     case 'kontenSave':     return kKontenSave_(me, b.row || {});
     case 'kontenDelete':   return kKontenDelete_(me, b.id);
+    case 'kontenGet':      return kKontenGet_(me, b.id);
+    case 'kontenDraft':    return kKontenDraft_(me, b);
+    case 'kontenReview':   return kKontenReview_(me, b);
+    case 'kontenPublish':  return kKontenPublish_(me, b);
+    case 'kontenUnpublish': return kKontenUnpublish_(me, b);
+    case 'webList':        return kWebList_(me);
+    case 'webToggle':      return kWebToggle_(me, b);
+    case 'webImport':      return kWebImport_(me, b);
+    case 'upload':         return kUpload_(me, b);
     case 'regList':        return kRegList_(me, b.reg);
     case 'regSave':        return kRegSave_(me, b.reg, b.row || {});
     case 'regDelete':      return kRegDelete_(me, b.reg, b.id);
@@ -692,7 +707,10 @@ function kCanSeeKonten_(u, k) { return kSeesAll_(u) || u.role === 'peneliti' || 
 function kCanEditKonten_(u, k) { return kSeesAll_(u) || kKontenPeople_(k).indexOf(u.id) >= 0; }
 function kKontenOut_(k) {
   return { id: k.id, type: k.type, title: k.title, ref_id: k.ref_id, stage: k.stage || 'draf', owner_uid: k.owner_uid, assignees: kJson_(k.assignees, {}), due: k.due,
-    priority: k.priority || 'sedang', notes: k.notes, link: k.link, doi: k.doi, project_id: k.project_id, created_by: k.created_by, created: k.created, updated: k.updated, done_at: k.done_at };
+    priority: k.priority || 'sedang', notes: k.notes, link: k.link, doi: k.doi, project_id: k.project_id, created_by: k.created_by, created: k.created, updated: k.updated, done_at: k.done_at,
+    web_id: k.web_id || '', web_status: k.web_status || '', review: kJson_(k.review, null), published_at: k.published_at || '', published_by: k.published_by || '',
+    has_draft: !!k.draft_sig, pending: k.web_status === 'tayang' && !!k.draft_sig && k.draft_sig !== k.pub_sig,
+    review_ok: !!(kJson_(k.review, null) && kJson_(k.review, {}).d === 'setuju' && kJson_(k.review, {}).sig === k.draft_sig) };
 }
 function kKontenSave_(me, r) {
   return withLock_(function () {
@@ -729,6 +747,7 @@ function kKontenDelete_(me, id) {
   return withLock_(function () {
     kDeleteWhere_('comments', function (c) { return c.task_id === id; });
     kDeleteWhere_('konten', function (x) { return x.id === id; });
+    kDeleteWhere_('naskah', function (x) { return x.id === id; });
     kLog_(me.id, 'hapus konten', 'konten', id, k.title);
     return { ok: true };
   });
@@ -915,4 +934,204 @@ function kosongkanCache() {
   PROPS.setProperties(set);
   CacheService.getScriptCache().remove('k_portfolio');
   Logger.log('Cache Ruang Kerja dikosongkan. Semua tab akan dibaca ulang dari spreadsheet.');
+}
+
+
+/* ============================================================
+   PHASE 6: WRITE, REVIEW AND PUBLISH WEBSITE CONTENT
+   News and announcements (website tab "news") and portfolio entries ("projects") are written here,
+   reviewed, then published straight to the website sheets that the public site reads.
+   ============================================================ */
+const K_WEB = { berita: 'news', portofolio: 'projects' };
+const K_NASKAH = {
+  news: ['category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured'],
+  projects: ['disclosure', 'title_id', 'title_en', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role',
+    'summary_id', 'summary_en', 'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'client', 'funder', 'partners',
+    'official_title', 'location_detail', 'image_url', 'related_publications', 'testimonial_id', 'testimonial_en', 'testimonial_by', 'date', 'areas', 'photo_public']
+};
+const K_NASKAH_LONG = { body_id: 20000, body_en: 20000, summary_id: 8000, summary_en: 8000, excerpt_id: 2000, excerpt_en: 2000, testimonial_id: 3000, testimonial_en: 3000 };
+const K_NASKAH_BOOL = { featured: 1, photo_public: 1 };
+const K_PUBLISHERS = ['superadmin', 'direktur', 'admin'];
+function kCanPublish_(u) { return K_PUBLISHERS.indexOf(u.role) >= 0; }
+function kWebUrl_(wt, id) { return CONTACT.site + (wt === 'news' ? '#/latest/' : '#/projects/') + encodeURIComponent(id); }
+function kKonten_(id) { return kRead_('konten').filter(function (k) { return k.id === id; })[0] || null; }
+function kDraftOf_(k) {
+  const wt = K_WEB[k.type], n = kRead_('naskah').filter(function (x) { return x.id === k.id; })[0], o = {};
+  if (!wt) return o;
+  /* cells that start with = + - @ are stored with a leading apostrophe (formula guard); hand back the text as written */
+  K_NASKAH[wt].forEach(function (f) { o[f] = n ? (K_NASKAH_BOOL[f] ? isTrue_(n[f]) : String(n[f] == null ? '' : n[f]).replace(/^'(?=[=+\-@])/, '')) : (K_NASKAH_BOOL[f] ? false : ''); });
+  return o;
+}
+function kSig_(wt, d) { return hash_(JSON.stringify(K_NASKAH[wt].map(function (f) { return K_NASKAH_BOOL[f] ? isTrue_(d[f]) : String(d[f] == null ? '' : d[f]).trim(); }))).slice(0, 16); }
+function kWebRow_(wt, id) {
+  if (!id) return null;
+  try { return readAll_(wt).filter(function (r) { return String(r.id) === String(id); })[0] || null; } catch (e) { return null; }
+}
+function kWebStats_() {
+  const out = {};
+  try { readAll_('stats').forEach(function (r) { out[r.id] = { reads: Number(r.reads) || 0, shares: Number(r.shares) || 0 }; }); } catch (e) { /* no stats yet */ }
+  return out;
+}
+function kWebPeople_(k, me) { return kKontenPeople_(k).filter(function (u) { return u !== me.id; }); }
+
+function kKontenGet_(me, id) {
+  const k = kKonten_(id);
+  if (!k || !kCanSeeKonten_(me, k)) return { ok: false, error: 'Item tidak ditemukan atau Anda tidak memiliki akses.' };
+  const wt = K_WEB[k.type], out = { ok: true, item: kKontenOut_(k), web_type: wt || '', draft: kDraftOf_(k), can_publish: kCanPublish_(me) };
+  if (wt && k.web_id) {
+    const w = kWebRow_(wt, k.web_id);
+    if (w) { const o = { published: isTrue_(w.published) }; K_NASKAH[wt].forEach(function (f) { o[f] = K_NASKAH_BOOL[f] ? isTrue_(w[f]) : String(w[f] == null ? '' : w[f]); }); out.web = o; }
+    out.url = kWebUrl_(wt, k.web_id);
+    out.stats = kWebStats_()[k.web_id] || { reads: 0, shares: 0 };
+  }
+  return out;
+}
+function kKontenDraft_(me, b) {
+  return withLock_(function () {
+    const k = kKonten_(b.id);
+    if (!k) return { ok: false, error: 'Item tidak ditemukan.' };
+    if (!kCanEditKonten_(me, k)) kDeny_();
+    const wt = K_WEB[k.type]; if (!wt) return { ok: false, error: 'Naskah website hanya untuk berita dan portofolio.' };
+    const d = b.draft || {}, row = { id: k.id, web_type: wt, updated: kNow_(), updated_by: me.id };
+    K_NASKAH[wt].forEach(function (f) {
+      if (d[f] === undefined) return;
+      if (K_NASKAH_BOOL[f]) row[f] = isTrue_(d[f]);
+      else if (f === 'image_url') row[f] = kUrl_(d[f]);
+      else if (f === 'date') row[f] = kDate_(d[f]);
+      else if (f === 'disclosure') row[f] = ['A', 'B', 'C', 'D'].indexOf(String(d[f]).toUpperCase()) >= 0 ? String(d[f]).toUpperCase() : '';
+      else row[f] = String(d[f] == null ? '' : d[f]).replace(/\r/g, '').slice(0, K_NASKAH_LONG[f] || 1500);
+    });
+    const have = kRead_('naskah').some(function (x) { return x.id === k.id; });
+    if (!have && !row.date) row.date = kToday_();                 /* a fixed date keeps the reviewed version identical at publish time */
+    if (wt === 'news' && !have && !row.category) row.category = 'Berita';
+    if (have) kUpdate_('naskah', k.id, row); else kInsert_('naskah', row);
+    const draft = kDraftOf_(Object.assign({}, k)), sig = kSig_(wt, draft), patch = { draft_sig: sig, updated: kNow_() };
+    if (draft.title_id && draft.title_id !== k.title) patch.title = clean_(draft.title_id, 300);
+    kUpdate_('konten', k.id, patch);
+    kLog_(me.id, 'ubah naskah', 'konten', k.id, patch.title || k.title);
+    return { ok: true, item: kKontenOut_(Object.assign({}, k, patch)), draft: draft };
+  });
+}
+/* reviewer decision: approve (moves on to layout) or send back to draft */
+function kKontenReview_(me, b) {
+  return withLock_(function () {
+    const k = kKonten_(b.id); if (!k) return { ok: false, error: 'Item tidak ditemukan.' };
+    const a = kJson_(k.assignees, {}), reviewer = a.telaah === me.id || kSeesAll_(me);
+    if (!reviewer) return { ok: false, error: 'Hanya penelaah tahap Telaah internal atau pimpinan yang dapat memberi keputusan.' };
+    if (k.owner_uid === me.id && a.telaah && a.telaah !== me.id && !kCanPublish_(me)) return { ok: false, error: 'Naskah sendiri ditelaah oleh orang lain.' };
+    const ok = b.decision === 'setuju', note = clean_(b.note, 3000), now = kNow_();
+    const patch = { review: JSON.stringify({ d: ok ? 'setuju' : 'revisi', by: me.id, at: now, note: note, sig: k.draft_sig || '' }), stage: ok ? (K_STAGES.indexOf(k.stage) < K_STAGES.indexOf('tata_letak') ? 'tata_letak' : k.stage) : 'draf', updated: now };
+    kUpdate_('konten', k.id, patch);
+    kInsert_('comments', { id: 'C-' + kShortId_(), task_id: k.id, uid: me.id, body: (ok ? 'Telaah: disetujui untuk terbit.' : 'Telaah: perlu revisi.') + (note ? '\n' + note : ''), mentions: '', created: now });
+    kNotify_(k.owner_uid, 'persetujuan', (ok ? 'Naskah disetujui penelaah: ' : 'Naskah perlu revisi: ') + k.title + (note ? '. ' + note.slice(0, 120) : ''), 'konten:' + k.id, me.id);
+    if (ok) {
+      const next = a.tata_letak || a.terbit;
+      if (next) kNotify_(next, 'tugas', 'Naskah siap dilanjutkan: ' + k.title, 'konten:' + k.id, me.id);
+      kRead_('users').filter(function (u) { return u.status === 'aktif' && kCanPublish_(u) && u.id !== me.id && u.id !== next; }).slice(0, 5)
+        .forEach(function (u) { kNotify_(u.id, 'persetujuan', 'Naskah siap diterbitkan ke website: ' + k.title, 'konten:' + k.id, me.id); });
+    }
+    kLog_(me.id, ok ? 'setujui naskah' : 'minta revisi naskah', 'konten', k.id, k.title);
+    return { ok: true, item: kKontenOut_(Object.assign({}, k, patch)) };
+  });
+}
+function kNextProjectId_() {
+  const y = kToday_().slice(0, 4), re = new RegExp('^PRJ-' + y + '-(\\d+)$');
+  let max = 0; readAll_('projects').forEach(function (r) { const m = String(r.id).match(re); if (m) max = Math.max(max, Number(m[1])); });
+  return 'PRJ-' + y + '-' + ('00' + (max + 1)).slice(-3);
+}
+function kKontenPublish_(me, b) {
+  if (!kCanPublish_(me)) return { ok: false, error: 'Hanya superadmin, direktur, dan admin yang dapat menerbitkan ke website.' };
+  return withLock_(function () {
+    const k = kKonten_(b.id); if (!k) return { ok: false, error: 'Item tidak ditemukan.' };
+    const wt = K_WEB[k.type]; if (!wt) return { ok: false, error: 'Produk repositori diterbitkan lewat GitHub.' };
+    const d = kDraftOf_(k), sig = kSig_(wt, d), rv = kJson_(k.review, null);
+    if (!d.title_id) return { ok: false, error: 'Judul (Bahasa Indonesia) di naskah masih kosong.' };
+    if (wt === 'news' && !d.body_id && !d.excerpt_id) return { ok: false, error: 'Isi atau ringkasan berita masih kosong.' };
+    if (wt === 'projects' && ['A', 'B', 'C'].indexOf(d.disclosure) < 0) return { ok: false, error: 'Pilih tingkat keterbukaan A, B, atau C. Tingkat D tidak ditayangkan di website.' };
+    if (!(rv && rv.d === 'setuju' && rv.sig === sig) && !isTrue_(b.force)) return { ok: false, need_force: true, error: 'Versi naskah ini belum disetujui penelaah.' };
+    const row = { published: true };
+    K_NASKAH[wt].forEach(function (f) { row[f] = d[f]; });
+    if (!row.date) row.date = kToday_();
+    row.id = k.web_id || (wt === 'projects' ? kNextProjectId_() : 'N-' + kToday_().replace(/-/g, '') + '-' + Utilities.getUuid().replace(/-/g, '').slice(0, 6));
+    const saved = save_(wt, row);
+    try { CacheService.getScriptCache().remove('k_portfolio'); } catch (e) {}
+    const now = kNow_(), first = !k.web_id || k.web_status !== 'tayang';
+    const patch = { web_id: saved.id, web_status: 'tayang', published_at: now, published_by: me.id, pub_sig: sig, draft_sig: sig, link: kWebUrl_(wt, saved.id), updated: now };
+    if (K_STAGES.indexOf(k.stage) < K_STAGES.indexOf('terbit')) patch.stage = 'terbit';
+    kUpdate_('konten', k.id, patch);
+    kWebPeople_(k, me).forEach(function (uid) { kNotify_(uid, 'persetujuan', (first ? 'Tayang di website: ' : 'Versi tayang diperbarui: ') + k.title, 'konten:' + k.id, me.id); });
+    const a = kJson_(k.assignees, {}); if (a.diseminasi && first) kNotify_(a.diseminasi, 'tugas', 'Sudah tayang, giliran diseminasi: ' + k.title, 'konten:' + k.id, me.id);
+    kLog_(me.id, first ? 'terbitkan ke website' : 'perbarui versi tayang', 'konten', k.id, k.title);
+    return { ok: true, item: kKontenOut_(Object.assign({}, k, patch)), url: patch.link };
+  });
+}
+function kKontenUnpublish_(me, b) {
+  if (!kCanPublish_(me)) return { ok: false, error: 'Hanya superadmin, direktur, dan admin yang dapat menarik konten dari website.' };
+  return withLock_(function () {
+    const k = kKonten_(b.id); if (!k || !k.web_id) return { ok: false, error: 'Item ini belum tayang di website.' };
+    save_(K_WEB[k.type], { id: k.web_id, published: false });
+    try { CacheService.getScriptCache().remove('k_portfolio'); } catch (e) {}
+    const patch = { web_status: 'ditarik', updated: kNow_() };
+    kUpdate_('konten', k.id, patch);
+    kLog_(me.id, 'tarik dari website', 'konten', k.id, k.title);
+    return { ok: true, item: kKontenOut_(Object.assign({}, k, patch)) };
+  });
+}
+/* everything currently on the website, with reads and shares, for the "Di website" control view */
+function kWebList_(me) {
+  if (!kSeesAll_(me)) kDeny_();
+  const links = {}; kRead_('konten').forEach(function (k) { if (k.web_id) links[K_WEB[k.type] + ':' + k.web_id] = k.id; });
+  const st = kWebStats_(), map = function (wt) {
+    let rows = []; try { rows = readAll_(wt); } catch (e) {}
+    return rows.map(function (r) {
+      const s = st[r.id] || {};
+      return { id: String(r.id), title: String(r.title_id || ''), category: String(r.category || ''), disclosure: String(r.disclosure || ''), date: String(r.date || ''),
+        published: isTrue_(r.published), featured: isTrue_(r.featured), image_url: String(r.image_url || ''), reads: s.reads || 0, shares: s.shares || 0, konten_id: links[wt + ':' + r.id] || '', url: kWebUrl_(wt, r.id) };
+    });
+  };
+  return { ok: true, news: map('news'), projects: map('projects'), can_publish: kCanPublish_(me) };
+}
+function kWebToggle_(me, b) {
+  if (!kCanPublish_(me)) return { ok: false, error: 'Hanya superadmin, direktur, dan admin yang dapat mengubah tayangan website.' };
+  const wt = b.type === 'projects' ? 'projects' : 'news', field = b.field === 'featured' && wt === 'news' ? 'featured' : 'published', on = isTrue_(b.value);
+  return withLock_(function () {
+    const w = kWebRow_(wt, b.web_id); if (!w) return { ok: false, error: 'Item website tidak ditemukan.' };
+    if (field === 'published' && on && wt === 'projects' && ['A', 'B', 'C'].indexOf(String(w.disclosure).toUpperCase()) < 0) return { ok: false, error: 'Tingkat keterbukaan proyek ini D atau kosong, jadi tidak dapat ditayangkan.' };
+    const row = { id: w.id }; row[field] = on; save_(wt, row);
+    try { CacheService.getScriptCache().remove('k_portfolio'); } catch (e) {}
+    const k = kRead_('konten').filter(function (x) { return x.web_id === String(w.id) && K_WEB[x.type] === wt; })[0];
+    if (k) {
+      const patch = field === 'published' ? { web_status: on ? 'tayang' : 'ditarik', updated: kNow_() } : { updated: kNow_() };
+      if (field === 'featured') { const n = kRead_('naskah').some(function (x) { return x.id === k.id; }); if (n) kUpdate_('naskah', k.id, { featured: on }); patch.draft_sig = kSig_(wt, kDraftOf_(k)); patch.pub_sig = k.draft_sig === k.pub_sig ? patch.draft_sig : k.pub_sig; }
+      kUpdate_('konten', k.id, patch);
+    }
+    kLog_(me.id, (on ? 'aktifkan ' : 'matikan ') + field + ' web', wt, String(w.id), String(w.title_id || ''));
+    return { ok: true };
+  });
+}
+/* bring an item that already exists on the website under the content workflow */
+function kWebImport_(me, b) {
+  if (!kSeesAll_(me)) kDeny_();
+  const wt = b.type === 'projects' ? 'projects' : 'news', type = wt === 'news' ? 'berita' : 'portofolio';
+  return withLock_(function () {
+    const have = kRead_('konten').filter(function (k) { return k.web_id === String(b.web_id) && k.type === type; })[0];
+    if (have) return { ok: true, item: kKontenOut_(have) };
+    const w = kWebRow_(wt, b.web_id); if (!w) return { ok: false, error: 'Item website tidak ditemukan.' };
+    const id = 'KN-' + kShortId_(), now = kNow_(), pub = isTrue_(w.published), n = { id: id, web_type: wt, updated: now, updated_by: me.id };
+    K_NASKAH[wt].forEach(function (f) { n[f] = w[f] instanceof Date ? Utilities.formatDate(w[f], K_TZ, 'yyyy-MM-dd') : (K_NASKAH_BOOL[f] ? isTrue_(w[f]) : String(w[f] == null ? '' : w[f])); });
+    kInsert_('naskah', n);
+    const sig = kSig_(wt, n);
+    const row = { id: id, type: type, title: clean_(w.title_id || '(tanpa judul)', 300), ref_id: wt === 'projects' ? String(w.id) : '', stage: pub ? 'terbit' : 'draf', owner_uid: me.id, assignees: '{}',
+      priority: 'sedang', created_by: me.id, created: now, updated: now, web_id: String(w.id), web_status: pub ? 'tayang' : 'ditarik', draft_sig: sig, pub_sig: pub ? sig : '', link: kWebUrl_(wt, w.id),
+      review: pub ? JSON.stringify({ d: 'setuju', by: me.id, at: now, note: 'Diambil dari website yang sudah tayang', sig: sig }) : '' };
+    kInsert_('konten', row);
+    kLog_(me.id, 'ambil dari website', 'konten', id, row.title);
+    return { ok: true, item: kKontenOut_(row) };
+  });
+}
+function kUpload_(me, b) {
+  if (!(kSeesAll_(me) || me.role === 'peneliti' || kRead_('konten').some(function (k) { return kKontenPeople_(k).indexOf(me.id) >= 0; }))) kDeny_();
+  if (['image/jpeg', 'image/png', 'image/webp'].indexOf(b.mimeType) < 0) return { ok: false, error: 'Unggah foto berformat JPG, PNG, atau WebP.' };
+  if (!PROPS.getProperty('FOLDER_ID')) return { ok: false, error: 'Folder unggahan belum disiapkan. Tempel tautan Google Drive sebagai gantinya.' };
+  return { ok: true, data: upload_(b) };
 }

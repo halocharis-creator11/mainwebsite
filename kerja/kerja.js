@@ -56,7 +56,7 @@
 
   /* ---------- state ---------- */
   const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [], konten: [], hours: {}, summary: {} };
-  const EXPECTED = "2026-11-19-f6";
+  const EXPECTED = "2026-11-19-f7";
   const K = window.K = { S, esc, ic, ROLE, STATUS, STATUS_L, PRIO, PRIO_L, PSTATUS_L, MONTHS, MONTHS_L, views: {} };
 
   /* ---------- api ---------- */
@@ -232,7 +232,7 @@
     checking = true;
     try {
       const j = await api("sync", { rev: S.rev || "" });
-      if (j.changed) { await load(true); if ($("drawer").hidden && $("modal").hidden) { buildNav(); route(true); } }
+      if (j.changed) { await load(true); if ($("drawer").hidden && $("modal").hidden) { buildNav(); if (!held()) route(true); } }
       else stamp();
     } catch (e) { sync("Offline, mencoba lagi"); } finally { checking = false; }
   }
@@ -258,7 +258,9 @@
   document.addEventListener("visibilitychange", () => { if (!document.hidden) check(false); });
   addEventListener("online", () => check(false));
   addEventListener("focus", () => check(false));
-  K.reload = async () => { await load(true); buildNav(); route(true); };
+  /* a page being edited (the website text editor) can ask not to be redrawn by background refreshes */
+  const held = () => !!(K.hold && K.hold());
+  K.reload = async () => { await load(true); buildNav(); if (!held()) route(true); };
 
   /* ============================================================
      LAYOUT
@@ -307,6 +309,7 @@
       (SEE_ALL.includes(r) ? row("../admin/", "web", "Konten website", "Berita, portofolio, mitra, permintaan laporan") : "") + "</div>";
   }
   function setActive(r) {
+    if (r === "naskah") r = "konten";
     if (["konten", "administrasi", "keuangan", "pengguna", "profil"].includes(r) && matchMedia("(max-width: 860px)").matches) r = "menu";
     document.querySelectorAll("[data-r]").forEach(a => { if (a.dataset.r === r) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   }
@@ -330,6 +333,7 @@
     else if (parts[0] === "proyek") viewProjects(v, q);
     else if (parts[0] === "tugas") viewMine(v);
     else if (parts[0] === "konten" && K.pages.konten) K.pages.konten(v, q);
+    else if (parts[0] === "naskah" && K.pages.naskah) K.pages.naskah(v, parts[1], q);
     else if (parts[0] === "administrasi" && K.pages.admin) K.pages.admin(v, parts[1] || "", q);
     else if (parts[0] === "keuangan" && K.pages.keuangan) K.pages.keuangan(v, parts[1] || "", q);
     else if (parts[0] === "notifikasi") viewNotifications(v);

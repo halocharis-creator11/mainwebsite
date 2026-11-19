@@ -261,3 +261,9 @@ Akun dengan peran superadmin, direktur, atau admin juga dapat masuk ke panel kon
 - Laporan Excel: laporan proyek untuk pemberi dana, laporan tahunan yayasan, dan rekap pajak bulanan. File dibuat langsung di peramban.
 
 **Kecepatan dan sinkronisasi**: server menyimpan salinan setiap tab spreadsheet di cache Apps Script dan hanya membaca ulang tab yang berubah. Peramban menyimpan data terakhir Ruang Kerja di perangkat sehingga aplikasi langsung tampil saat dibuka, lalu memeriksa perubahan setiap 20 detik, saat jendela kembali aktif, dan saat berpindah halaman. Data keuangan tidak disimpan di perangkat, hanya di memori selama halaman terbuka. Keluar dari akun menghapus salinan di perangkat. Bila data di spreadsheet diubah langsung (bukan dari aplikasi), jalankan fungsi `kosongkanCache` di Apps Script agar perubahan langsung terbaca.
+
+**Berita, pengumuman, dan portofolio dari Ruang Kerja**: di menu Alur konten, buat item berjenis "Berita dan pengumuman" atau "Portofolio". Editor naskah langsung terbuka, dengan pratinjau kartu dan halaman seperti di website. Naskah tersimpan otomatis.
+1. Penulis menekan "Kirim untuk telaah" dan memilih penelaah.
+2. Penelaah memilih "Setujui naskah" atau "Minta revisi".
+3. Superadmin, direktur, atau admin menekan "Terbitkan ke website". Berita langsung tampil di beranda dan halaman Terbaru, lengkap dengan tombol bagikan serta jumlah dibaca dan dibagikan.
+Perubahan setelah tayang tidak langsung mengubah website sampai ditekan "Perbarui versi tayang". Tampilan "Di website" berisi semua berita dan portofolio yang ada di website, dengan saklar tayang dan slider beranda. Item lama bisa dikelola dengan tombol "Kelola". Proyek tingkat D tidak pernah ditayangkan, dan pratinjau portofolio menunjukkan kolom mana yang tampil untuk tiap tingkat. Produk repositori tetap diterbitkan lewat GitHub. Data internal proyek (kontrak, nilai, dasar keterbukaan) tetap diisi di panel `/admin/`.

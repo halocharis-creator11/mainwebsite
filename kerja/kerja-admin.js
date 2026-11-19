@@ -11,7 +11,7 @@
   const STAGES = [["draf", "Draf"], ["telaah", "Telaah internal"], ["tata_letak", "Tata letak dan grafik"], ["zenodo", "Unggah ke Zenodo"], ["terbit", "Terbit di web"], ["diseminasi", "Diseminasi"]];
   const STAGE_L = Object.fromEntries(STAGES);
   K.STAGE_L = STAGE_L;
-  const TYPES = [["repositori", "Produk repositori"], ["berita", "Berita"], ["portofolio", "Pembaruan portofolio"]];
+  const TYPES = [["repositori", "Produk repositori"], ["berita", "Berita dan pengumuman"], ["portofolio", "Portofolio"]];
   const TYPE_L = Object.fromEntries(TYPES);
   /* news and portfolio updates skip the Zenodo step */
   const stagesFor = type => STAGES.filter(([k]) => type === "repositori" || k !== "zenodo");
@@ -27,15 +27,17 @@
     if (q.get("type")) kType = q.get("type");
     const list = S.konten.filter(k => !kType || k.type === kType);
     v.innerHTML = '<div class="toolbar"><div class="seg" role="group" aria-label="Jenis konten">' + [["", "Semua"]].concat(TYPES).map(([k, l]) => '<button type="button" data-t="' + k + '" aria-pressed="' + (k === kType) + '">' + l + "</button>").join("") + "</div>" +
-      '<div class="seg" role="group" aria-label="Tampilan"><button type="button" data-v="papan" aria-pressed="' + (kView === "papan") + '">' + ic("board") + 'Papan</button><button type="button" data-v="daftar" aria-pressed="' + (kView === "daftar") + '">' + ic("list") + "Daftar</button></div>" +
+      '<div class="seg" role="group" aria-label="Tampilan"><button type="button" data-v="papan" aria-pressed="' + (kView === "papan") + '">' + ic("board") + 'Papan</button><button type="button" data-v="daftar" aria-pressed="' + (kView === "daftar") + '">' + ic("list") + "Daftar</button>" +
+      (K.seesAll() && K.renderWebView ? '<button type="button" data-v="web" aria-pressed="' + (kView === "web") + '">' + ic("web") + "Di website</button>" : "") + "</div>" +
       '<span style="flex:1"></span>' + (canCreateK() ? '<button class="btn" type="button" id="kNew">' + ic("plus") + "Konten baru</button>" : "") + "</div>" +
-      '<p class="small muted" style="margin:-4px 0 14px">Alur: draf, telaah internal, tata letak dan grafik, unggah ke Zenodo (khusus produk repositori), terbit di web, lalu diseminasi.</p><div id="kBody"></div>';
+      '<p class="small muted" style="margin:-4px 0 14px">' + (kView === "web" ? "Semua berita, pengumuman, dan portofolio yang ada di website, dengan jumlah dibaca dan dibagikan." : "Alur: draf, telaah internal, tata letak dan grafik, unggah ke Zenodo (khusus produk repositori), terbit di web, lalu diseminasi. Berita, pengumuman, dan portofolio ditulis dan diterbitkan langsung dari sini.") + '</p><div id="kBody"></div>';
     v.querySelectorAll("[data-t]").forEach(b => (b.onclick = () => { kType = b.dataset.t; K.pages.konten(v, new URLSearchParams()); }));
     v.querySelectorAll("[data-v]").forEach(b => (b.onclick = () => { kView = b.dataset.v; K.pages.konten(v, new URLSearchParams()); }));
     if ($("kNew")) $("kNew").onclick = () => openKonten(null, { type: kType || "repositori" });
     const body = $("kBody");
+    if (kView === "web" && K.renderWebView) { K.renderWebView(body); return; }
     const card = k => '<button class="card" type="button" data-k="' + k.id + '"><span class="t"><span class="pr pr-' + k.priority + '"></span><span>' + esc(k.title) + "</span></span>" +
-      '<span class="labs"><span class="kchip ' + k.type + '">' + TYPE_L[k.type] + "</span>" + (k.ref_id ? '<span class="chip lab">' + esc(k.ref_id) + "</span>" : "") + "</span>" +
+      '<span class="labs"><span class="kchip ' + k.type + '">' + TYPE_L[k.type] + "</span>" + (K.webChip ? K.webChip(k) : "") + (k.ref_id ? '<span class="chip lab">' + esc(k.ref_id) + "</span>" : "") + "</span>" +
       '<span class="f"><span class="ic">' + K.avatar(K.whoNow(k), "sm") + '<span>' + esc(shortName(K.uName(K.whoNow(k)))) + "</span>" + (S.ccount[k.id] ? "<span>" + ic("chat") + S.ccount[k.id] + "</span>" : "") + "</span>" +
       (k.stage === "diseminasi" ? '<span class="due done">Selesai</span>' : K.dueBadge(k.due, false)) + "</span></button>";
     if (!list.length) { body.innerHTML = '<div class="panel empty"><strong>Belum ada konten di alur ini</strong>' + (canCreateK() ? "Tambahkan produk repositori, berita, atau pembaruan portofolio yang sedang disiapkan." : "Item yang melibatkan Anda akan muncul di sini.") + "</div>"; }
@@ -45,7 +47,7 @@
     } else {
       body.innerHTML = '<div class="panel" style="overflow:hidden"><table class="atable"><thead><tr><th>Judul</th><th>Jenis</th><th>Tahap</th><th>Giliran</th><th>Target</th></tr></thead><tbody>' +
         list.sort((a, b) => STAGES.findIndex(x => x[0] === a.stage) - STAGES.findIndex(x => x[0] === b.stage) || (a.due || "9999").localeCompare(b.due || "9999"))
-          .map(k => '<tr class="click" data-k="' + k.id + '"><td class="wrap sm-full"><b>' + esc(k.title) + "</b>" + (k.ref_id ? '<br><span class="small muted">' + esc(k.ref_id) + "</span>" : "") + '</td><td class="sm-hide"><span class="kchip ' + k.type + '">' + TYPE_L[k.type] + "</span></td><td>" + esc(STAGE_L[k.stage]) +
+          .map(k => '<tr class="click" data-k="' + k.id + '"><td class="wrap sm-full"><b>' + esc(k.title) + "</b>" + (k.ref_id ? '<br><span class="small muted">' + esc(k.ref_id) + "</span>" : "") + '</td><td class="sm-hide"><span class="kchip ' + k.type + '">' + TYPE_L[k.type] + "</span>" + (K.webChip ? " " + K.webChip(k) : "") + "</td><td>" + esc(STAGE_L[k.stage]) +
             '</td><td class="sm-hide">' + esc(K.uName(K.whoNow(k))) + "</td><td>" + (k.stage === "diseminasi" ? '<span class="due done">Selesai</span>' : K.dueBadge(k.due, false)) + "</td></tr>").join("") + "</tbody></table></div>";
     }
     body.querySelectorAll("[data-k]").forEach(el => (el.onclick = () => openKonten(el.dataset.k)));
@@ -66,6 +68,7 @@
     dr.innerHTML = '<div class="dr-h"><span class="crumb">Alur konten' + (isNew ? ": item baru" : "") + "</span>" + (!isNew && (K.seesAll() || k.created_by === S.me.id) ? '<button class="icon-btn" id="kDel" type="button" aria-label="Hapus item">' + ic("trash") + "</button>" : "") +
       '<button class="icon-btn" id="kClose" type="button" aria-label="Tutup">' + ic("close") + "</button></div>" +
       '<div class="dr-b"><div><label class="sr-only" for="kTitle">Judul</label><textarea class="title-in" id="kTitle" rows="1" placeholder="Judul produk, berita, atau pembaruan"' + dis + ">" + esc(k.title) + "</textarea></div>" +
+      (!isNew && K.WEB && K.WEB[k.type] ? '<div class="nk-box"><div style="min-width:0"><b>Naskah website</b><span class="small muted">' + (k.web_status === "tayang" ? "Tayang di website" + (k.pending ? ", ada perubahan yang belum tayang" : "") : k.web_status === "ditarik" ? "Ditarik dari website" : k.has_draft ? "Sedang ditulis, belum tayang" : "Belum ada naskah") + '</span></div><button class="btn small" type="button" id="kEd">' + ic("edit") + (k.has_draft ? "Buka editor" : "Tulis naskah") + "</button></div>" : "") +
       '<div><div class="dlabel"><span>Tahap</span>' + (k.due && k.stage !== "diseminasi" ? K.dueBadge(k.due, false) : "") + '</div><div class="stepper" id="kStep"></div></div>' +
       '<div class="props"><label class="field"><span>Jenis</span><select class="in" id="kType"' + dis + ">" + TYPES.map(([a, b]) => '<option value="' + a + '"' + (a === k.type ? " selected" : "") + ">" + b + "</option>").join("") + "</select></label>" +
       '<label class="field"><span>Kode atau ID terkait</span><input class="in" id="kRef" value="' + esc(k.ref_id) + '" list="kRefList" placeholder="mis. CHARIS-2026-008"' + dis + '><datalist id="kRefList"></datalist></label>' +
@@ -118,9 +121,12 @@
       if (row.link && !/^https:\/\//.test(row.link)) { K.toast("Tautan harus diawali https://", true); return; }
       if (!isNew) row.id = k.id;
       const j = await K.api("kontenSave", { row }); upsert(j.item);
-      dirty = false; K.closeDrawer(true); K.toast(isNew ? "Item dibuat." : "Perubahan disimpan."); K.buildNav(); K.route(true);
+      dirty = false; K.closeDrawer(true); K.toast(isNew ? "Item dibuat." : "Perubahan disimpan."); K.buildNav();
+      if (isNew && K.WEB && K.WEB[j.item.type]) { location.hash = "#/naskah/" + j.item.id; return; }   /* news and portfolio: straight to writing */
+      K.route(true);
     });
     $("kClose").onclick = () => K.closeDrawer(); $("kCancel").onclick = () => K.closeDrawer();
+    if ($("kEd")) $("kEd").onclick = () => { K.closeDrawer(true); location.hash = "#/naskah/" + k.id; };
     if ($("kDel")) $("kDel").onclick = () => K.confirmBox("Hapus item ini beserta komentarnya?", "Hapus item", async () => {
       await K.api("kontenDelete", { id: k.id }); S.konten = S.konten.filter(x => x.id !== k.id); K.closeDrawer(true); K.toast("Item dihapus."); K.route(true);
     });

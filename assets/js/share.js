@@ -45,17 +45,17 @@ window.CharisShare = (function () {
     } else { const d = demoGet(); d[id] = d[id] || {}; d[id][FIELD[event]] = (Number(d[id][FIELD[event]]) || 0) + 1; try { localStorage.setItem(demoKey, JSON.stringify(d)); } catch (e) { /* ignore */ } }
   }
   const nf = v => new Intl.NumberFormat(lang() === "en" ? "en-GB" : "id-ID").format(Number(v) || 0);
-  function statsHtml(s) {
+  function statsHtml(s, noDownloads) {
     s = s || {};
     return '<span class="cs-stat" title="' + esc(tr("Dibaca", "Reads")) + '">' + I.eye + "<b>" + nf(s.reads) + "</b><span>" + esc(tr("dibaca", "reads")) + "</span></span>" +
-      '<span class="cs-stat" title="' + esc(tr("Diunduh (PDF lengkap)", "Downloads (full PDF)")) + '">' + I.down + "<b>" + nf(s.downloads) + "</b><span>" + esc(tr("diunduh", "downloads")) + "</span></span>" +
+      (noDownloads ? "" : '<span class="cs-stat" title="' + esc(tr("Diunduh (PDF lengkap)", "Downloads (full PDF)")) + '">' + I.down + "<b>" + nf(s.downloads) + "</b><span>" + esc(tr("diunduh", "downloads")) + "</span></span>") +
       '<span class="cs-stat" title="' + esc(tr("Dibagikan", "Shares")) + '">' + I.share + "<b>" + nf(s.shares) + "</b><span>" + esc(tr("dibagikan", "shares")) + "</span></span>";
   }
   /* fill every [data-stats-for] element on the page */
   function paint() {
     const els = document.querySelectorAll("[data-stats-for]");
     if (!els.length) return;
-    stats().then(s => els.forEach(el => { el.innerHTML = statsHtml(s[el.dataset.statsFor]); el.classList.add("ready"); }));
+    stats().then(s => els.forEach(el => { el.innerHTML = statsHtml(s[el.dataset.statsFor], el.dataset.statsKind === "news"); el.classList.add("ready"); }));
   }
 
   /* ---------- share widget ---------- */

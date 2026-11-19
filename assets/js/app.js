@@ -682,9 +682,10 @@
       document.title = f(n, "title") + " | CHARIS";
       app.innerHTML = '<article class="sec"><div class="wrap narrow"><a class="back" href="#/latest">' + esc(t("back")) + '</a><p class="card-meta"><span class="card-cat">' + esc(n.category || t("type.news")) + "</span><time>" + fmtDate(n.date) + "</time></p>" +
         '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (n.image_url ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
-        '<div class="prose">' + paras(f(n, "body")) + '</div><div class="share-row"><span>' + esc(t("share.this")) + "</span>" + shareBox(String(n.id), absHash("#/latest/" + encodeURIComponent(n.id)), f(n, "title")) + "</div></div></article>" + newsletter();
+        '<div class="prose">' + paras(f(n, "body")) + '</div><div class="share-row"><span>' + esc(t("share.this")) + "</span>" + shareBox(String(n.id), absHash("#/latest/" + encodeURIComponent(n.id)), f(n, "title")) +
+        '<span class="cs-stats" data-stats-for="' + esc(String(n.id)) + '" data-stats-kind="news"></span></div></div></article>' + newsletter();
       bindNewsletter();
-      if (CS) CS.track(String(n.id), "read");
+      if (CS) { CS.track(String(n.id), "read"); CS.paint(); }
     },
 
     team() {
