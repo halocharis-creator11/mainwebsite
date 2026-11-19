@@ -149,16 +149,16 @@ function authorList(a) {
   return n.length <= 1 ? (n[0] || "") : n.slice(0, -1).join(", ") + ", & " + n[n.length - 1];
 }
 function citeAPA(m, url) {
-  return `${authorList(m.authors)} (${year(m.date_published)}). ${m.title_id}${m.series ? ` (${m.series})` : ""}. ${site.publisher_short}, ${site.institution}. ${m.doi ? doiUrl(m.doi) : url}`;
+  return `${authorList(m.authors)} (${year(m.date_published)}). ${m.title_id}${m.series ? ` (${m.series})` : ""}. ${m.publisher || site.publisher_short + ", " + site.institution}. ${m.doi ? doiUrl(m.doi) : url}`;
 }
 function citeBib(m, url) {
   const key = (m.authors[0] ? m.authors[0].name.split(/\s+/).pop() : "charis").toLowerCase().replace(/[^a-z]/g, "") + year(m.date_published);
-  return `@techreport{${key},\n  title       = {${m.title_id}},\n  author      = {${m.authors.map(a => a.name).join(" and ")}},\n  institution = {${site.publisher_short}, ${site.institution}},\n  year        = {${year(m.date_published)}},\n` +
+  return `@techreport{${key},\n  title       = {${m.title_id}},\n  author      = {${m.authors.map(a => a.name).join(" and ")}},\n  institution = {${m.publisher || site.publisher_short + ", " + site.institution}},\n  year        = {${year(m.date_published)}},\n` +
     (m.series ? `  number      = {${m.series}},\n` : "") + (m.doi ? `  doi         = {${cleanDoi(m.doi)}},\n` : "") + `  url         = {${m.doi ? doiUrl(m.doi) : url}}\n}`;
 }
 function citeRIS(m, url) {
   return ["TY  - RPRT", ...m.authors.map(a => "AU  - " + a.name), "TI  - " + m.title_id, m.title_en ? "T2  - " + m.title_en : "", "PY  - " + year(m.date_published),
-    "DA  - " + slash(m.date_published), "PB  - " + site.publisher_short + ", " + site.institution, "CY  - " + site.place, m.series ? "SN  - " + m.series : "",
+    "DA  - " + slash(m.date_published), "PB  - " + (m.publisher || site.publisher_short + ", " + site.institution), "CY  - " + (m.publisher_place || site.place), m.series ? "SN  - " + m.series : "",
     m.doi ? "DO  - " + cleanDoi(m.doi) : "", "UR  - " + (m.doi ? doiUrl(m.doi) : url), "AB  - " + m.abstract_id, ...(m.keywords || []).map(k => "KW  - " + k), "LA  - " + (m.language || "id"), "ER  - "].filter(Boolean).join("\n");
 }
 
@@ -175,9 +175,9 @@ function headBlock(m, url, slug) {
   m.authors.forEach(a => { t("citation_author", a.name); t("citation_author_institution", a.affiliation); if (a.orcid) t("citation_author_orcid", a.orcid); });
   t("citation_publication_date", slash(m.date_published));
   t("citation_online_date", slash(m.date_published));
-  t("citation_technical_report_institution", site.publisher_short + ", " + site.institution);
+  t("citation_technical_report_institution", m.publisher || site.publisher_short + ", " + site.institution);
   t("citation_technical_report_number", m.series || m.id);
-  t("citation_publisher", site.publisher);
+  t("citation_publisher", m.publisher || site.publisher);
   t("citation_doi", cleanDoi(m.doi));
   t("citation_language", m.language || "id");
   t("citation_keywords", (m.keywords || []).join("; "));
@@ -187,7 +187,7 @@ function headBlock(m, url, slug) {
   /* Dublin Core */
   L.push(`  <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">`);
   t("DC.title", m.title_id); m.authors.forEach(a => t("DC.creator", a.name));
-  t("DC.date", (m.date_published || "").slice(0, 10)); t("DC.publisher", site.publisher); t("DC.type", "Text.Report");
+  t("DC.date", (m.date_published || "").slice(0, 10)); t("DC.publisher", m.publisher || site.publisher); t("DC.type", "Text.Report");
   t("DC.language", m.language || "id"); t("DC.rights", m.license); t("DC.description", m.abstract_id);
   if (m.doi) t("DC.identifier", "doi:" + cleanDoi(m.doi));
   /* Open Graph */
@@ -198,7 +198,7 @@ function headBlock(m, url, slug) {
   const ld = { "@context": "https://schema.org", "@type": "Report", "name": m.title_id, "alternateName": m.title_en || undefined, "headline": m.title_id,
     "abstract": m.abstract_id, "author": m.authors.map(a => ({ "@type": "Person", "name": a.name, "affiliation": a.affiliation ? { "@type": "Organization", "name": a.affiliation } : undefined, "sameAs": a.orcid ? "https://orcid.org/" + a.orcid : undefined })),
     "datePublished": m.date_published, "inLanguage": m.language || "id", "keywords": (m.keywords || []).join(", "), "license": m.license,
-    "publisher": { "@type": "Organization", "name": site.publisher }, "url": url, "identifier": m.doi ? { "@type": "PropertyValue", "propertyID": "DOI", "value": cleanDoi(m.doi) } : m.id,
+    "publisher": { "@type": "Organization", "name": m.publisher || site.publisher }, "url": url, "identifier": m.doi ? { "@type": "PropertyValue", "propertyID": "DOI", "value": cleanDoi(m.doi) } : m.id,
     "reportNumber": m.series || m.id, "isAccessibleForFree": true };
   L.push(`  <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>`);
   return L.join("\n");

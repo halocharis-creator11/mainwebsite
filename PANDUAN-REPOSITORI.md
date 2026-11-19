@@ -65,6 +65,8 @@ Anda                         GitHub (otomatis)                  Website CHARIS
 | `service` | Lini layanan: `financing`, `analytics`, `evaluation`, `planning`, `workforce`, `quality` | |
 | `doi` | DOI dari Zenodo, mis. `10.5281/zenodo.1234567` | |
 | `license` | mis. `CC BY 4.0` atau `CC BY-NC 4.0`. Lisensi CC tampil otomatis sebagai badge resmi Creative Commons yang menaut ke teks lisensinya | |
+| `publisher` | Opsional. Isi bila karya diterbitkan lembaga lain, mis. `Center for Public Health Innovation (CPHI), Universitas Udayana`. Dipakai di kutipan APA, BibTeX, RIS, dan metadata Google Scholar. Kosongkan untuk penerbit CHARIS | |
+| `publisher_place` | Opsional, kota penerbit lain, mis. `Denpasar, Bali, Indonesia` | |
 | `pages` | Jumlah halaman versi PDF | |
 | `cover` | Opsional. Kosongkan agar sampul dideteksi otomatis (lihat bagian Sampul) | |
 | `pdf_summary` | Nama file ringkasan PDF publik (opsional, **maks. 5 MB** agar diindeks Scholar) | |

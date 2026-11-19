@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-19",
-  "count": 7,
+  "count": 8,
   "items": [
     {
       "id": "CHARIS-2026-001",
@@ -381,6 +381,65 @@
         "repositori/2026-01-iklim-morbiditas-anak/auto-p3.jpg",
         "repositori/2026-01-iklim-morbiditas-anak/auto-p4.jpg",
         "repositori/2026-01-iklim-morbiditas-anak/auto-p5.jpg"
+      ],
+      "pdf_summary": "",
+      "full_pdf": "request",
+      "featured": true
+    },
+    {
+      "id": "CHARIS-2026-008",
+      "slug": "2025-12-keberlanjutan-kader-posyandu-ilp",
+      "url": "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/",
+      "type": "Laporan penelitian",
+      "type_en": "Research report",
+      "series": "",
+      "subtitle_id": "Menghubungkan jalur psikososial dan insentif melalui Structural Equation Modeling (SEM) dan pemodelan ekonomi",
+      "subtitle_en": "Linking psychosocial pathways and incentives using Structural Equation Modeling (SEM) and economic modeling",
+      "title_id": "Lebih dari Sekadar Sukarela: Apa yang Menentukan Keberlanjutan Kader Kesehatan?",
+      "title_en": "Beyond Volunteering: What Drives Health Cadre Sustainability?",
+      "abstract_id": "Latar belakang: Kader kesehatan adalah tulang punggung Posyandu dalam Integrasi Layanan Primer (ILP) di Bali, tetapi bukti tentang gabungan faktor psikososial dan ekonomi yang menentukan keberlanjutan mereka masih terbatas, terutama pada program ILP yang baru berjalan. Studi ini menilai bagaimana faktor psikososial dan insentif ekonomi memengaruhi keberlanjutan kader Posyandu di Bali. Metode: Studi potong lintang pada 99 kader Posyandu ILP di Kota Denpasar dengan kuesioner terstruktur. Hubungan antara motivasi, kepuasan, dukungan organisasi, pengalaman, dan keberlanjutan dianalisis dengan Structural Equation Modeling (SEM). Lima skenario insentif dievaluasi melalui pemodelan ekonomi dengan menghitung beban ekonomi bersih kader yang distandarkan terhadap upah minimum kota (UMK), lalu dinilai efektivitas biayanya dengan rasio efektivitas biaya inkremental. Hasil: Kepuasan adalah penentu terkuat keberlanjutan (β = 0,69; p < 0,001). Motivasi (β = 0,50; p < 0,001) dan dukungan organisasi (β = 0,21; p = 0,031) bekerja melalui kepuasan, sedangkan dukungan organisasi tidak memprediksi keberlanjutan secara langsung. Honorarium yang hanya menutup biaya peluang masih menyisakan beban bersih 0,9% UMK, status quo dan subsidi biaya langsung hanya memberi keuntungan kecil (3,7% dan 4,6% UMK), sedangkan honorarium 30% UMK dan paket insentif terpadu memberi keuntungan bersih besar (27,8% dan 23,7% UMK) serta skor keberlanjutan prediksi tertinggi. Kesimpulan: Keberlanjutan kader membutuhkan kebijakan yang menyelaraskan dukungan organisasi dan insentif untuk meningkatkan kepuasan, dengan kompensasi yang memberi manfaat ekonomi bersih yang jelas, bukan sekadar pengganti biaya.",
+      "abstract_en": "Background: Community health cadres are central to Posyandu-based Integrated Primary Health Care (Integrasi Layanan Primer, ILP) in Bali, yet evidence on the combined psychosocial and economic determinants of their long-term retention remains limited, particularly in newly implemented ILP programmes. This study assessed how psychosocial factors and economic incentives influence the sustainability of Posyandu health cadres in Bali, Indonesia. Methods: A cross-sectional survey of 99 Posyandu ILP cadres in Denpasar City used a structured questionnaire. Relationships among motivation, satisfaction, organisational support, experience and sustainability were analysed with Structural Equation Modeling (SEM). Five incentive scenarios were evaluated through economic modelling of the net economic burden on cadres, standardised to the local minimum wage (UMK), and assessed for cost-effectiveness using incremental cost-effectiveness ratios. Results: Satisfaction was the strongest determinant of sustainability (β = 0.69, p < 0.001). Motivation (β = 0.50, p < 0.001) and organisational support (β = 0.21, p = 0.031) acted through satisfaction, while organisational support did not directly predict sustainability. An honorarium that only offset opportunity costs still left a net burden of 0.9% of UMK, the status quo and a direct cost subsidy gave only small gains (3.7% and 4.6% of UMK), whereas an honorarium of 30% of UMK and an integrated incentive package gave large net gains (27.8% and 23.7% of UMK) and the highest predicted sustainability. Conclusions: Cadre sustainability requires policies that align organisational support and incentives to raise satisfaction, with compensation that delivers a clear net economic benefit rather than cost recovery alone.",
+      "authors": [
+        {
+          "name": "Ngakan Putu Anom Harjana",
+          "affiliation": "CHARIS (Center for Health Analytics, Research and Integrated Services), Yayasan Peduli Insan Rentan, Gianyar, Bali, Indonesia"
+        },
+        {
+          "name": "Luh Putu Sinthya Ulandari",
+          "affiliation": "Center for Public Health Innovation (CPHI), Universitas Udayana, Denpasar, Bali, Indonesia"
+        }
+      ],
+      "date_published": "2025-12-28",
+      "uploaded": "2026-11-19",
+      "added": "2026-11-19T14:27:20.882Z",
+      "sort_date": "2025-12-28",
+      "language": "en",
+      "keywords": [
+        "kader kesehatan",
+        "Posyandu",
+        "Integrasi Layanan Primer",
+        "keberlanjutan tenaga kesehatan",
+        "insentif",
+        "honorarium",
+        "Structural Equation Modeling",
+        "evaluasi ekonomi",
+        "Bali",
+        "Indonesia"
+      ],
+      "service": "public_health",
+      "project_id": "",
+      "doi": "10.5281/zenodo.18287957",
+      "license": "CC BY 4.0",
+      "pages": 8,
+      "version": "1",
+      "cover": "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/sampul.jpg",
+      "thumb": "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/auto-thumb.jpg",
+      "preview": [
+        "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/auto-p1.jpg",
+        "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/auto-p2.jpg",
+        "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/auto-p3.jpg",
+        "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/auto-p4.jpg",
+        "repositori/2025-12-keberlanjutan-kader-posyandu-ilp/auto-p5.jpg"
       ],
       "pdf_summary": "",
       "full_pdf": "request",
