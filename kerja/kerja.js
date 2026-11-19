@@ -54,7 +54,8 @@
   const ic = (n, cls) => '<svg class="' + (cls || "") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + P[n] + '"/></svg>';
 
   /* ---------- state ---------- */
-  const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [] };
+  const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [], konten: [], hours: {}, summary: {} };
+  const EXPECTED = "2026-11-19-f34";
   const K = window.K = { S, esc, ic, ROLE, STATUS, STATUS_L, PRIO, PRIO_L, PSTATUS_L, MONTHS, MONTHS_L, views: {} };
 
   /* ---------- api ---------- */
@@ -205,7 +206,9 @@
   async function load(quiet) {
     if (!quiet) sync("Memuat data");
     const j = await api("load");
-    Object.assign(S, { me: j.me, today: j.today, users: j.users, projects: j.projects, milestones: j.milestones, tasks: j.tasks, ccount: j.comment_counts || {}, notifications: j.notifications, portfolio: j.portfolio || [] });
+    Object.assign(S, { me: j.me, today: j.today, users: j.users, projects: j.projects, milestones: j.milestones, tasks: j.tasks, ccount: j.comment_counts || {}, notifications: j.notifications, portfolio: j.portfolio || [],
+      konten: j.konten || [], hours: j.hours_by_task || {}, summary: j.summary || {} });
+    S.stale = j.version !== EXPECTED;
     sync("Tersinkron " + new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":"));
     loadedOnce = true;
   }
@@ -234,19 +237,39 @@
       ["dasbor", "Dasbor", "dash"], ["proyek", "Proyek", "proj"], ["tugas", "Tugas saya", "task", S.tasks.filter(t => t.assignee_uid === S.me.id && t.status !== "selesai").length],
       ["notifikasi", "Notifikasi", "bell", cnt]
     ];
-    const soon = [["Alur konten", "flow"], ["Administrasi", "doc"], ["Keuangan", "money"]];
+    const more = [["administrasi", "Administrasi", "doc", r === "direktur" || r === "superadmin" ? S.summary.leave_pending : 0]];
+    if (canSeeKonten()) more.unshift(["konten", "Alur konten", "flow", S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length]);
+    items.splice(3, 0, ...more);
+    const soon = [["Keuangan", "money"]];
     const extra = [];
     if (r === "superadmin" || r === "direktur") extra.push(["pengguna", "Pengguna", "users"]);
     const a = (h, l, i, n) => '<a class="nav-a" href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>";
     $("railNav").innerHTML = items.map(x => a(...x)).join("") + soon.map(x => '<span class="nav-a soon">' + ic(x[1]) + "<span>" + x[0] + "</span><small>segera</small></span>").join("") + extra.map(x => a(...x)).join("");
     $("railFoot").innerHTML = (SEE_ALL.includes(r) ? '<a class="nav-a" href="../admin/">' + ic("web") + "<span>Konten website</span></a>" : "") +
       '<a class="nav-a" href="#/profil" data-r="profil">' + avatar(S.me.id, "sm") + "<span>" + esc(S.me.name) + "</span></a>";
-    $("tabbar").innerHTML = [["dasbor", "Dasbor", "dash"], ["proyek", "Proyek", "proj"], ["tugas", "Tugas", "task"], ["notifikasi", "Notifikasi", "bell", cnt], ["profil", "Akun", "user"]]
+    const moreCnt = (canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0) + ((r === "direktur" || r === "superadmin") ? (S.summary.leave_pending || 0) : 0);
+    $("tabbar").innerHTML = [["dasbor", "Dasbor", "dash"], ["proyek", "Proyek", "proj"], ["tugas", "Tugas", "task"], ["notifikasi", "Notifikasi", "bell", cnt], ["menu", "Menu", "list", moreCnt]]
       .map(([h, l, i, n]) => '<a href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>").join("");
     $("bellBtn").innerHTML = ic("bell") + '<span class="dot" id="bellCount"' + (cnt ? "" : " hidden") + ">" + cnt + "</span>";
     $("meBtn").outerHTML = '<a class="avatar me-av" id="meBtn" href="#/profil" aria-label="Profil" style="background:hsl(' + hue(S.me.id) + ' 32% 42%)">' + esc(initials(S.me.name)) + "</a>";
   }
+  const canSeeKonten = () => seesAll() || S.me.role === "peneliti" || S.konten.length > 0;
+  const whoNow = k => (k.assignees || {})[k.stage] || k.owner_uid;
+  Object.assign(K, { canSeeKonten, whoNow });
+  /* phone: every section in one list (the bottom bar holds only five) */
+  function viewMenu(v) {
+    setTop("Menu");
+    const r = S.me.role, konten = canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0;
+    const row = (href, i, l, sub, n) => '<a class="trow" href="' + href + '" style="text-decoration:none;color:inherit"><span class="nic">' + ic(i) + '</span><span style="min-width:0"><span class="t">' + l + '</span><span class="p">' + sub + "</span></span>" + (n ? '<span class="due today">' + n + "</span>" : "") + "</a>";
+    v.innerHTML = '<a class="panel pad" href="#/profil" style="display:flex;gap:14px;align-items:center;margin-bottom:16px;text-decoration:none;color:inherit">' + avatar(S.me.id, "lg") + '<span style="flex:1;min-width:0"><b>' + esc(S.me.name) + '</b><br><span class="small muted">' + ROLE[r] + ", akun dan password</span></span></a>" +
+      '<div class="panel">' + (canSeeKonten() ? row("#/konten", "flow", "Alur konten", "Repositori, berita, dan portofolio", konten) : "") +
+      row("#/administrasi", "doc", "Administrasi", r === "konsultan" ? "Timesheet" : (SEE_ALL.includes(r) || r === "bendahara") ? "Surat, kontrak, rapat, cuti, timesheet, aset" : "Rapat, cuti, dan timesheet", (r === "direktur" || r === "superadmin") ? S.summary.leave_pending : 0) +
+      '<span class="trow" style="opacity:.55;cursor:default"><span class="nic">' + ic("money") + '</span><span><span class="t">Keuangan</span><span class="p">Segera hadir</span></span></span>' +
+      (r === "superadmin" || r === "direktur" ? row("#/pengguna", "users", "Pengguna", "Akun dan peran tim") : "") +
+      (SEE_ALL.includes(r) ? row("../admin/", "web", "Konten website", "Berita, portofolio, mitra, permintaan laporan") : "") + "</div>";
+  }
   function setActive(r) {
+    if (["konten", "administrasi", "pengguna", "profil"].includes(r) && matchMedia("(max-width: 860px)").matches) r = "menu";
     document.querySelectorAll("[data-r]").forEach(a => { if (a.dataset.r === r) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   }
   function setTop(title, back) {
@@ -268,15 +291,30 @@
     if (parts[0] === "proyek" && parts[1]) viewProject(v, parts[1], parts[2] || "papan", q);
     else if (parts[0] === "proyek") viewProjects(v, q);
     else if (parts[0] === "tugas") viewMine(v);
+    else if (parts[0] === "konten" && K.pages.konten) K.pages.konten(v, q);
+    else if (parts[0] === "administrasi" && K.pages.admin) K.pages.admin(v, parts[1] || "", q);
     else if (parts[0] === "notifikasi") viewNotifications(v);
     else if (parts[0] === "pengguna") viewUsers(v);
     else if (parts[0] === "profil") viewProfile(v);
+    else if (parts[0] === "menu") viewMenu(v);
     else viewDashboard(v);
     if (same) scrollTo(0, keepY); else scrollTo(0, 0);
     const t = q.get("t");
     if (t && !refresh && $("drawer").hidden) openTask(t);
+    const kk = q.get("k");
+    if (kk && !refresh && $("drawer").hidden && K.openKonten) K.openKonten(kk);
+    staleNotice();
   }
   addEventListener("hashchange", () => route());
+  K.pages = {};
+  K.route = route; K.setTop = (a, b) => setTop(a, b); K.buildNav = () => buildNav();
+  /* the Web App still runs an older Kerja.gs: say so once per page */
+  function staleNotice() {
+    if (!S.stale || document.getElementById("staleNote")) return;
+    const n = document.createElement("p"); n.id = "staleNote"; n.className = "note warn"; n.style.margin = "0 0 16px";
+    n.textContent = "Versi Apps Script belum diperbarui. Tempel Kerja.gs terbaru, lalu buat versi deployment baru agar semua fitur berfungsi.";
+    $("view").prepend(n);
+  }
 
   /* ============================================================
      DASHBOARD
@@ -305,12 +343,23 @@
       kpi("#/dasbor?f=late", late.length, "Tugas terlambat", true) + kpi("#/dasbor?f=week", week.length, "Tenggat 7 hari") + kpi("#/tugas", mine.length, "Tugas saya terbuka") + "</div>" +
       '<div class="dash"><section class="sec"><div class="sec-h"><h2>Progres proyek</h2><a href="#/proyek" class="small">Semua proyek</a></div><div class="panel">' +
       (sorted.length ? sorted.map(prow).join("") : '<div class="empty"><strong>Belum ada proyek</strong>' + (seesAll() ? "Buat proyek pertama untuk mulai membagi tugas." : "Anda belum ditambahkan ke proyek mana pun.") + "</div>") + "</div></section>" +
-      '<div><section class="sec" id="secLate"><div class="sec-h"><h2>Perlu perhatian: terlambat</h2></div><div class="panel">' + (late.length ? groupByProject(late) : '<div class="empty">Tidak ada tugas yang terlambat.</div>') + "</div></section>" +
+      '<div>' + todoPanel() + '<section class="sec" id="secLate"><div class="sec-h"><h2>Perlu perhatian: terlambat</h2></div><div class="panel">' + (late.length ? groupByProject(late) : '<div class="empty">Tidak ada tugas yang terlambat.</div>') + "</div></section>" +
       '<section class="sec" id="secWeek"><div class="sec-h"><h2>Tenggat 7 hari ke depan</h2></div><div class="panel">' + (week.length ? groupByProject(week) : '<div class="empty">Tidak ada tenggat dalam 7 hari.</div>') + "</div></section></div></div>";
     bindRows(v);
     if ($("dNew")) $("dNew").onclick = () => projectForm();
     const f = new URLSearchParams(location.hash.split("?")[1] || "").get("f");
     if (f) { const el = $(f === "late" ? "secLate" : "secWeek"); if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 30); }
+  }
+  /* things waiting for this person: approvals, expiring agreements, content turns, hours this week */
+  function todoPanel() {
+    const s = S.summary || {}, rows = [];
+    const line = (href, iconName, text, right) => '<a class="trow" href="' + href + '" style="text-decoration:none;color:inherit"><span class="nic" style="width:30px;height:30px">' + ic(iconName) + '</span><span style="min-width:0"><span class="t">' + text + "</span></span>" + (right || "") + "</a>";
+    if (s.leave_pending) rows.push(line("#/administrasi/cuti", "user", s.leave_pending + " pengajuan cuti menunggu persetujuan Anda", '<span class="due today">Tinjau</span>'));
+    (s.contracts_ending || []).forEach(c => rows.push(line("#/administrasi/kontrak?id=" + c.id, "doc", esc(c.kind + ": " + c.title) + (c.party ? '<span class="p">' + esc(c.party) + "</span>" : ""), dueBadge(c.end, false))));
+    S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).forEach(k => rows.push(line("#/konten?k=" + k.id, "flow", esc(k.title) + '<span class="p">Tahap: ' + esc(K.STAGE_L ? K.STAGE_L[k.stage] : k.stage) + "</span>", k.due ? dueBadge(k.due, false) : "")));
+    if (s.my_leave_pending) rows.push(line("#/administrasi/cuti", "user", "Pengajuan cuti Anda sedang menunggu keputusan", ""));
+    rows.push(line("#/administrasi/timesheet", "load", "Jam kerja tercatat minggu ini", '<span class="chip">' + fmtNum(s.week_hours || 0) + " jam</span>"));
+    return '<section class="sec"><div class="sec-h"><h2>Perlu tindakan</h2></div><div class="panel todo">' + rows.join("") + "</div></section>";
   }
   function trow(t) {
     return '<button class="trow" type="button" data-task="' + t.id + '">' + avatar(t.assignee_uid, "sm") + '<span style="min-width:0"><span class="t">' + esc(t.title) + '</span><span class="p">' +
@@ -516,9 +565,7 @@
       (full ? "" : '<p class="note">Anda dapat memperbarui status, checklist, lampiran, dan komentar. Detail tugas diatur oleh tim proyek.</p>') +
       '<div><div class="dlabel"><span>Checklist</span><span id="dClN"></span></div><div class="cl" id="dCl"></div>' + (edit ? '<div class="cl-add"><input class="in" id="dClIn" placeholder="Tambah butir checklist"><button class="btn ghost small" id="dClAdd" type="button">Tambah</button></div>' : "") + "</div>" +
       '<div><div class="dlabel"><span>Lampiran dari Google Drive</span></div><div class="att" id="dAtt"></div>' + (edit ? '<div class="att-add"><input class="in" id="dAttName" placeholder="Nama dokumen"><input class="in" id="dAttUrl" placeholder="Tautan https://drive.google.com" inputmode="url"><button class="btn ghost small" id="dAttAdd" type="button">Lampirkan</button></div>' : "") + "</div>" +
-      (isNew ? "" : '<div><div class="dlabel"><span>Komentar</span></div><div class="comments" id="dCm"><p class="muted small">Memuat komentar</p></div>' +
-        '<div class="cm-in" style="margin-top:12px"><textarea class="in" id="dCmIn" rows="2" placeholder="Tulis komentar. Ketik @ untuk menyebut anggota tim."></textarea><div class="mpick" id="dPick" role="listbox" hidden></div><div style="display:flex;justify-content:flex-end"><button class="btn small" id="dCmSend" type="button">Kirim komentar</button></div></div>' +
-        '<div class="actlog" id="dLog" style="margin-top:14px"></div></div>') + "</div>" +
+      (isNew ? "" : '<div id="dHrs"></div>' + COMMENTS_HTML) + "</div>" +
       '<div class="dr-f"><span class="dirty-note" id="dDirty"></span><div style="display:flex;gap:8px;margin-left:auto"><button class="btn ghost" type="button" id="dCancel">' + (isNew ? "Batal" : "Tutup") + '</button>' +
       (full || isNew ? '<button class="btn" type="button" id="dSave"' + (isNew ? "" : " hidden") + ">" + (isNew ? "Buat tugas" : "Simpan perubahan") + "</button>" : "") + "</div></div>";
     dr.hidden = false; $("scrim").hidden = false; document.body.style.overflow = "hidden";
@@ -547,8 +594,26 @@
       if (!D.isNew) await quickSave({ attachments: D.t.attachments }, "Lampiran ditambahkan.");
     };
     if ($("dSave")) $("dSave").onclick = () => saveTask();
-    if (!isNew) { loadComments(t.id); bindMentions(team); }
+    if (!isNew) { mountComments(t.id, team); drawHours(t); }
   }
+  /* hours logged on a task (timesheet), with a quick entry for the signed-in person */
+  function drawHours(t) {
+    const box = $("dHrs"); if (!box) return;
+    const done = S.hours[t.id] || 0, est = t.est_hours || 0, pct = est ? Math.min(100, Math.round(done / est * 100)) : 0;
+    box.innerHTML = '<div class="dlabel"><span>Jam kerja</span><span class="num">' + fmtNum(done) + " jam tercatat" + (est ? " dari perkiraan " + fmtNum(est) + " jam" : "") + "</span></div>" +
+      (est ? '<div class="bar thin" style="margin-bottom:10px"><i style="width:' + pct + "%;background:" + (done > est ? "var(--late)" : "var(--teal)") + '"></i></div>' : "") +
+      '<div class="hrs-add"><input class="in" type="date" id="hDate" value="' + S.today + '" aria-label="Tanggal"><input class="in" type="number" id="hH" min="0.25" max="24" step="0.25" placeholder="Jam" aria-label="Jumlah jam">' +
+      '<input class="in" id="hNote" placeholder="Catatan singkat (opsional)" aria-label="Catatan"><button class="btn ghost small" type="button" id="hAdd">Catat jam</button></div>';
+    $("hAdd").onclick = () => run($("hAdd"), async () => {
+      const h = Number($("hH").value);
+      if (!(h > 0 && h <= 24)) { toast("Isi jumlah jam antara 0 dan 24.", true); return; }
+      await api("regSave", { reg: "timesheet", row: { task_id: t.id, date: $("hDate").value, hours: h, note: $("hNote").value } });
+      S.hours[t.id] = (S.hours[t.id] || 0) + h; S.summary.week_hours = (S.summary.week_hours || 0) + h;
+      drawHours(t); toast(fmtNum(h) + " jam dicatat.");
+    });
+  }
+  const fmtNum = n => new Intl.NumberFormat("id-ID", { maximumFractionDigits: 2 }).format(n || 0);
+  K.fmtNum = fmtNum;
   function formRow() {
     return { title: $("dTitle").value.trim(), assignee_uid: $("dWho").value, milestone_id: $("dMs").value, start: $("dStart").value, due: $("dDue").value, priority: $("dPrio").value,
       est_hours: $("dHours").value, labels: $("dLabels").value.split(",").map(s => s.trim()).filter(Boolean), description: $("dDesc").value };
@@ -592,12 +657,18 @@
     $("dAtt").querySelectorAll("[data-x]").forEach(x => (x.onclick = async () => { a.splice(Number(x.dataset.x), 1); drawAttachments(edit); if (!D.isNew) await quickSave({ attachments: a }, "Lampiran dihapus."); }));
   }
   const mentionHtml = body => { let h = esc(body); S.users.slice().sort((a, b) => b.name.length - a.name.length).forEach(u => { h = h.split("@" + esc(u.name)).join('<span class="mention">@' + esc(u.name) + "</span>"); }); return h; };
+  let CM = null;   /* comment box state: { id, mentions } */
+  const COMMENTS_HTML = '<div><div class="dlabel"><span>Komentar</span></div><div class="comments" id="dCm"><p class="muted small">Memuat komentar</p></div>' +
+    '<div class="cm-in" style="margin-top:12px"><textarea class="in" id="dCmIn" rows="2" placeholder="Tulis komentar. Ketik @ untuk menyebut anggota tim."></textarea><div class="mpick" id="dPick" role="listbox" hidden></div><div style="display:flex;justify-content:flex-end"><button class="btn small" id="dCmSend" type="button">Kirim komentar</button></div></div>' +
+    '<div class="actlog" id="dLog" style="margin-top:14px"></div></div>';
+  function mountComments(id, team) { CM = { id, mentions: [] }; loadComments(id); bindMentions(team); }
+  const ACT = [["status ", "mengubah status menjadi "], ["buat tugas", "membuat tugas"], ["ubah tugas", "mengubah tugas"], ["tahap ", "memindahkan ke tahap "], ["buat konten", "membuat item ini"], ["ubah konten", "mengubah item ini"]];
   async function loadComments(tid) {
     try {
       const j = await api("comments", { task_id: tid });
-      if (!D || D.t.id !== tid) return;
+      if (!CM || CM.id !== tid) return;
       $("dCm").innerHTML = j.comments.length ? j.comments.map(c => '<div class="cm">' + avatar(c.uid, "") + '<div><div class="h"><b>' + esc(uName(c.uid)) + "</b> <span>" + esc(fmtTime(c.created)) + "</span>" + '</div><div class="b">' + mentionHtml(c.body) + "</div></div></div>").join("") : '<p class="muted small">Belum ada komentar.</p>';
-      $("dLog").innerHTML = j.activity.length ? "<b>Riwayat</b>" + j.activity.slice().reverse().map(a => "<span>" + esc(fmtTime(a.ts)) + ": " + esc(uName(a.uid)) + " " + esc(a.action.replace("status ", "mengubah status menjadi ").replace("buat tugas", "membuat tugas").replace("ubah tugas", "mengubah tugas")) + "</span>").join("") : "";
+      $("dLog").innerHTML = j.activity.length ? "<b>Riwayat</b>" + j.activity.slice().reverse().map(a => "<span>" + esc(fmtTime(a.ts)) + ": " + esc(uName(a.uid)) + " " + esc(ACT.reduce((s, [x, y]) => s.indexOf(x) === 0 ? y + s.slice(x.length) : s, a.action)) + "</span>").join("") : "";
     } catch (e) { $("dCm").innerHTML = '<p class="err">' + esc(e.message) + "</p>"; }
   }
   function bindMentions(team) {
@@ -606,7 +677,7 @@
     let idx = 0, items = [];
     const at = () => { const pos = ta.selectionStart, m = ta.value.slice(0, pos).match(/@([^\s@]{0,20})$/); return m ? { q: m[1].toLowerCase(), from: pos - m[0].length, to: pos } : null; };
     const close = () => { pick.hidden = true; items = []; };
-    const choose = u => { const a = at(); if (!a) return; ta.value = ta.value.slice(0, a.from) + "@" + u.name + " " + ta.value.slice(a.to); const c = a.from + u.name.length + 2; ta.setSelectionRange(c, c); D.mentions.push(u); close(); ta.focus(); };
+    const choose = u => { const a = at(); if (!a) return; ta.value = ta.value.slice(0, a.from) + "@" + u.name + " " + ta.value.slice(a.to); const c = a.from + u.name.length + 2; ta.setSelectionRange(c, c); CM.mentions.push(u); close(); ta.focus(); };
     const show = () => {
       const a = at(); if (!a) return close();
       items = pool.filter(u => u.name.toLowerCase().split(/\s+/).some(w => w.startsWith(a.q)) || u.name.toLowerCase().startsWith(a.q)).slice(0, 8);
@@ -627,18 +698,19 @@
     ta.addEventListener("blur", () => setTimeout(close, 150));
     $("dCmSend").onclick = () => run($("dCmSend"), async () => {
       const body = ta.value.trim(); if (!body) return;
-      const mentions = [...new Set(D.mentions.filter(u => body.includes("@" + u.name)).map(u => u.id))];
-      await api("commentAdd", { task_id: D.t.id, body, mentions });
-      ta.value = ""; D.mentions = []; S.ccount[D.t.id] = (S.ccount[D.t.id] || 0) + 1;
-      loadComments(D.t.id); toast(mentions.length ? "Komentar terkirim, " + mentions.length + " orang diberi tahu." : "Komentar terkirim.");
+      const mentions = [...new Set(CM.mentions.filter(u => body.includes("@" + u.name)).map(u => u.id))];
+      await api("commentAdd", { task_id: CM.id, body, mentions });
+      ta.value = ""; CM.mentions = []; S.ccount[CM.id] = (S.ccount[CM.id] || 0) + 1;
+      loadComments(CM.id); toast(mentions.length ? "Komentar terkirim, " + mentions.length + " orang diberi tahu." : "Komentar terkirim.");
     });
   }
   function closeDrawer(force) {
-    if (!force && D && D.dirty) { confirmBox("Ada perubahan yang belum disimpan. Tutup tanpa menyimpan?", "Tutup tanpa menyimpan", async () => closeDrawer(true)); return; }
-    $("drawer").hidden = true; $("drawer").innerHTML = ""; $("scrim").hidden = true; document.body.style.overflow = ""; D = null;
-    if (/[?&]t=/.test(location.hash)) history.replaceState(null, "", location.hash.replace(/([?&])t=[^&]*&?/, "$1").replace(/[?&]$/, ""));
+    if (!force && ((D && D.dirty) || (K.extDirty && K.extDirty()))) { confirmBox("Ada perubahan yang belum disimpan. Tutup tanpa menyimpan?", "Tutup tanpa menyimpan", async () => closeDrawer(true)); return; }
+    $("drawer").hidden = true; $("drawer").innerHTML = ""; $("scrim").hidden = true; document.body.style.overflow = ""; D = null; CM = null; K.extDirty = null;
+    if (/[?&][tk]=/.test(location.hash)) history.replaceState(null, "", location.hash.replace(/([?&])[tk]=[^&]*&?/, "$1").replace(/[?&]$/, ""));
   }
   $("scrim").onclick = () => closeDrawer();
+  Object.assign(K, { closeDrawer, mountComments, COMMENTS_HTML, sel: (...a) => sel(...a) });
   addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("modal").hidden) closeModal(); else if (!$("drawer").hidden) closeDrawer(); } });
 
   /* ============================================================
@@ -681,7 +753,7 @@
      ============================================================ */
   function viewNotifications(v) {
     setTop("Notifikasi");
-    const n = S.notifications, kindIcon = { tugas: "task", sebutan: "chat", tenggat: "flag", terlambat: "alert", proyek: "proj" };
+    const n = S.notifications, kindIcon = { tugas: "task", sebutan: "chat", tenggat: "flag", terlambat: "alert", proyek: "proj", persetujuan: "check" };
     v.innerHTML = '<div class="sec-h"><p class="muted">Pemberitahuan saat Anda ditugaskan, disebut di komentar, dan saat tenggat mendekat atau terlewat.</p>' + (unread() ? '<button class="btn ghost small" id="nAll" type="button">Tandai semua dibaca</button>' : "") + "</div>" +
       '<div class="panel nlist">' + (n.length ? n.map(x => '<button class="n' + (x.read ? "" : " unread") + '" type="button" data-n="' + esc(x.id) + '"><span class="nic ' + esc(x.kind) + '">' + ic(kindIcon[x.kind] || "bell") + '</span><span><span class="tx">' + esc(x.text) + '</span><br><span class="small muted">' + esc(fmtTime(x.created)) + "</span></span>" + (x.read ? "" : '<span class="due today">Baru</span>') + "</button>").join("")
         : '<div class="empty"><strong>Belum ada notifikasi</strong>Semua kabar penting tentang tugas Anda akan muncul di sini.</div>') + "</div>";
@@ -692,6 +764,8 @@
       const [kind, id] = String(x.link || "").split(":");
       if (kind === "task") { const t = S.tasks.find(y => y.id === id); if (t) { location.hash = "#/proyek/" + t.project_id + "/papan?t=" + id; } else toast("Tugas ini sudah tidak tersedia.", true); }
       else if (kind === "project") location.hash = "#/proyek/" + id;
+      else if (kind === "konten") { if (S.konten.find(y => y.id === id)) location.hash = "#/konten?k=" + id; else toast("Item ini sudah tidak tersedia.", true); }
+      else if (kind === "admin") location.hash = "#/administrasi/" + id + (x.link.split(":")[2] ? "?id=" + x.link.split(":")[2] : "");
     }));
   }
 

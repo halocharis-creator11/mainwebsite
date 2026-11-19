@@ -246,3 +246,7 @@ Akun dengan peran superadmin, direktur, atau admin juga dapat masuk ke panel kon
 **Lupa password**: gunakan tautan "Lupa password?" (kode dikirim ke email). Superadmin dapat membuat password sementara baru dari menu Pengguna. Jika superadmin sendiri terkunci, jalankan `resetSuperadmin` di Apps Script.
 
 **Notifikasi** hanya tampil di aplikasi (lonceng), untuk penugasan, sebutan @nama di komentar, tenggat besok, dan tugas yang terlewat tenggat.
+
+**Alur konten (tahap 3)**: papan dan daftar untuk produk repositori, berita, dan pembaruan portofolio dengan tahap draf, telaah internal, tata letak dan grafik, unggah ke Zenodo (khusus repositori), terbit di web, dan diseminasi. Setiap tahap bisa punya penanggung jawab sendiri; orang tersebut mendapat notifikasi saat item masuk ke tahapnya.
+
+**Administrasi (tahap 4)**: surat masuk dan keluar dengan penomoran otomatis (`nomor/CHARIS/kode/bulan Romawi/tahun`, surat masuk mendapat nomor agenda `AG-tahun-nomor`), kontrak dan MoU dengan pengingat 30 hari, 7 hari, dan hari terakhir, rapat dengan notulen dan daftar hadir yang bisa dicetak, cuti dengan persetujuan direktur, timesheet per tugas, dan inventaris aset (`INV-tahun-nomor`). Tab baru di spreadsheet Ruang Kerja dibuat otomatis saat pertama dipakai.
