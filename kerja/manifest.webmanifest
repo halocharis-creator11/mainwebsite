@@ -1,0 +1,19 @@
+{
+  "name": "Ruang Kerja CHARIS",
+  "short_name": "Ruang Kerja",
+  "description": "Proyek, peluang dan proposal, administrasi, dan keuangan tim CHARIS.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F7F5",
+  "theme_color": "#0B403C",
+  "icons": [
+    { "src": "../assets/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "../assets/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Catat peluang", "short_name": "Catat peluang", "url": "./#/peluang/baru", "icons": [{ "src": "../assets/img/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Tugas saya", "url": "./#/tugas" }
+  ],
+  "share_target": { "action": "./", "method": "GET", "params": { "title": "title", "text": "text", "url": "url" } }
+}

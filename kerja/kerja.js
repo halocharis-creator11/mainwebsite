@@ -15,7 +15,7 @@
   const STATUS_L = Object.fromEntries(STATUS);
   const PRIO = [["rendah", "Rendah"], ["sedang", "Sedang"], ["tinggi", "Tinggi"], ["mendesak", "Mendesak"]];
   const PRIO_L = Object.fromEntries(PRIO);
-  const PSTATUS = [["perencanaan", "Perencanaan"], ["berjalan", "Berjalan"], ["ditunda", "Ditunda"], ["selesai", "Selesai"]];
+  const PSTATUS = [["perencanaan", "Perencanaan"], ["berjalan", "Berjalan"], ["ditunda", "Ditunda"], ["selesai", "Selesai"], ["proposal", "Proposal"], ["tidak_lolos", "Tidak lolos"]];
   const PSTATUS_L = Object.fromEntries(PSTATUS);
   const SEE_ALL = ["superadmin", "direktur", "admin"];
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
@@ -31,6 +31,7 @@
     user: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8",
     web: "M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20",
     flow: "M4 6h16M4 12h10M4 18h6",
+    opp: "M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0012 3z",
     doc: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M8 13h8M8 17h5",
     money: "M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
     back: "M15 18l-6-6 6-6",
@@ -56,7 +57,7 @@
 
   /* ---------- state ---------- */
   const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [], konten: [], hours: {}, summary: {} };
-  const EXPECTED = "2026-11-19-f7";
+  const EXPECTED = "2026-11-19-f8";
   const K = window.K = { S, esc, ic, ROLE, STATUS, STATUS_L, PRIO, PRIO_L, PSTATUS_L, MONTHS, MONTHS_L, views: {} };
 
   /* ---------- api ---------- */
@@ -219,7 +220,7 @@
   function apply(j) {
     S.rev = j.rev || "";
     Object.assign(S, { me: j.me, today: j.today, users: j.users, projects: j.projects, milestones: j.milestones, tasks: j.tasks, ccount: j.comment_counts || {}, notifications: j.notifications, portfolio: j.portfolio || [],
-      konten: j.konten || [], hours: j.hours_by_task || {}, summary: j.summary || {} });
+      konten: j.konten || [], hours: j.hours_by_task || {}, summary: j.summary || {}, peluang: j.peluang || [] });
     S.stale = j.version !== EXPECTED;
   }
   /* ask the server whether anything changed since our copy; reload only if so */
@@ -273,7 +274,8 @@
       ["notifikasi", "Notifikasi", "bell", cnt]
     ];
     const more = [["administrasi", "Administrasi", "doc", r === "direktur" || r === "superadmin" ? S.summary.leave_pending : 0]];
-    if (canSeeKonten()) more.unshift(["konten", "Alur konten", "flow", S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length]);
+    more.unshift(["peluang", "Peluang dan proposal", "opp", oppCount()]);
+    if (canSeeKonten()) more.splice(1, 0, ["konten", "Alur konten", "flow", S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length]);
     more.push(["keuangan", "Keuangan", "money", finCount()]);
     items.splice(3, 0, ...more);
     const soon = [];
@@ -283,7 +285,7 @@
     $("railNav").innerHTML = items.map(x => a(...x)).join("") + soon.map(x => '<span class="nav-a soon">' + ic(x[1]) + "<span>" + x[0] + "</span><small>segera</small></span>").join("") + extra.map(x => a(...x)).join("");
     $("railFoot").innerHTML = (SEE_ALL.includes(r) ? '<a class="nav-a" href="../admin/">' + ic("web") + "<span>Konten website</span></a>" : "") +
       '<a class="nav-a" href="#/profil" data-r="profil">' + avatar(S.me.id, "sm") + "<span>" + esc(S.me.name) + "</span></a>";
-    const moreCnt = finCount() + (canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0) + ((r === "direktur" || r === "superadmin") ? (S.summary.leave_pending || 0) : 0);
+    const moreCnt = oppCount() + finCount() + (canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0) + ((r === "direktur" || r === "superadmin") ? (S.summary.leave_pending || 0) : 0);
     $("tabbar").innerHTML = [["dasbor", "Dasbor", "dash"], ["proyek", "Proyek", "proj"], ["tugas", "Tugas", "task"], ["notifikasi", "Notifikasi", "bell", cnt], ["menu", "Menu", "list", moreCnt]]
       .map(([h, l, i, n]) => '<a href="#/' + h + '" data-r="' + h + '">' + ic(i) + "<span>" + l + "</span>" + (n ? '<span class="cnt">' + n + "</span>" : "") + "</a>").join("");
     $("bellBtn").innerHTML = ic("bell") + '<span class="dot" id="bellCount"' + (cnt ? "" : " hidden") + ">" + cnt + "</span>";
@@ -293,6 +295,10 @@
   const finCount = () => { const s = S.summary || {}; return (s.req_check || 0) + (s.req_approve || 0) + (s.req_pay || 0) + (s.invoice_due || 0); };
   const FIN_FULL = ["superadmin", "direktur", "bendahara"];
   K.finFull = () => FIN_FULL.includes(S.me.role); K.finCount = finCount;
+  /* opportunities that need this person soon: open, in their team, deadline within 7 days */
+  const OPP_OPEN = ["masuk", "brainstorm", "keputusan", "eoi", "penyusunan", "telaah", "diajukan", "klarifikasi"];
+  const oppCount = () => (S.peluang || []).filter(o => OPP_OPEN.includes(o.stage) && o.team.includes(S.me.id) && o.deadline && o.deadline >= S.today && diffDays(o.deadline) <= 7 && !["diajukan", "klarifikasi"].includes(o.stage)).length;
+  K.OPP_OPEN = OPP_OPEN; K.oppCount = oppCount;
   const canSeeKonten = () => seesAll() || S.me.role === "peneliti" || S.konten.length > 0;
   const whoNow = k => (k.assignees || {})[k.stage] || k.owner_uid;
   Object.assign(K, { canSeeKonten, whoNow });
@@ -302,7 +308,7 @@
     const r = S.me.role, konten = canSeeKonten() ? S.konten.filter(k => k.stage !== "diseminasi" && whoNow(k) === S.me.id).length : 0;
     const row = (href, i, l, sub, n) => '<a class="trow" href="' + href + '" style="text-decoration:none;color:inherit"><span class="nic">' + ic(i) + '</span><span style="min-width:0"><span class="t">' + l + '</span><span class="p">' + sub + "</span></span>" + (n ? '<span class="due today">' + n + "</span>" : "") + "</a>";
     v.innerHTML = '<a class="panel pad" href="#/profil" style="display:flex;gap:14px;align-items:center;margin-bottom:16px;text-decoration:none;color:inherit">' + avatar(S.me.id, "lg") + '<span style="flex:1;min-width:0"><b>' + esc(S.me.name) + '</b><br><span class="small muted">' + ROLE[r] + ", akun dan password</span></span></a>" +
-      '<div class="panel">' + (canSeeKonten() ? row("#/konten", "flow", "Alur konten", "Repositori, berita, dan portofolio", konten) : "") +
+      '<div class="panel">' + row("#/peluang", "opp", "Peluang dan proposal", "Catat call, brainstorming, dan penyusunan proposal", oppCount()) + (canSeeKonten() ? row("#/konten", "flow", "Alur konten", "Repositori, berita, dan portofolio", konten) : "") +
       row("#/administrasi", "doc", "Administrasi", r === "konsultan" ? "Timesheet" : (SEE_ALL.includes(r) || r === "bendahara") ? "Surat, kontrak, rapat, cuti, timesheet, aset" : "Rapat, cuti, dan timesheet", (r === "direktur" || r === "superadmin") ? S.summary.leave_pending : 0) +
       row("#/keuangan", "money", "Keuangan", FIN_FULL.includes(r) ? "Pengajuan dana, kas, anggaran, invoice, honorarium, laporan" : "Pengajuan dana dan honorarium Anda", finCount()) +
       (r === "superadmin" || r === "direktur" ? row("#/pengguna", "users", "Pengguna", "Akun dan peran tim") : "") +
@@ -310,7 +316,7 @@
   }
   function setActive(r) {
     if (r === "naskah") r = "konten";
-    if (["konten", "administrasi", "keuangan", "pengguna", "profil"].includes(r) && matchMedia("(max-width: 860px)").matches) r = "menu";
+    if (["konten", "administrasi", "keuangan", "peluang", "pengguna", "profil"].includes(r) && matchMedia("(max-width: 860px)").matches) r = "menu";
     document.querySelectorAll("[data-r]").forEach(a => { if (a.dataset.r === r) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   }
   function setTop(title, back) {
@@ -335,6 +341,7 @@
     else if (parts[0] === "konten" && K.pages.konten) K.pages.konten(v, q);
     else if (parts[0] === "naskah" && K.pages.naskah) K.pages.naskah(v, parts[1], q);
     else if (parts[0] === "administrasi" && K.pages.admin) K.pages.admin(v, parts[1] || "", q);
+    else if (parts[0] === "peluang" && K.pages.peluang) K.pages.peluang(v, parts[1] || "", q);
     else if (parts[0] === "keuangan" && K.pages.keuangan) K.pages.keuangan(v, parts[1] || "", q);
     else if (parts[0] === "notifikasi") viewNotifications(v);
     else if (parts[0] === "pengguna") viewUsers(v);
@@ -405,6 +412,9 @@
     if (s.req_pay) rows.push(line("#/keuangan/pengajuan?f=disetujui", "money", s.req_pay + " pengajuan dana disetujui dan siap dibayar", '<span class="due today">Bayar</span>'));
     if (s.invoice_due) rows.push(line("#/keuangan/invoice", "doc", s.invoice_due + " invoice jatuh tempo dalam 7 hari atau terlambat", '<span class="due soon">Cek</span>'));
     if (s.my_req_open) rows.push(line("#/keuangan/pengajuan", "money", s.my_req_open + " pengajuan dana Anda sedang diproses", ""));
+    (S.peluang || []).filter(o => OPP_OPEN.includes(o.stage) && !["diajukan", "klarifikasi"].includes(o.stage) && o.deadline && o.deadline >= S.today && diffDays(o.deadline) <= 14 && (o.team.includes(S.me.id) || seesAll()))
+      .sort((a, b) => a.deadline.localeCompare(b.deadline)).slice(0, 4)
+      .forEach(o => rows.push(line("#/peluang/" + o.id, "opp", esc(o.title) + '<span class="p">' + esc(K.OPP_STAGE_L ? K.OPP_STAGE_L[o.stage] : o.stage) + "</span>", dueBadge(o.deadline, false))));
     if (s.my_leave_pending) rows.push(line("#/administrasi/cuti", "user", "Pengajuan cuti Anda sedang menunggu keputusan", ""));
     rows.push(line("#/administrasi/timesheet", "load", "Jam kerja tercatat minggu ini", '<span class="chip">' + fmtNum(s.week_hours || 0) + " jam</span>"));
     return '<section class="sec"><div class="sec-h"><h2>Perlu tindakan</h2></div><div class="panel todo">' + rows.join("") + "</div></section>";
@@ -423,11 +433,11 @@
     setTop("Proyek");
     let status = q.get("status") || "aktif", term = "";
     v.innerHTML = '<div class="toolbar"><input class="in grow" id="pSearch" type="search" placeholder="Cari proyek, klien, atau kode" aria-label="Cari proyek">' +
-      '<div class="seg" id="pSeg" role="group" aria-label="Filter status">' + [["aktif", "Aktif"], ["berjalan", "Berjalan"], ["perencanaan", "Perencanaan"], ["ditunda", "Ditunda"], ["selesai", "Selesai"], ["semua", "Semua"]]
+      '<div class="seg" id="pSeg" role="group" aria-label="Filter status">' + [["aktif", "Aktif"], ["berjalan", "Berjalan"], ["perencanaan", "Perencanaan"], ["proposal", "Proposal"], ["ditunda", "Ditunda"], ["selesai", "Selesai"], ["semua", "Semua"]]
         .map(([k, l]) => '<button type="button" data-s="' + k + '">' + l + "</button>").join("") + "</div>" + (seesAll() ? '<button class="btn" id="pNew" type="button">' + ic("plus") + "Proyek baru</button>" : "") + '</div><div id="pList"></div>';
     const draw = () => {
       v.querySelectorAll("#pSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === status)));
-      const list = S.projects.filter(p => (status === "semua" || (status === "aktif" ? p.status !== "selesai" : p.status === status)) &&
+      const list = S.projects.filter(p => (status === "semua" || (status === "aktif" ? !["selesai", "proposal", "tidak_lolos"].includes(p.status) : p.status === status)) &&
         (!term || [p.name, p.client, p.code, p.id].join(" ").toLowerCase().includes(term)));
       $("pList").innerHTML = list.length ? '<div class="pcards">' + list.map(pcard).join("") + "</div>" : '<div class="panel empty"><strong>Tidak ada proyek</strong>Ubah filter atau kata kunci pencarian.</div>';
     };
@@ -813,6 +823,7 @@
       if (kind === "task") { const t = S.tasks.find(y => y.id === id); if (t) { location.hash = "#/proyek/" + t.project_id + "/papan?t=" + id; } else toast("Tugas ini sudah tidak tersedia.", true); }
       else if (kind === "project") location.hash = "#/proyek/" + id;
       else if (kind === "konten") { if (S.konten.find(y => y.id === id)) location.hash = "#/konten?k=" + id; else toast("Item ini sudah tidak tersedia.", true); }
+      else if (kind === "opp") location.hash = "#/peluang/" + id;
       else if (kind === "fin") location.hash = "#/keuangan/" + id + (x.link.split(":")[2] ? "?id=" + x.link.split(":")[2] : "");
       else if (kind === "admin") location.hash = "#/administrasi/" + id + (x.link.split(":")[2] ? "?id=" + x.link.split(":")[2] : "");
     }));

@@ -14,7 +14,7 @@
  */
 
 /* Bump when this file changes; /kerja/ shows a notice when the Web App deployment is older. */
-const K_VERSION = '2026-11-19-f7';
+const K_VERSION = '2026-11-19-f8';
 const K_ROLES = ['superadmin', 'direktur', 'admin', 'bendahara', 'peneliti', 'konsultan'];
 const K_SEE_ALL = ['superadmin', 'direktur', 'admin'];          /* see every project */
 const K_SUPERADMIN_EMAIL = 'halo.charis@gmail.com';
@@ -22,7 +22,7 @@ const K_TZ = 'Asia/Makassar';
 const K_SESSION_DAYS = 14;
 const K_STATUS = ['belum', 'dikerjakan', 'ditinjau', 'selesai'];
 const K_PRIORITY = ['rendah', 'sedang', 'tinggi', 'mendesak'];
-const K_PROJECT_STATUS = ['perencanaan', 'berjalan', 'ditunda', 'selesai'];
+const K_PROJECT_STATUS = ['perencanaan', 'berjalan', 'ditunda', 'selesai', 'proposal', 'tidak_lolos'];
 
 const K_SCHEMA = {
   users:         ['id', 'email', 'name', 'role', 'title', 'phone', 'status', 'pw_hash', 'pw_salt', 'must_change', 'created', 'last_login'],
@@ -38,6 +38,12 @@ const K_SCHEMA = {
   konten:        ['id', 'type', 'title', 'ref_id', 'stage', 'owner_uid', 'assignees', 'due', 'priority', 'notes', 'link', 'doi', 'project_id', 'created_by', 'created', 'updated', 'done_at',
                   'web_id', 'web_status', 'review', 'published_at', 'published_by', 'draft_sig', 'pub_sig'],
   /* website text being written for a news item or portfolio entry (one row per content item) */
+  /* opportunities and proposals (Peluang.gs) */
+  peluang:       ['id', 'number', 'title', 'link', 'deadline', 'kind', 'funder', 'value', 'currency', 'service', 'stage', 'visibility', 'lead_uid', 'team',
+                  'project_id', 'brief', 'decision', 'result', 'rate', 'rate_date', 'workplan', 'parent_id', 'submitted_at', 'notes', 'created_by', 'created', 'updated'],
+  peluang_ide:   ['id', 'opp_id', 'uid', 'text', 'votes', 'created'],
+  peluang_skor:  ['id', 'opp_id', 'uid', 'fit', 'win', 'capacity', 'value', 'note', 'updated'],
+  peluang_rab:   ['id', 'opp_id', 'pos_id', 'description', 'volume', 'unit', 'price', 'order'],
   naskah:        ['id', 'web_type', 'updated', 'updated_by', 'category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured',
                   'disclosure', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role', 'summary_id', 'summary_en',
                   'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'client', 'funder', 'partners', 'official_title',
@@ -126,6 +132,7 @@ function kerjaHarianRun_() {
     });
   });
   try { kFinHarian_(today, have); } catch (e) { console.warn('kFinHarian_: ' + e.message); }
+  try { if (typeof kOppHarian_ === 'function') kOppHarian_(today, have); } catch (e) { console.warn('kOppHarian_: ' + e.message); }
   /* tidy up: expired sessions and read notifications older than 90 days */
   const now = kNow_(), old = kAddDays_(today, -90);
   kDeleteWhere_('sessions', function (s) { return s.expires < now; });
@@ -176,6 +183,9 @@ function kerjaRun_(b) {
     case 'webToggle':      return kWebToggle_(me, b);
     case 'webImport':      return kWebImport_(me, b);
     case 'upload':         return kUpload_(me, b);
+    case 'oppCapture': case 'oppSave': case 'oppGet': case 'oppStage': case 'oppIdea': case 'oppVote': case 'oppIdeaDelete': case 'oppScore':
+    case 'oppDecide': case 'oppBudget': case 'oppResult': case 'oppCopy': case 'oppDelete':
+      return peluang_(me, b);                                   /* Peluang.gs */
     case 'regList':        return kRegList_(me, b.reg);
     case 'regSave':        return kRegSave_(me, b.reg, b.row || {});
     case 'regDelete':      return kRegDelete_(me, b.reg, b.id);
@@ -304,7 +314,7 @@ function kDeny_() { throw new Error('Anda tidak memiliki akses untuk tindakan in
    ============================================================ */
 function kLoad_(me) {
   const rev = kRev_();
-  kCacheGet_(['wprojects', 'tasks', 'comments', 'notifications', 'milestones', 'konten', 'timesheet', 'cuti', 'kontrak'].concat(kProps_()['FIN_SS_ID'] ? ['pengajuan', 'invoice', 'transaksi'] : []));
+  kCacheGet_(['wprojects', 'tasks', 'comments', 'notifications', 'milestones', 'konten', 'timesheet', 'cuti', 'kontrak', 'peluang', 'peluang_ide', 'peluang_skor'].concat(kProps_()['FIN_SS_ID'] ? ['pengajuan', 'invoice', 'transaksi'] : []));
   const projects = kRead_('wprojects').filter(function (p) { return kCanSeeProject_(me, p); });
   const pids = {}; projects.forEach(function (p) { pids[p.id] = 1; });
   const tasks = kRead_('tasks').filter(function (t) { return pids[t.project_id]; }).map(kTaskOut_);
@@ -328,6 +338,7 @@ function kLoad_(me) {
   return { ok: true, version: K_VERSION, rev: rev, me: kPublicUser_(me, true), today: kToday_(), users: users, projects: projects.map(kProjectOut_),
     konten: kRead_('konten').filter(function (k) { return kCanSeeKonten_(me, k); }).map(kKontenOut_), hours_by_task: hours, summary: kSummary_(me),
     milestones: kRead_('milestones').filter(function (m) { return pids[m.project_id]; }).map(kMilestoneOut_),
+    peluang: typeof kOppList_ === 'function' ? kOppList_(me) : [],
     tasks: tasks, comment_counts: ccount, notifications: notes, portfolio: portfolio };
 }
 function kProjectOut_(p) {
@@ -501,6 +512,7 @@ function kTaskDelete_(me, id) {
   });
 }
 function kTaskVisible_(me, id) {
+  if (String(id).indexOf('OPP-') === 0 && typeof kOppVisible_ === 'function') return kOppVisible_(me, id);
   if (String(id).indexOf('KN-') === 0) {
     const k = kRead_('konten').filter(function (x) { return x.id === id; })[0];
     if (!k || !kCanSeeKonten_(me, k)) return null;
