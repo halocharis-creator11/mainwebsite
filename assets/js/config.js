@@ -19,7 +19,8 @@ window.CHARIS_CONFIG = {
     hero:      { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.51.20.jpeg", alt: "", credit: "", credit_url: "" },   // first slide on the home page
     highlight: { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg", alt: "", credit: "", credit_url: "" },   // "Pembiayaan kesehatan" highlight on the home page
     about:     { src: "", alt: "", credit: "", credit_url: "" },   // banner on Tentang Kami
-    services:  { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.51.20.jpeg", alt: "", credit: "", credit_url: "" }    // banner on Layanan Kami
+    services:  { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.51.20.jpeg", alt: "", credit: "", credit_url: "" },    // banner on Layanan Kami
+     vision: { src: "assets/img/foto/WhatsApp Image 2026-11-19 at 18.17.24.jpeg", alt: "", credit: "", credit_url: "" }
   },
   /* Older setting, still honoured for the highlight photo. */
   HIGHLIGHT_IMAGE: "",
