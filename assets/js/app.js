@@ -391,10 +391,10 @@
     about() {
       app.innerHTML = pageTop(t("about.t")) + banner("about") +
         '<section class="sec"><div class="wrap ab-profile"><p class="ab-k">' + esc(t("about.profile")) + '</p><div class="prose ab-prose"><p class="big">' + esc(t("about.lead")) + "</p><p>" + esc(t("about.p2")) + "</p><p>" + esc(t("about.p3")) + "</p><p>" + esc(t("about.p4")) + "</p>" +
-        '<p class="ab-home">' + esc(t("about.home")) + "</p></div></div></section>" +
+        "</div></div></section>" +
         visionBand(false) + valuesSec() +
         '<section class="sec"><div class="wrap logo-mean"><img src="assets/img/logo-symbol.svg" alt="" width="160" height="160"><div><h2>' + esc(t("about.logo")) + "</h2>" + pillars(false, ["a", "r", "s"]) + "</div></div></section>" +
-        '<section class="sec" id="experience-all"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p><div id="expGrid"></div><p class="exp-note">' + esc(t("exp.note")) + "</p></div></section>" +
+        '<section class="sec" id="experience-all"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p><div id="expGrid"></div></div></section>' +
         '<section class="sec steps-sec"><div class="wrap">' + secHead(t("steps.t")) + stepCards() + "</div></section>" + newsletter();
       bindNewsletter(); bindSwipe();
       const toExp = pendingPillar === "exp";
@@ -618,13 +618,13 @@
         '<section class="sec pf-x-sec" id="pf-list"><div class="wrap">' + secHead(t("pf.x.t")) + '<p class="sec-lead">' + esc(t("pf.x.lead")) + '</p><div id="pfExplorer"></div>' +
         '<section id="pfProfile" class="pfp-wrap" hidden aria-live="polite"></section><p class="proj-note">' + esc(t("proj.note")) + "</p></div></section>" +
         '<section class="sec pf-charts-sec"><div class="wrap">' + secHead(t("pf.charts.t")) + '<div id="pfDash" class="pf-dash"></div></div></section>' +
-        '<section class="pf-cta"><div class="wrap pf-cta-in"><div><h2>' + esc(t("pf.cta.t")) + "</h2><p>" + esc(t("pf.cta.d")) + '</p></div><div class="pf-cta-act"><a class="btn btn-light" href="#/contact">' + esc(t("pf.cta.b1")) + '</a><a class="btn btn-outline-light" href="#/research">' + esc(t("pf.cta.b2")) + "</a></div></div></section>";
+        '<section class="pf-cta">' + motif() + '<div class="wrap pf-cta-in"><div><h2>' + esc(t("pf.cta.t")) + "</h2><p>" + esc(t("pf.cta.d")) + '</p></div><div class="pf-cta-act"><a class="btn btn-light" href="#/contact">' + esc(t("pf.cta.b1")) + '</a><a class="btn btn-outline-light" href="#/research">' + esc(t("pf.cta.b2")) + "</a></div></div></section>";
       const [rows, repo, pcov, partners] = await Promise.all([safeList("projects"), API.repo().catch(() => []), API.portfolioCovers().catch(() => ({})), safeList("partners")]);
       const dash = document.getElementById("pfDash"), kpiHost = document.getElementById("pfKpis");
       if (!rows) { kpiHost.innerHTML = errMsg(); return; }
       rows.sort((a, b) => String(b.date || b.year_start || "").localeCompare(String(a.date || a.year_start || "")));
       const nowY = new Date().getFullYear();
-      const PCOL = { a: "#0E5A55", r: "#6E9C99", s: "#32736E" };
+      const PCOL = { a: "#0E5A55", r: "#34538F", s: "#C9692A" };
       const svcColor = k => { const s = svc(k); return s ? PCOL[s.pillar] : "#6E9C99"; };
       const years = r => r.year_start && r.year_end && String(r.year_start) !== String(r.year_end) ? r.year_start + (lang === "en" ? " to " : " sampai ") + r.year_end : (r.year_start || r.year_end || "");
       const roleLabel = v => { const k = "role." + v, x = t(k); return x === k ? v : x; };
@@ -656,18 +656,19 @@
         const m = /(\d{1,2})(?:\.(\w+))?/.exec(x); if (!m) return;
         const g = Number(m[1]); (sdgs[g] = sdgs[g] || new Set()); if (m[2]) sdgs[g].add(m[1] + "." + m[2]);
       }));
-      const fig = (n, label, sub, href) => '<li class="lg">' + (href ? '<a href="' + href + '">' : "<div>") + "<b>" + (typeof n === "number" ? nf(n) : esc(n)) + "</b><span>" + esc(label) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + (href ? "</a>" : "</div>") + "</li>";
+      const fig = (n, label, sub, href, g, col) => '<li class="lg" style="--k:' + (col || "#0E5A55") + '">' + (href ? '<a href="' + href + '">' : "<div>") + (g ? '<span class="gl-tile">' + glyph(g) + "</span>" : "") + "<b>" + (typeof n === "number" ? nf(n) : esc(n)) + "</b><span>" + esc(label) + "</span>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + (href ? "</a>" : "</div>") + "</li>";
       const regSub = national ? (regionsHit ? t("pf.k.regions.n").replace("{n}", regionsHit) : "") : t("pf.k.regions.s");
       const kpis = '<ul class="pf-ledger">' +
-        fig(rows.length, t("pf.k.projects"), rows.some(r => /sebelum CHARIS/i.test(r.role || "")) ? t("pf.k.projects.s") : "") +
-        fig(svcKeys.length, t("pf.k.services"), t("pf.k.services.s").replace("{n}", SV.length)) +
-        fig(national ? t("pf.k.national") : regionsHit, t("pf.k.regions"), regSub) +
-        fig(repo.length, t("pf.k.products"), t("pf.k.products.s"), "#/research") +
-        (tim.length ? fig(tim.length, t("pf.k.partners"), t("pf.k.partners.s"), "#/about") : "") + "</ul>";
+        fig(rows.length, t("pf.k.projects"), rows.some(r => /sebelum CHARIS/i.test(r.role || "")) ? t("pf.k.projects.s") : "", "", "plan", "#0E5A55") +
+        fig(svcKeys.length, t("pf.k.services"), t("pf.k.services.s").replace("{n}", SV.length), "", "gear", "#34538F") +
+        fig(national ? t("pf.k.national") : regionsHit, t("pf.k.regions"), regSub, "", "access", "#C9692A") +
+        fig(repo.length, t("pf.k.products"), t("pf.k.products.s"), "#/research", "policy", "#6B4FA0") +
+        (tim.length ? fig(tim.length, t("pf.k.partners"), t("pf.k.partners.s"), "#/about", "people", "#B7791F") : "") + "</ul>";
 
       /* ---------- projects by field and service line (rows, click to filter) ---------- */
-      const PC = { a: "#0E5A55", r: "#6E9C99", s: "#32736E" };
+      const PC = PCOL, PAL = ["#0E5A55", "#34538F", "#C9692A", "#6B4FA0", "#B7791F", "#2D8C7F"];
       const total = Math.max(1, rows.length);
+      const pdh = (g, col, title) => '<header class="pd-h"><span class="gl-tile" style="background:' + col + '">' + glyph(g) + "</span><h3>" + esc(title) + "</h3></header>";
       const bar = (n, max, col) => '<span class="pd-bar"><i style="width:' + Math.max(3, n / max * 100).toFixed(1) + "%;background:" + col + '"></i></span>';
       const maxS = Math.max(1, ...SV.map(s => rows.filter(r => r.service === s.key).length));
       const bySvc = PILLARS.map(p => {
@@ -676,19 +677,19 @@
         return '<div class="pd-group"><p class="pd-gh">' + shape(p) + "<span>" + esc(t("p." + p + ".t")) + "</span><b>" + list.reduce((a, x) => a + x.n, 0) + "</b></p><ul>" +
           list.map(x => '<li><button type="button" data-pf-svc="' + x.k + '"><span class="pd-name">' + esc(serviceName(x.k)) + "</span>" + bar(x.n, maxS, PC[p]) + '<b class="pd-n">' + x.n + "</b></button></li>").join("") + "</ul></div>";
       }).join("");
-      const chartSvc = '<section class="pd-block"><h3>' + esc(t("pf.c.svc")) + "</h3>" + bySvc + '<p class="pf-hint">' + esc(t("pf.c.svc.h")) + "</p></section>";
+      const chartSvc = '<section class="pd-block">' + pdh("data", "#0E5A55", t("pf.c.svc")) + bySvc + '<p class="pf-hint">' + esc(t("pf.c.svc.h")) + "</p></section>";
 
       /* ---------- client types: ranked rows instead of a donut ---------- */
       const ct = {}; rows.forEach(r => { const k = r.client_type || t("pf.other"); ct[k] = (ct[k] || 0) + 1; });
       const ctl = Object.entries(ct).sort((a, b) => b[1] - a[1]), maxC = Math.max(1, ...ctl.map(x => x[1]));
-      const chartClient = '<section class="pd-block"><h3>' + esc(t("pf.c.client")) + '</h3><ul class="pd-rows">' +
-        ctl.map(([k, n]) => '<li><span class="pd-name">' + esc(k) + "</span>" + bar(n, maxC, "#0E5A55") + '<b class="pd-n">' + n + '</b><small class="pd-pc">' + Math.round(n / total * 100) + "%</small></li>").join("") + "</ul></section>";
+      const chartClient = '<section class="pd-block">' + pdh("people", "#34538F", t("pf.c.client")) + '<ul class="pd-rows">' +
+        ctl.map(([k, n], i) => '<li><span class="pd-name"><i class="pd-dot" style="background:' + PAL[i % PAL.length] + '"></i>' + esc(k) + "</span>" + bar(n, maxC, PAL[i % PAL.length]) + '<b class="pd-n">' + n + '</b><small class="pd-pc">' + Math.round(n / total * 100) + "%</small></li>").join("") + "</ul></section>";
 
       /* ---------- timeline: one thin line per project on a year ruler ---------- */
       const ys = rows.map(r => Number(r.year_start)).filter(Boolean), ye = rows.map(r => Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start))).filter(Boolean);
       const y0 = Math.min(nowY, ...ys), y1 = Math.max(nowY, ...ye, y0), span = y1 - y0 + 1;
       const tl = rows.filter(r => r.year_start).slice().sort((a, b) => String(a.year_start).localeCompare(String(b.year_start)));
-      const chartTl = '<section class="pd-block pd-wide"><h3>' + esc(t("pf.c.tl")) + '</h3><div class="pd-tl" style="--span:' + span + '">' +
+      const chartTl = '<section class="pd-block pd-wide">' + pdh("plan", "#C9692A", t("pf.c.tl")) + '<div class="pd-tl" style="--span:' + span + '">' +
         '<div class="pd-tl-axis"><span></span><span class="pd-tl-years">' + Array.from({ length: span }, (_, i) => "<span>" + (y0 + i) + "</span>").join("") + "</span></div>" +
         tl.map(r => {
           const a = Number(r.year_start), b = Number(r.year_end || (r.status === "berjalan" ? nowY : r.year_start));
@@ -699,13 +700,13 @@
       /* ---------- team experience by institution type ---------- */
       const CATS = ["gov", "un", "intl", "ngo", "uni"];
       const byCat = CATS.map(c => [c, tim.filter(p => p.category === c).length]).filter(x => x[1]), maxE = Math.max(1, ...byCat.map(x => x[1]));
-      const exp = tim.length ? '<section class="pd-block"><h3>' + esc(t("pf.c.exp").replace("{n}", tim.length)) + '</h3><ul class="pd-rows">' +
-        byCat.map(([c, n]) => '<li><span class="pd-name">' + esc(t("cat." + c)) + "</span>" + bar(n, maxE, "#32736E") + '<b class="pd-n">' + n + "</b></li>").join("") + '</ul><p class="pf-hint"><a href="#/about" data-pillar="exp">' + esc(t("pf.c.exp.l")) + "</a></p></section>" : "";
+      const exp = tim.length ? '<section class="pd-block">' + pdh("partner", "#6B4FA0", t("pf.c.exp").replace("{n}", tim.length)) + '<ul class="pd-rows">' +
+        byCat.map(([c, n], i) => '<li><span class="pd-name"><i class="pd-dot" style="background:' + PAL[(i + 1) % PAL.length] + '"></i>' + esc(t("cat." + c)) + "</span>" + bar(n, maxE, PAL[(i + 1) % PAL.length]) + '<b class="pd-n">' + n + "</b></li>").join("") + '</ul><p class="pf-hint"><a href="#/about" data-pillar="exp">' + esc(t("pf.c.exp.l")) + "</a></p></section>" : "";
 
       /* ---------- SDG goals and targets ---------- */
       const SDGC = { 1: "#E5243B", 2: "#DDA63A", 3: "#4C9F38", 4: "#C5192D", 5: "#FF3A21", 6: "#26BDE2", 7: "#FCC30B", 8: "#A21942", 9: "#FD6925", 10: "#DD1367", 11: "#FD9D24", 12: "#BF8B2E", 13: "#3F7E44", 14: "#0A97D9", 15: "#56C02B", 16: "#00689D", 17: "#19486A" };
       const sdgKeys = Object.keys(sdgs).map(Number).sort((a, b) => a - b);
-      const sdgBox = sdgKeys.length ? '<section class="pd-block"><h3>' + esc(t("pf.c.sdg")) + '</h3><ul class="pd-sdg">' + sdgKeys.map(g =>
+      const sdgBox = sdgKeys.length ? '<section class="pd-block">' + pdh("target", "#3F7E44", t("pf.c.sdg")) + '<ul class="pd-sdg">' + sdgKeys.map(g =>
         '<li><span class="pd-sdg-n" style="background:' + (SDGC[g] || "#52615E") + '">' + g + "</span><span>" + esc(t("sdg." + g) !== "sdg." + g ? t("sdg." + g) : "SDG " + g) + (sdgs[g].size ? "<small>" + esc(t("pf.targets")) + " " + esc([...sdgs[g]].join(", ")) + "</small>" : "") + "</span></li>").join("") + "</ul></section>" : "";
 
       kpiHost.innerHTML = kpis;
@@ -876,7 +877,7 @@
   const io = "IntersectionObserver" in window && smoothOK() ? new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -8% 0px" }) : null;
   function reveal() {
     if (!io) return;
-    app.querySelectorAll(".sec .wrap > *:not(.rv), .card:not(.rv), .ritem:not(.rv), .pj:not(.rv), .svc:not(.rv), .pillar:not(.rv), .member:not(.rv), .mcard:not(.rv), .vcard:not(.rv), .scard:not(.rv), .field-col:not(.rv)").forEach((el, i) => {
+    app.querySelectorAll(".sec .wrap > *:not(.rv), .card:not(.rv), .ritem:not(.rv), .pj:not(.rv), .svc:not(.rv), .pillar:not(.rv), .member:not(.rv), .mcard:not(.rv), .vcard:not(.rv), .scard:not(.rv), .field-col:not(.rv), .pd-block:not(.rv), .pf-ledger .lg:not(.rv)").forEach((el, i) => {
       el.classList.add("rv");
       if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("in");   /* already on screen: show at once */
       else { el.style.transitionDelay = (i % 3) * 60 + "ms"; io.observe(el); }

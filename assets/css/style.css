@@ -1468,3 +1468,80 @@ label .req, .field .req { display: inline; gap: 0; }
   .psec-head { flex-direction: column; }
 }
 @media (max-width: 480px) { .psec-head h2 { font-size: 28px; } .svc-top h3 { font-size: 19px; } }
+
+/* Penelitian dan Pengembangan in deep blue, so the three fields read apart: green, blue, orange */
+:root { --blue: #34538F; --blue-deep: #1F3566; }
+.sh-r { background: var(--blue); }
+.logo-mean .sh-r { background: var(--teal-60); }   /* the logo itself keeps its own colours */
+.svc-jump a.on .sh-r { background: #fff; }
+.fields-sec .fc-r { border-top-color: var(--blue); }
+.psec-r { --bg: #F4F6FB; --band: 26,42,86; --head-bg: #E3E9F6; --head-ink: var(--blue-deep); --acc: var(--blue); }
+.psec-r .svc-card { border-left-color: var(--blue); }
+.psec-r .svc-top::after { border-color: rgba(52,83,143,.25); }
+.psec-r .out-list li:hover::before { background: var(--blue); color: #fff; }
+.psec-r .svc-scope li:hover { border-color: #9DB0D6; background: #EEF2FA; }
+.psec-r .svc-top .ic-tile { box-shadow: 0 6px 16px rgba(31,53,102,.16); }
+.sh-s { background: #C9692A; }
+.logo-mean .sh-s { background: var(--teal-85); }
+.svc-jump a.on .sh-s { background: #fff; }
+
+/* ============================================================
+   Portofolio: figure cards, chart cards, colour per field
+   ============================================================ */
+/* figures under the page title: white cards, one colour each */
+.pf-ledger { gap: 14px; border: 0; margin: 36px 0 18px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.pf-ledger .lg, .pf-ledger .lg:first-child { border: 0; }
+.pf-ledger .lg > a, .pf-ledger .lg > div, .pf-ledger .lg:first-child > * { position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%;
+  padding: 20px 20px 18px; background: #fff; color: var(--ink); border-radius: 16px; box-shadow: 0 14px 30px rgba(0,0,0,.18); transition: transform .3s cubic-bezier(.25,.1,.2,1), box-shadow .3s; }
+.pf-ledger .lg > *::after { content: ""; position: absolute; right: -26px; top: -26px; width: 92px; height: 92px; border-radius: 26px; background: var(--k); opacity: .09; transform: rotate(18deg); }
+.pf-ledger .lg > a:hover { transform: translateY(-3px); box-shadow: 0 20px 38px rgba(0,0,0,.24); }
+.pf-ledger .gl-tile { width: 48px; height: 48px; border-radius: 13px; background: var(--k); margin-bottom: 16px; }
+.pf-ledger .gl-tile .gl { width: 28px; height: 28px; }
+.pf-ledger b { color: var(--k); font-weight: 700; font-size: clamp(30px, 2.8vw, 38px); }
+.pf-ledger span:not(.gl-tile) { color: var(--ink); font-size: 15px; }
+.pf-ledger small { color: var(--muted); }
+.pf-ledger a:hover span:not(.gl-tile) { text-decoration: underline; }
+.lg:hover .gl-tile { transform: translateY(-2px) rotate(-4deg); }
+
+/* charts: each in its own white card with an icon head */
+.pf-charts-sec { background: var(--mist); }
+.pd { column-gap: 22px; row-gap: 22px; }
+.pd-block { background: #fff; border: 0; border-radius: 18px; padding: 26px 28px 24px; box-shadow: 0 2px 0 #CFDCD8, 0 12px 28px rgba(20,40,38,.06); }
+.pd-h { display: flex; align-items: center; gap: 14px; margin: 0 0 18px; }
+.pd-h .gl-tile { width: 46px; height: 46px; border-radius: 13px; }
+.pd-h .gl { width: 27px; height: 27px; }
+.pd-h h3 { margin: 0; font-size: 19px; }
+.pd-block:hover .gl-tile { transform: translateY(-2px) rotate(-4deg); }
+.pd-bar { height: 10px; border-radius: 5px; background: #E8EEEC; }
+.pd-bar i { border-radius: 5px; }
+.pd-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 9px; vertical-align: 1px; }
+.pd-gh { padding: 8px 12px; margin: 0 0 4px; background: #F4F7F6; border-radius: 10px; }
+.pd-group button, .pd-rows li { border-top-color: #EEF2F1; }
+.pd-tl-track { height: 14px; }
+.pd-tl-track i { top: 2px; height: 10px; border-radius: 5px; }
+.pd-tl-row { border-radius: 8px; padding: 10px 8px; margin: 0 -8px; }
+.pd-tl-row:hover { background: #F4F7F6; }
+.pd-sdg-n { border-radius: 8px; width: 34px; height: 34px; font-size: 14px; }
+.pd-sdg li { grid-template-columns: 34px minmax(0, 1fr); }
+
+/* project list cards take the field colour */
+.pfx-item { border-left-width: 5px; }
+.pfx-item .pf-svc svg, .pfx-item .ic-mini { flex: none; }
+
+/* closing call with the block motif */
+.pf-cta { position: relative; overflow: hidden; isolation: isolate; padding: 72px 0; background: linear-gradient(120deg, var(--teal-deep), #123E5C); }
+.pf-cta .vm-motif { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.pf-cta .vm-motif rect, .pf-cta .vm-motif circle, .pf-cta .vm-motif path { fill: none; stroke: rgba(255,255,255,.09); stroke-width: 2; }
+.pf-cta .vm-motif circle:first-of-type { fill: rgba(232,131,58,.14); stroke: none; }
+
+@media (max-width: 860px) {
+  .pf-ledger { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pf-ledger .lg, .pf-ledger .lg:nth-child(-n+2) { border-top: 0; }
+  .pf-ledger .lg > a, .pf-ledger .lg > div, .pf-ledger .lg:first-child > * { padding: 16px 14px 14px; }
+  .pf-ledger .gl-tile { width: 40px; height: 40px; margin-bottom: 12px; }
+  .pf-ledger .gl-tile .gl { width: 24px; height: 24px; }
+  .pf-ledger b { font-size: 26px; }
+  .pd-block { padding: 20px 18px; }
+}
+@media (max-width: 860px) { .pf-ledger .lg:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+@media (max-width: 340px) { .pf-ledger { grid-template-columns: 1fr; } }
