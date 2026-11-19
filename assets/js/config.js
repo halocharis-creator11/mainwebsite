@@ -22,7 +22,7 @@ window.CHARIS_CONFIG = {
     about:    { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg", alt: "Kegiatan tim CHARIS", credit: "", credit_url: "" },   // banner on Tentang Kami
     services: { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.51.20.jpeg", alt: "Kegiatan tim CHARIS", credit: "", credit_url: "" },   // banner on Layanan Kami
     vision:   { src: "assets/img/foto/WhatsApp Image 2026-11-19 at 18.17.24.jpeg", alt: "", credit: "", credit_url: "" },   // soft backdrop of the vision and mission band
-    svc_a:    { src: "assets/img/foto/WhatsApp Image 2026-11-18 at 09.47.09.jpeg", alt: "", credit: "", credit_url: "" },   // backdrop of Analisis Kesehatan on Layanan
+    svc_a:    { src: "assets/img/foto/WhatsApp Image 2026-11-19 at 19.04.59.jpeg", alt: "", credit: "", credit_url: "" },   // backdrop of Analisis Kesehatan on Layanan
     svc_r:    { src: "assets/img/foto/WhatsApp Image 2026-11-19 at 18.47.35.jpeg", alt: "", credit: "", credit_url: "" },   // backdrop of Penelitian dan Pengembangan
     svc_s:    { src: "assets/img/foto/WhatsApp Image 2026-11-19 at 18.48.08.jpeg", alt: "", credit: "", credit_url: "" }    // backdrop of Layanan Kesehatan Terintegrasi
   },
