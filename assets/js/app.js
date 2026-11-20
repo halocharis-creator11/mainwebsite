@@ -373,6 +373,30 @@
     const paint = () => { const w = row.firstElementChild ? row.firstElementChild.offsetWidth + 12 : 1, i = Math.min(dots.length - 1, Math.round(row.scrollLeft / w)); dots.forEach((d, k) => d.classList.toggle("on", k === i)); };
     row.addEventListener("scroll", () => requestAnimationFrame(paint), { passive: true }); paint();
   }
+  /* ---------- theme song: a still image until the visitor presses play, then a privacy-mode YouTube player ---------- */
+  const SONG_ID = (cfg.THEME_SONG && cfg.THEME_SONG.youtube) || "5JZivzkbym4";
+  const songFrame = () => '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(SONG_ID) + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="Together We Rise, ' + esc(t("song.k")) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+  const songPoster = () => '<button type="button" class="song-play" data-song-inline aria-label="' + esc(t("song.play")) + ': Together We Rise">' +
+    '<img src="https://i.ytimg.com/vi/' + encodeURIComponent(SONG_ID) + '/maxresdefault.jpg" alt="" loading="lazy" decoding="async" onerror="if(!this.dataset.f){this.dataset.f=1;this.src=this.src.replace(\'maxresdefault\',\'hqdefault\')}">' +
+    '<span class="song-btn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span><span class="song-cap">' + esc(t("song.play")) + "</span></button>";
+  const songSection = () => '<section class="sec song-sec" aria-labelledby="songT"><div class="wrap song-grid"><div class="song-media" id="songMedia">' + songPoster() + "</div>" +
+    '<div class="song-text"><p class="song-k"><span class="song-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' + esc(t("song.k")) + '</p><h2 id="songT" lang="en">Together We Rise</h2>' +
+    "<p>" + t("song.p1") + "</p><p>" + esc(t("song.p2")) + "</p><p>" + esc(t("song.p3")) + '</p><p class="song-motto" lang="en">One world. One vision. Together, we rise.</p>' +
+    '<p class="song-sign" lang="en">CHARIS. For a Healthier World.</p><p class="song-yt"><a class="btn-text" href="https://www.youtube.com/watch?v=' + encodeURIComponent(SONG_ID) + '" target="_blank" rel="noopener">' + esc(t("song.yt")) + "</a></p></div></div></section>";
+  document.addEventListener("click", e => {
+    const inl = e.target.closest("[data-song-inline]");
+    if (inl) { const box = inl.closest(".song-media"); box.classList.add("on"); box.innerHTML = songFrame(); return; }
+    const b = e.target.closest("[data-song]"); if (!b) return;
+    e.preventDefault();
+    const d = document.createElement("dialog"); d.className = "song-dlg"; d.setAttribute("aria-label", "Together We Rise");
+    d.innerHTML = '<div class="song-dlg-h"><b lang="en">Together We Rise</b><span>' + esc(t("song.k")) + '</span><button type="button" class="song-x" aria-label="' + esc(t("song.close")) + '">×</button></div><div class="song-frame">' + songFrame() + "</div>";
+    document.body.appendChild(d); d.showModal();
+    const close = () => { if (d.open) d.close(); d.remove(); b.focus(); };
+    d.querySelector(".song-x").addEventListener("click", close);
+    d.addEventListener("click", ev => { if (ev.target === d) close(); });
+    d.addEventListener("close", () => d.remove());
+  });
+
   /* ---------- views ---------- */
   const views = {
     home() {
@@ -392,7 +416,7 @@
       app.innerHTML = pageTop(t("about.t")) + banner("about") +
         '<section class="sec"><div class="wrap ab-profile"><p class="ab-k">' + esc(t("about.profile")) + '</p><div class="prose ab-prose"><p class="big">' + esc(t("about.lead")) + "</p><p>" + esc(t("about.p2")) + "</p><p>" + esc(t("about.p3")) + "</p><p>" + esc(t("about.p4")) + "</p>" +
         "</div></div></section>" +
-        visionBand(false) + valuesSec() +
+        visionBand(false) + songSection() + valuesSec() +
         '<section class="sec"><div class="wrap logo-mean"><img src="assets/img/logo-symbol.svg" alt="" width="160" height="160"><div><h2>' + esc(t("about.logo")) + "</h2>" + pillars(false, ["a", "r", "s"]) + "</div></div></section>" +
         '<section class="sec" id="experience-all"><div class="wrap">' + secHead(t("exp.t")) + '<p class="sec-lead">' + esc(t("exp.lead")) + '</p><div id="expGrid"></div></div></section>' +
         '<section class="sec steps-sec"><div class="wrap">' + secHead(t("steps.t")) + stepCards() + "</div></section>" + newsletter();
