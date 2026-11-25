@@ -16,7 +16,7 @@
 
 const SCHEMA = {
   publications: ['id', 'title_id', 'title_en', 'summary_id', 'summary_en', 'category', 'year', 'file_url', 'cover_url', 'date', 'featured', 'published'],
-  news:         ['id', 'category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured', 'published'],
+  news:         ['id', 'category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured', 'published', 'video_url', 'gallery', 'thumb_url'],
   team:         ['id', 'group', 'name', 'role_id', 'role_en', 'bio_id', 'bio_en', 'photo_url', 'order', 'published'],
   /* Portfolio. 'disclosure' A/B/C/D controls which columns are public (see PROJECT_PUBLIC). */
   projects:     ['id', 'disclosure', 'title_id', 'title_en', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role',

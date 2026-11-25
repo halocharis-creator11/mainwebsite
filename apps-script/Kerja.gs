@@ -14,7 +14,7 @@
  */
 
 /* Bump when this file changes; /kerja/ shows a notice when the Web App deployment is older. */
-const K_VERSION = '2026-11-19-f8';
+const K_VERSION = '2026-11-25-m1';
 const K_ROLES = ['superadmin', 'direktur', 'admin', 'bendahara', 'peneliti', 'konsultan'];
 const K_SEE_ALL = ['superadmin', 'direktur', 'admin'];          /* see every project */
 const K_SUPERADMIN_EMAIL = 'halo.charis@gmail.com';
@@ -47,7 +47,7 @@ const K_SCHEMA = {
   naskah:        ['id', 'web_type', 'updated', 'updated_by', 'category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured',
                   'disclosure', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role', 'summary_id', 'summary_en',
                   'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'client', 'funder', 'partners', 'official_title',
-                  'location_detail', 'related_publications', 'testimonial_id', 'testimonial_en', 'testimonial_by', 'areas', 'photo_public'],
+                  'location_detail', 'related_publications', 'testimonial_id', 'testimonial_en', 'testimonial_by', 'areas', 'photo_public', 'video_url', 'gallery', 'thumb_url'],
   /* phase 4: administration */
   surat:         ['id', 'direction', 'number', 'seq', 'code', 'date', 'subject', 'party', 'ref_number', 'project_id', 'file_url', 'notes', 'created_by', 'created', 'updated'],
   kontrak:       ['id', 'kind', 'number', 'title', 'party', 'project_id', 'value', 'start', 'end', 'file_url', 'notes', 'created_by', 'created', 'updated'],
@@ -956,12 +956,12 @@ function kosongkanCache() {
    ============================================================ */
 const K_WEB = { berita: 'news', portofolio: 'projects' };
 const K_NASKAH = {
-  news: ['category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured'],
+  news: ['category', 'title_id', 'title_en', 'excerpt_id', 'excerpt_en', 'body_id', 'body_en', 'image_url', 'date', 'featured', 'video_url', 'gallery', 'thumb_url'],
   projects: ['disclosure', 'title_id', 'title_en', 'client_type', 'service', 'component', 'region', 'year_start', 'year_end', 'duration_months', 'status', 'role',
     'summary_id', 'summary_en', 'methods_id', 'methods_en', 'outputs_id', 'outputs_en', 'capacity_id', 'capacity_en', 'keywords', 'sdg', 'client', 'funder', 'partners',
     'official_title', 'location_detail', 'image_url', 'related_publications', 'testimonial_id', 'testimonial_en', 'testimonial_by', 'date', 'areas', 'photo_public']
 };
-const K_NASKAH_LONG = { body_id: 20000, body_en: 20000, summary_id: 8000, summary_en: 8000, excerpt_id: 2000, excerpt_en: 2000, testimonial_id: 3000, testimonial_en: 3000 };
+const K_NASKAH_LONG = { body_id: 20000, body_en: 20000, summary_id: 8000, summary_en: 8000, excerpt_id: 2000, excerpt_en: 2000, testimonial_id: 3000, testimonial_en: 3000, gallery: 8000 };
 const K_NASKAH_BOOL = { featured: 1, photo_public: 1 };
 const K_PUBLISHERS = ['superadmin', 'direktur', 'admin'];
 function kCanPublish_(u) { return K_PUBLISHERS.indexOf(u.role) >= 0; }

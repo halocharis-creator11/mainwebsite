@@ -100,11 +100,18 @@
 
   /* unified feed item for news / publications / projects */
   function toItem(type, r) {
-    if (type === "news") return { type, id: r.id, cat: r.category || t("type.news"), title: f(r, "title"), text: brief(f(r, "excerpt")), img: r.image_url, date: r.date, added: r.date, href: "#/latest/" + encodeURIComponent(r.id), featured: isTrue(r.featured) };
+    if (type === "news") {
+      /* card picture: the chosen thumbnail, else the main photo, the first gallery photo, or the video's own picture */
+      const M = window.CHARIS_MEDIA, vp = M && r.video_url ? M.parse(r.video_url) : null, gl = M ? M.list(r.gallery) : [];
+      return { type, id: r.id, cat: r.category || t("type.news"), title: f(r, "title"), text: brief(f(r, "excerpt")), img: r.thumb_url || r.image_url || gl[0] || (vp && vp.thumb) || "",
+        video: !!vp, photos: gl.length, date: r.date, added: r.date, href: "#/latest/" + encodeURIComponent(r.id), featured: isTrue(r.featured) };
+    }
     if (type === "publications") return { type, id: r.id, cat: typeLabel(r) || t("type.publications"), title: f(r, "title"), text: brief((lang === "en" ? r.subtitle_en : r.subtitle_id) || f(r, "summary")), img: r.cover_url, isCover: !!r.cover_url, date: r.date, added: r.added || r.uploaded || r.date, href: r.url || "#/research", featured: isTrue(r.featured) };
     return { type, id: r.id, cat: serviceName(r.service) || t("type.projects"), title: f(r, "title"), text: brief(f(r, "summary")), img: r.image_url, date: r.date || (r.year_start ? r.year_start + "-01-01" : ""), added: r.date || (r.year_start ? r.year_start + "-01-01" : ""), href: "#/projects/" + encodeURIComponent(r.id), featured: false };
   }
-  const card = it => '<li class="card"><a href="' + esc(it.href) + '"><div class="card-media' + (it.isCover ? " is-cover" : "") + '">' + media(it.img, it.title, it.id, 800) + '</div><div class="card-body">' +
+  const cardBadge = it => it.video ? '<span class="card-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>' + esc(t("media.video")) + "</span>" :
+    it.photos > 1 ? '<span class="card-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2" fill="#0E5A55"/><path d="M4 18l5-5 4 4 3-3 4 4" fill="none" stroke="#0E5A55" stroke-width="2"/></svg>' + it.photos + " " + esc(t("media.photos")) + "</span>" : "";
+  const card = it => '<li class="card"><a href="' + esc(it.href) + '"><div class="card-media' + (it.isCover ? " is-cover" : "") + '">' + media(it.img, it.title, it.id, 800) + cardBadge(it) + '</div><div class="card-body">' +
     '<p class="card-meta">' + (isNew(it) ? '<span class="card-new">' + esc(t("badge.new")) + "</span>" : "") + '<span class="card-cat">' + esc(it.cat) + "</span>" + (it.date && it.type !== "projects" ? "<time>" + fmtDate(it.date) + "</time>" : "") + "</p><h3>" + esc(it.title) + "</h3></div></a></li>";
 
   /* ---------- home: slider ---------- */
@@ -396,6 +403,41 @@
     d.addEventListener("click", ev => { if (ev.target === d) close(); });
     d.addEventListener("close", () => d.remove());
   });
+
+  /* ---------- news media: a video player and a photo carousel ---------- */
+  function videoBlock(p, title) {
+    const open = '<p class="vid-src"><a class="btn-text" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(t("media.open").replace("{p}", p.label)) + "</a></p>";
+    if (!p.embed) return '<a class="vid-link" href="' + esc(p.url) + '" target="_blank" rel="noopener"><span class="vid-link-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span><span><b>' +
+      esc(t("media.watch").replace("{p}", p.label)) + "</b><small>" + esc(t("media.ext")) + "</small></span></a>";
+    const frame = src => '<iframe src="' + esc(src) + '" title="' + esc(title) + '" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+    const cls = "vid vid-" + (p.ratio === "9/16" ? "tall" : p.ratio === "ig" ? "ig" : p.ratio === "tt" ? "tt" : p.ratio === "li" ? "li" : "wide");
+    if (p.provider === "youtube") return '<figure class="' + cls + '"><button type="button" class="vid-poster" data-vid="' + esc(p.embed + "&autoplay=1") + '" data-vtitle="' + esc(title) + '" aria-label="' + esc(t("media.play")) + '">' +
+      '<img src="' + esc(p.thumb) + '" alt="" loading="lazy"><span class="song-btn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span></button></figure>' + open;
+    return '<figure class="' + cls + '">' + frame(p.embed) + "</figure>" + open;
+  }
+  function galleryBlock(urls, title) {
+    if (!urls.length) return "";
+    const M = window.CHARIS_MEDIA, n = urls.length;
+    return '<section class="gal" aria-roledescription="carousel" aria-label="' + esc(t("media.gallery")) + '"><div class="gal-head"><h2>' + esc(t("media.gallery")) + '</h2><p class="gal-count" aria-live="polite"><b>1</b> / ' + n + "</p></div>" +
+      '<div class="gal-stage"><div class="gal-track" tabindex="0">' + urls.map((u, i) => '<figure class="gal-s" aria-roledescription="slide" aria-label="' + (i + 1) + " / " + n + '"><button type="button" data-zoom="' + esc(M.img(u, 2000)) + '" data-alt="' + esc(title + ", " + (i + 1)) + '">' +
+        '<img src="' + esc(M.img(u, 1600)) + '" alt="' + esc(title + ", " + t("media.photo") + " " + (i + 1)) + '"' + (i > 1 ? ' loading="lazy"' : "") + "></button></figure>").join("") + "</div>" +
+      (n > 1 ? '<button type="button" class="gal-nav prev" data-gal="-1" aria-label="' + esc(t("media.prev")) + '">‹</button><button type="button" class="gal-nav next" data-gal="1" aria-label="' + esc(t("media.next")) + '">›</button>' : "") + "</div>" +
+      (n > 1 ? '<div class="gal-thumbs">' + urls.map((u, i) => '<button type="button" data-go="' + i + '"' + (i ? "" : ' aria-current="true"') + ' aria-label="' + esc(t("media.photo")) + " " + (i + 1) + '"><img src="' + esc(M.img(u, 240)) + '" alt="" loading="lazy"></button>').join("") + "</div>" : "") + "</section>";
+  }
+  function bindGallery() {
+    app.querySelectorAll(".vid-poster").forEach(b => b.addEventListener("click", () => {
+      b.outerHTML = '<iframe src="' + esc(b.dataset.vid) + '" title="' + esc(b.dataset.vtitle) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'; }));
+    app.querySelectorAll(".gal").forEach(g => {
+      const tr = g.querySelector(".gal-track"), n = tr.children.length, cnt = g.querySelector(".gal-count b"), th = [...g.querySelectorAll("[data-go]")];
+      const cur = () => Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth));
+      const go = i => { i = (i + n) % n; tr.scrollTo({ left: i * tr.clientWidth, behavior: smoothOK() ? "smooth" : "auto" }); };
+      const paint = () => { const i = cur(); cnt.textContent = i + 1; th.forEach((b, k) => b.toggleAttribute("aria-current", k === i)); const a = th[i]; if (a) a.parentNode.scrollTo({ left: a.offsetLeft - a.parentNode.clientWidth / 2 + a.clientWidth / 2, behavior: "auto" }); };
+      let raf = 0; tr.addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(paint); }, { passive: true });
+      g.querySelectorAll("[data-gal]").forEach(b => b.addEventListener("click", () => go(cur() + +b.dataset.gal)));
+      th.forEach(b => b.addEventListener("click", () => go(+b.dataset.go)));
+      tr.addEventListener("keydown", e => { if (e.key === "ArrowRight") { e.preventDefault(); go(cur() + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); go(cur() - 1); } });
+    });
+  }
 
   /* ---------- views ---------- */
   const views = {
@@ -759,11 +801,12 @@
       const n = rows.find(r => String(r.id) === id);
       if (!n) { app.innerHTML = '<section class="sec"><div class="wrap narrow">' + msg("empty") + "</div></section>"; return; }
       document.title = f(n, "title") + " | CHARIS";
+      const MM = window.CHARIS_MEDIA, vp = MM && n.video_url ? MM.parse(n.video_url) : null, gl = MM ? MM.list(n.gallery) : [];
       app.innerHTML = '<article class="sec"><div class="wrap narrow"><a class="back" href="#/latest">' + esc(t("back")) + '</a><p class="card-meta"><span class="card-cat">' + esc(n.category || t("type.news")) + "</span><time>" + fmtDate(n.date) + "</time></p>" +
-        '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (n.image_url ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
-        '<div class="prose">' + paras(f(n, "body")) + '</div><div class="share-row"><span>' + esc(t("share.this")) + "</span>" + shareBox(String(n.id), absHash("#/latest/" + encodeURIComponent(n.id)), f(n, "title")) +
+        '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (vp ? videoBlock(vp, f(n, "title")) : "") + (n.image_url && !(vp && vp.embed) ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
+        '<div class="prose">' + paras(f(n, "body")) + "</div>" + galleryBlock(gl, f(n, "title")) + '<div class="share-row"><span>' + esc(t("share.this")) + "</span>" + shareBox(String(n.id), absHash("#/latest/" + encodeURIComponent(n.id)), f(n, "title")) +
         '<span class="cs-stats" data-stats-for="' + esc(String(n.id)) + '" data-stats-kind="news"></span></div></div></article>' + newsletter();
-      bindNewsletter();
+      bindNewsletter(); bindGallery();
       if (CS) { CS.track(String(n.id), "read"); CS.paint(); }
     },
 

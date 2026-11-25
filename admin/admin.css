@@ -229,3 +229,19 @@ dialog form { display: flex; flex-direction: column; max-height: calc(100vh - 2r
   .topbar { margin: 0 -14px 14px; }
 }
 @media (min-width: 600px) and (max-width: 860px) { .topbar { margin: 0 -24px 18px; padding-left: 24px; } }
+
+/* video link and photo gallery fields */
+.vid-chip { margin: 6px 0 0; font-size: 13px; line-height: 1.45; color: var(--muted, #5B6B68); }
+.vid-chip.ok { color: #1F6B4F; } .vid-chip.warn { color: #9A5B12; }
+.vid-chip:empty { display: none; }
+.gal-text { font-size: 13px; }
+.gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; margin: 10px 0; }
+.gal-grid figure { position: relative; margin: 0; border-radius: 8px; overflow: hidden; background: #EEF2F1; aspect-ratio: 4 / 3; }
+.gal-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gal-grid figcaption { position: absolute; left: 6px; top: 6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.gal-grid figure > div { position: absolute; right: 4px; bottom: 4px; display: flex; gap: 3px; }
+.gal-grid figure button { width: 28px; height: 28px; border: 0; border-radius: 7px; background: rgba(255,255,255,.92); font-size: 17px; line-height: 1; cursor: pointer; color: #142826; }
+.gal-grid figure button:disabled { opacity: .35; cursor: default; }
+.gal-grid figure button[data-gdel] { color: #B3261E; }
+.gal-n { grid-column: 1 / -1; margin: 0; font-size: 12.5px; color: var(--muted, #5B6B68); }
+.gal-up { margin-top: 2px; }

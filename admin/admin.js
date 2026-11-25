@@ -266,13 +266,43 @@
     else if (kind === "image" || kind === "file") ctl = '<div class="upload"><input id="' + id + '" name="' + k + '" type="url" placeholder="Tempel link Google Drive atau unggah" value="' + esc(val) + '">' +
       '<label class="btn btn-outline sm">Unggah<input type="file" class="sr-only" data-target="' + id + '" accept="' + (kind === "image" ? "image/jpeg,image/png,image/webp" : "application/pdf,.docx,.pptx") + '"></label></div>' +
       (kind === "image" && val ? '<img class="thumb" src="' + esc(thumb(val)) + '" alt="">' : "");
+    else if (kind === "video") ctl = '<input id="' + id + '" name="' + k + '" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." value="' + esc(val) + '"><p class="vid-chip" data-vchip="' + id + '"></p>';
+    else if (kind === "gallery") ctl = '<textarea id="' + id + '" name="' + k + '" rows="3" class="gal-text" placeholder="https://drive.google.com/file/d/...">' + esc(val) + '</textarea>' +
+      '<div class="gal-grid" data-gal="' + id + '"></div><label class="btn btn-outline sm gal-up">Unggah beberapa foto<input type="file" class="sr-only" multiple data-gallery="' + id + '" accept="image/jpeg,image/png,image/webp"></label>';
     else if (kind === "privatefile") ctl = '<div class="upload"><input id="' + id + '" name="' + k + '" type="text" placeholder="ID file Google Drive (terisi otomatis setelah unggah)" value="' + esc(val) + '">' +
       '<label class="btn btn-outline sm">Unggah PDF<input type="file" class="sr-only" data-private="1" data-target="' + id + '" accept="application/pdf"></label></div>';
     else ctl = '<input id="' + id + '" name="' + k + '" type="' + (kind === "date" ? "date" : kind === "number" ? "number" : "text") + '" value="' + esc(val) + '">';
-    return '<div class="field' + (kind === "long" || kind === "readonly" && k === "message" ? " wide" : "") + '"><label for="' + id + '">' + esc(label) + "</label>" + ctl + "</div>";
+    return '<div class="field' + (kind === "long" || kind === "gallery" || kind === "video" || kind === "readonly" && k === "message" ? " wide" : "") + '"><label for="' + id + '">' + esc(label) + "</label>" + ctl + "</div>";
   }
   function isOn(v) { return v === true || String(v).toUpperCase() === "TRUE"; }
   function thumb(url) { const m = String(url).match(/(?:\/d\/|id=)([\w-]{20,})/); return m ? "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w300" : url; }
+  /* video link: say which service was recognised and how it will show on the website */
+  function paintVideo(inp) {
+    const chip = document.querySelector('[data-vchip="' + inp.id + '"]'); if (!chip) return;
+    const v = inp.value.trim(), M = window.CHARIS_MEDIA, p = v && M ? M.parse(v) : null;
+    chip.className = "vid-chip" + (v ? (p && p.embed ? " ok" : " warn") : "");
+    chip.textContent = !v ? "" : !p ? "Tautan belum dikenali. Pastikan diawali https://" : p.embed ? p.label + " dikenali: video diputar langsung di halaman berita." :
+      p.label + ": tampil sebagai tombol menuju " + p.label + " (layanan ini tidak mengizinkan video diputar di situs lain" + (p.provider === "tiktok" ? ", atau tautan belum memuat nomor video" : "") + ").";
+  }
+  /* gallery: thumbnails with move and remove, kept in step with the text box */
+  function paintGallery(ta) {
+    const grid = document.querySelector('[data-gal="' + ta.id + '"]'); if (!grid) return;
+    const M = window.CHARIS_MEDIA, urls = M ? M.list(ta.value) : [];
+    grid.innerHTML = urls.map((u, i) => '<figure><img src="' + esc(M.img(u, 300)) + '" alt="" loading="lazy"><figcaption>' + (i + 1) + '</figcaption><div>' +
+      '<button type="button" data-gmove="' + i + '" data-d="-1" aria-label="Geser ke kiri"' + (i ? "" : " disabled") + '>‹</button><button type="button" data-gmove="' + i + '" data-d="1" aria-label="Geser ke kanan"' + (i < urls.length - 1 ? "" : " disabled") + '>›</button>' +
+      '<button type="button" data-gdel="' + i + '" aria-label="Hapus foto">×</button></div></figure>').join("") + (urls.length ? '<p class="gal-n">' + urls.length + " foto, tampil berurutan sebagai carousel</p>" : "");
+  }
+  const galFix = (ta, fn) => { const M = window.CHARIS_MEDIA, u = M.list(ta.value); fn(u); ta.value = u.join("\n"); paintGallery(ta); };
+  $("dlgBody").addEventListener("input", e => {
+    if (e.target.matches(".gal-text")) paintGallery(e.target);
+    if (e.target.matches('input[type=url][name="video_url"]')) paintVideo(e.target);
+  });
+  $("dlgBody").addEventListener("click", e => {
+    const mv = e.target.closest("[data-gmove]"), dl = e.target.closest("[data-gdel]"); if (!mv && !dl) return;
+    const ta = e.target.closest(".field").querySelector(".gal-text");
+    if (mv) galFix(ta, u => { const i = +mv.dataset.gmove, j = i + +mv.dataset.d; [u[i], u[j]] = [u[j], u[i]]; });
+    else galFix(ta, u => u.splice(+dl.dataset.gdel, 1));
+  });
   function openEdit(row) {
     editing = row; const d = DEF[type];
     $("dlgTitle").textContent = (row ? (type === "inquiries" ? "Detail pesan" : "Edit ") : "Tambah ") + (type === "inquiries" ? "" : d.title.toLowerCase());
@@ -280,6 +310,8 @@
     $("delBtn").hidden = !row || !!d.decide; $("dlgStatus").textContent = "";
     $("saveBtn").textContent = d.decide ? "Proses keputusan" : d.readonly ? "Tutup" : "Simpan";
     $("saveBtn").hidden = d.decide && row && row.status !== "menunggu" ? false : false;
+    $("dlgBody").querySelectorAll(".gal-text").forEach(paintGallery);
+    $("dlgBody").querySelectorAll('input[name="video_url"]').forEach(paintVideo);
     dlg.showModal();
     const first = $("dlgBody").querySelector("input:not([type=checkbox]),textarea,select"); if (first) first.focus();
   }
@@ -288,6 +320,20 @@
 
   $("dlgBody").addEventListener("change", async e => {
     const inp = e.target.closest("input[type=file]"); if (!inp || !inp.files[0]) return;
+    if (inp.dataset.gallery) {
+      const ta = $(inp.dataset.gallery), files = [...inp.files].filter(f => f.size <= 15 * 1024 * 1024);
+      if (files.length < inp.files.length) $("dlgStatus").textContent = "Foto di atas 15 MB dilewati.";
+      for (let i = 0; i < files.length; i++) {
+        $("dlgStatus").textContent = "Mengunggah foto " + (i + 1) + " dari " + files.length;
+        try {
+          const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1]); fr.onerror = rej; fr.readAsDataURL(files[i]); });
+          const r = await api({ action: "upload", name: files[i].name, mimeType: files[i].type, data });
+          if (!r.ok) throw new Error(r.error);
+          ta.value = (ta.value.trim() ? ta.value.trim() + "\n" : "") + r.data.url; paintGallery(ta);
+        } catch (err) { $("dlgStatus").textContent = (err.message || "Gagal mengunggah") + " (" + files[i].name + ")"; inp.value = ""; return; }
+      }
+      $("dlgStatus").textContent = files.length + " foto terunggah ke Google Drive."; inp.value = ""; return;
+    }
     const file = inp.files[0];
     const priv = inp.dataset.private === "1";
     if (file.size > (priv ? 25 : 15) * 1024 * 1024) { $("dlgStatus").textContent = "File maksimal " + (priv ? 25 : 15) + " MB."; return; }

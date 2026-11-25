@@ -62,8 +62,11 @@
     else if (kind === "textarea" || kind === "long") ctl = '<textarea class="in" id="' + id + '" data-f="' + key + '" rows="' + (kind === "long" ? 14 : 4) + '"' + dis + ">" + esc(val) + "</textarea>" + (kind === "long" ? '<small class="muted">Pisahkan paragraf dengan satu baris kosong.</small>' : "");
     else if (kind === "image") ctl = '<div class="nk-img"><span class="nk-thumb" id="' + id + '_t">' + (imgSrc(val, 400) ? '<img alt="" src="' + esc(imgSrc(val, 400)) + '">' : ic("clip")) + '</span><div style="display:grid;gap:6px;min-width:0"><input class="in" id="' + id + '" data-f="' + key + '" inputmode="url" placeholder="Tempel tautan Google Drive (akses: siapa saja yang memiliki link)" value="' + esc(val) + '"' + dis + ">" +
       (dis ? "" : '<label class="btn ghost small nk-up"><input type="file" accept="image/jpeg,image/png,image/webp" data-up="' + key + '" hidden>' + ic("plus") + "Unggah foto</label>") + "</div></div>";
+    else if (kind === "video") ctl = '<input class="in" id="' + id + '" data-f="' + key + '" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." value="' + esc(val) + '"' + dis + '><small class="nk-vchip" id="' + id + '_c"></small>';
+    else if (kind === "gallery") ctl = '<textarea class="in" id="' + id + '" data-f="' + key + '" rows="3" placeholder="Satu tautan foto per baris"' + dis + ">" + esc(val) + '</textarea><div class="nk-gal" id="' + id + '_g"></div>' +
+      (dis ? "" : '<label class="btn ghost small nk-up"><input type="file" accept="image/jpeg,image/png,image/webp" multiple data-gal="' + key + '" hidden>' + ic("plus") + "Unggah beberapa foto</label>");
     else ctl = '<input class="in" id="' + id + '" data-f="' + key + '" type="' + (kind === "date" ? "date" : kind === "number" ? "number" : "text") + '" value="' + esc(val) + '"' + dis + ">";
-    const wide = ["textarea", "long", "image"].includes(kind) || /^(title|summary|testimonial|official|areas|keywords)/.test(key);
+    const wide = ["textarea", "long", "image", "video", "gallery"].includes(kind) || /^(title|summary|testimonial|official|areas|keywords)/.test(key);
     return '<label class="field nk-f' + (wide ? " full" : "") + '"><span>' + esc(label) + "</span>" + ctl + "</label>";
   }
 
@@ -82,8 +85,15 @@
     v.querySelectorAll("[data-lang]").forEach(b => (b.onclick = () => { ED.lang = b.dataset.lang; paintSeg(v); preview(); }));
     paintSeg(v);
     const form = $("nkForm");
-    form.addEventListener("input", e => { const f = e.target.dataset.f; if (!f) return; ED.d[f] = e.target.type === "checkbox" ? e.target.checked : e.target.value; if (f === "image_url") thumb(f); changed(); });
-    form.addEventListener("change", e => { if (e.target.dataset.up) upload(e.target); });
+    form.addEventListener("input", e => { const f = e.target.dataset.f; if (!f) return; ED.d[f] = e.target.type === "checkbox" ? e.target.checked : e.target.value; if (f === "image_url" || f === "thumb_url") thumb(f); if (f === "gallery") gal(); if (f === "video_url") vchip(); changed(); });
+    form.addEventListener("change", e => { if (e.target.dataset.up) upload(e.target); if (e.target.dataset.gal) uploadGal(e.target); });
+    form.addEventListener("click", e => {
+      const b = e.target.closest("[data-gi]"); if (!b) return; e.preventDefault();
+      const u = M.list(ED.d.gallery), i = +b.dataset.gi, d = b.dataset.gd;
+      if (d === "x") u.splice(i, 1); else { const j = i + +d; [u[i], u[j]] = [u[j], u[i]]; }
+      ED.d.gallery = u.join("\n"); $("nk_gallery").value = ED.d.gallery; gal(); changed();
+    });
+    gal(); vchip();
     form.onsubmit = e => { e.preventDefault(); save(); };
     head(); preview();
     K.mountComments(k.id, people(k));
@@ -91,6 +101,31 @@
   function paintSeg(v) {
     v.querySelectorAll("button[data-tab]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === ED.tab)));
     v.querySelectorAll("button[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === ED.lang)));
+  }
+  const M = window.CHARIS_MEDIA || { list: () => [], parse: () => null, img: u => u };
+  function gal() {
+    const box = $("nk_gallery_g"); if (!box) return;
+    const u = M.list(ED.d.gallery), ro = !canEdit(ED.k);
+    box.innerHTML = u.map((x, i) => '<figure><img alt="" src="' + esc(M.img(x, 300)) + '"><span>' + (i + 1) + "</span>" + (ro ? "" : '<div><button type="button" data-gi="' + i + '" data-gd="-1" aria-label="Geser ke kiri"' + (i ? "" : " disabled") + '>‹</button><button type="button" data-gi="' + i + '" data-gd="1" aria-label="Geser ke kanan"' + (i < u.length - 1 ? "" : " disabled") + '>›</button><button type="button" data-gi="' + i + '" data-gd="x" aria-label="Hapus foto">×</button></div>') + "</figure>").join("");
+  }
+  function vchip() {
+    const c = $("nk_video_url_c"); if (!c) return;
+    const v = String(ED.d.video_url || "").trim(), p = v ? M.parse(v) : null;
+    c.className = "nk-vchip" + (v ? (p && p.embed ? " ok" : " warn") : "");
+    c.textContent = !v ? "" : !p ? "Tautan belum dikenali. Pastikan diawali https://" : p.embed ? p.label + " dikenali: video diputar langsung di halaman berita." : p.label + ": tampil sebagai tombol menuju " + p.label + ".";
+  }
+  async function uploadGal(input) {
+    const files = [...input.files].filter(f => f.size <= 8 * 1024 * 1024), lab = input.closest("label");
+    if (files.length < input.files.length) K.toast("Foto di atas 8 MB dilewati.", true);
+    lab.classList.add("busy");
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const data = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.onerror = no; r.readAsDataURL(files[i]); });
+        const j = await K.api("upload", { name: files[i].name, mimeType: files[i].type, data });
+        const u = M.list(ED.d.gallery); u.push(j.data.url); ED.d.gallery = u.join("\n"); $("nk_gallery").value = ED.d.gallery; gal(); changed();
+      }
+      K.toast(files.length + " foto diunggah.");
+    } catch (e) { K.toast(e.message, true); } finally { lab.classList.remove("busy"); input.value = ""; }
   }
   function thumb(f) { const t = $("nk_" + f + "_t"); if (t) t.innerHTML = imgSrc(ED.d[f], 400) ? '<img alt="" src="' + esc(imgSrc(ED.d[f], 400)) + '">' : ic("clip"); }
   let pvT = 0;
@@ -208,11 +243,14 @@
     const el = $("nkPrev"); if (!el || !ED) return;
     const d = ED.d, L = ED.lang, pick = f => (L === "en" && d[f + "_en"]) || d[f + "_id"] || "";
     if (ED.wt === "news") {
-      const img = imgSrc(d.image_url, 1200);
-      el.innerHTML = '<p class="pv-l">Kartu di beranda dan halaman Terbaru</p><div class="pv-card">' + (img ? '<img alt="" src="' + esc(img) + '">' : '<span class="pv-noimg">Tanpa foto</span>') +
+      const img = imgSrc(d.image_url, 1200), vp = M.parse(d.video_url), gl = M.list(d.gallery);
+      const cardImg = imgSrc(d.thumb_url, 800) || img || (gl[0] ? M.img(gl[0], 800) : "") || (vp && vp.thumb) || "";
+      const media = (vp && vp.embed ? '<div class="pv-vid"><span>' + esc(vp.label) + "</span>Video diputar di sini</div>" : vp ? '<p class="pv-vlink">Tombol: Tonton di ' + esc(vp.label) + "</p>" : img ? '<img alt="" src="' + esc(img) + '">' : "");
+      const galH = gl.length ? '<div class="pv-gal">' + gl.slice(0, 6).map(u => '<img alt="" src="' + esc(M.img(u, 300)) + '">').join("") + "</div><p class=\"small muted\">Galeri carousel, " + gl.length + " foto</p>" : "";
+      el.innerHTML = '<p class="pv-l">Kartu di beranda dan halaman Terbaru</p><div class="pv-card">' + (cardImg ? '<img alt="" src="' + esc(cardImg) + '">' : '<span class="pv-noimg">Tanpa foto</span>') +
         '<div><p class="pv-cat"><span>' + esc(d.category || "Berita") + "</span><time>" + fmtLong(d.date) + "</time></p><b>" + esc(pick("title") || "Judul berita") + "</b><p>" + esc(pick("excerpt").slice(0, 160)) + "</p></div></div>" +
-        '<p class="pv-l">Halaman berita</p><article class="pv-art"><p class="pv-cat"><span>' + esc(d.category || "Berita") + "</span><time>" + fmtLong(d.date) + "</time></p><h2>" + esc(pick("title") || "Judul berita") + "</h2>" + (img ? '<img alt="" src="' + esc(img) + '">' : "") +
-        '<div class="pv-body">' + (paras(pick("body")) || '<p class="muted">Isi berita akan tampil di sini.</p>') + '</div><div class="pv-share"><span class="pv-btn">Bagikan</span><span class="small muted">' + nf(ED.stats ? ED.stats.reads : 0) + " dibaca, " + nf(ED.stats ? ED.stats.shares : 0) + " dibagikan</span></div></article>" +
+        '<p class="pv-l">Halaman berita</p><article class="pv-art"><p class="pv-cat"><span>' + esc(d.category || "Berita") + "</span><time>" + fmtLong(d.date) + "</time></p><h2>" + esc(pick("title") || "Judul berita") + "</h2>" + media +
+        '<div class="pv-body">' + (paras(pick("body")) || '<p class="muted">Isi berita akan tampil di sini.</p>') + "</div>" + galH + '<div class="pv-share"><span class="pv-btn">Bagikan</span><span class="small muted">' + nf(ED.stats ? ED.stats.reads : 0) + " dibaca, " + nf(ED.stats ? ED.stats.shares : 0) + " dibagikan</span></div></article>" +
         (L === "en" && !d.title_en ? '<p class="small muted">Versi English belum diisi; pengunjung berbahasa Inggris melihat teks Indonesia.</p>' : "");
       return;
     }
