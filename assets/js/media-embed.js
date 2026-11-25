@@ -7,7 +7,7 @@
   const driveId = u => { const m = String(u || "").match(/(?:\/d\/|[?&]id=)([\w-]{20,})/); return m ? m[1] : ""; };
   const img = (u, w) => { u = String(u || "").trim(); const id = driveId(u); return id ? "https://drive.google.com/thumbnail?id=" + id + "&sz=w" + (w || 1600) : (/^https:\/\//.test(u) ? u : ""); };
   const enc = encodeURIComponent;
-  function parse(raw) {
+  let parse = function (raw) {
     const url = String(raw || "").trim(); if (!/^https?:\/\//i.test(url)) return null;
     let u; try { u = new URL(url); } catch (e) { return null; }
     const h = u.hostname.replace(/^(www|m|mobile)\./, ""), p = u.pathname;
@@ -47,7 +47,11 @@
     }
     if (h === "x.com" || h === "twitter.com") return { provider: "x", label: "X", url, ratio: "", thumb: "", embed: "" };
     return { provider: "link", label: h, url, ratio: "", thumb: "", embed: "" };
-  }
+  };
+  /* only these play cleanly inside the page; social platforms overlay their own "View on ..." prompts, so they get a clean poster that opens the original */
+  const INLINE = { youtube: 1, vimeo: 1, drive: 1 };
+  const parse0 = parse;
+  parse = function (raw) { const p = parse0(raw); if (p) p.inline = !!(p.embed && INLINE[p.provider]); return p; };
   const list = s => String(s || "").split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x));
   window.CHARIS_MEDIA = { parse, list, img, driveId };
 })();

@@ -281,8 +281,8 @@
     const chip = document.querySelector('[data-vchip="' + inp.id + '"]'); if (!chip) return;
     const v = inp.value.trim(), M = window.CHARIS_MEDIA, p = v && M ? M.parse(v) : null;
     chip.className = "vid-chip" + (v ? (p && p.embed ? " ok" : " warn") : "");
-    chip.textContent = !v ? "" : !p ? "Tautan belum dikenali. Pastikan diawali https://" : p.embed ? p.label + " dikenali: video diputar langsung di halaman berita." :
-      p.label + ": tampil sebagai tombol menuju " + p.label + " (layanan ini tidak mengizinkan video diputar di situs lain" + (p.provider === "tiktok" ? ", atau tautan belum memuat nomor video" : "") + ").";
+    chip.textContent = !v ? "" : !p ? "Tautan belum dikenali. Pastikan diawali https://" : p.inline ? p.label + " dikenali: video diputar langsung di halaman berita tanpa tulisan yang menutupi." :
+      p.label + " dikenali: tampil sebagai sampul video yang bersih (dari foto utama, thumbnail, atau foto galeri pertama) dan dibuka di " + p.label + " saat diputar. " + p.label + " menutupi videonya dengan tulisan bila diputar di situs lain. Agar video diputar langsung di halaman, unggah juga ke YouTube (boleh Tidak publik) atau Google Drive, lalu pakai tautan itu.";
   }
   /* gallery: thumbnails with move and remove, kept in step with the text box */
   function paintGallery(ta) {

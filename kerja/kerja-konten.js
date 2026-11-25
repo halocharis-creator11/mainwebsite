@@ -112,7 +112,7 @@
     const c = $("nk_video_url_c"); if (!c) return;
     const v = String(ED.d.video_url || "").trim(), p = v ? M.parse(v) : null;
     c.className = "nk-vchip" + (v ? (p && p.embed ? " ok" : " warn") : "");
-    c.textContent = !v ? "" : !p ? "Tautan belum dikenali. Pastikan diawali https://" : p.embed ? p.label + " dikenali: video diputar langsung di halaman berita." : p.label + ": tampil sebagai tombol menuju " + p.label + ".";
+    c.textContent = !v ? "" : !p ? "Tautan belum dikenali. Pastikan diawali https://" : p.inline ? p.label + " dikenali: video diputar langsung di halaman berita tanpa tulisan yang menutupi." : p.label + " dikenali: tampil sebagai sampul video yang bersih dan dibuka di " + p.label + " saat diputar. Agar diputar langsung di halaman, pakai tautan YouTube (boleh Tidak publik) atau Google Drive.";
   }
   async function uploadGal(input) {
     const files = [...input.files].filter(f => f.size <= 8 * 1024 * 1024), lab = input.closest("label");
@@ -245,7 +245,8 @@
     if (ED.wt === "news") {
       const img = imgSrc(d.image_url, 1200), vp = M.parse(d.video_url), gl = M.list(d.gallery);
       const cardImg = imgSrc(d.thumb_url, 800) || img || (gl[0] ? M.img(gl[0], 800) : "") || (vp && vp.thumb) || "";
-      const media = (vp && vp.embed ? '<div class="pv-vid"><span>' + esc(vp.label) + "</span>Video diputar di sini</div>" : vp ? '<p class="pv-vlink">Tombol: Tonton di ' + esc(vp.label) + "</p>" : img ? '<img alt="" src="' + esc(img) + '">' : "");
+      const poster = img || imgSrc(d.thumb_url, 1000) || (gl[0] ? M.img(gl[0], 1000) : "");
+      const media = (vp && vp.inline ? '<div class="pv-vid"><span>' + esc(vp.label) + "</span>Video diputar di sini</div>" : vp && vp.provider !== "link" ? '<div class="pv-vid pv-vcard">' + (poster ? '<img alt="" src="' + esc(poster) + '">' : "") + "<span>Putar di " + esc(vp.label) + "</span></div>" : vp ? '<p class="pv-vlink">Tombol: Tonton di ' + esc(vp.label) + "</p>" : img ? '<img alt="" src="' + esc(img) + '">' : "");
       const galH = gl.length ? '<div class="pv-gal">' + gl.slice(0, 6).map(u => '<img alt="" src="' + esc(M.img(u, 300)) + '">').join("") + "</div><p class=\"small muted\">Galeri carousel, " + gl.length + " foto</p>" : "";
       el.innerHTML = '<p class="pv-l">Kartu di beranda dan halaman Terbaru</p><div class="pv-card">' + (cardImg ? '<img alt="" src="' + esc(cardImg) + '">' : '<span class="pv-noimg">Tanpa foto</span>') +
         '<div><p class="pv-cat"><span>' + esc(d.category || "Berita") + "</span><time>" + fmtLong(d.date) + "</time></p><b>" + esc(pick("title") || "Judul berita") + "</b><p>" + esc(pick("excerpt").slice(0, 160)) + "</p></div></div>" +

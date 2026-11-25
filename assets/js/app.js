@@ -405,7 +405,13 @@
   });
 
   /* ---------- news media: a video player and a photo carousel ---------- */
-  function videoBlock(p, title) {
+  function videoBlock(p, title, poster) {
+    if (!p.inline && p.provider !== "link") {
+      /* social platforms: a clean poster from our own photos; the video opens on the original platform */
+      const img = poster ? '<img src="' + esc(API.img(poster, 1600)) + '" alt="" loading="lazy">' : '<span class="vid-card-bg" aria-hidden="true"></span>';
+      return '<figure class="vid vid-wide vid-card"><a href="' + esc(p.url) + '" target="_blank" rel="noopener" aria-label="' + esc(t("media.watch").replace("{p}", p.label) + ": " + title) + '">' + img +
+        '<span class="song-btn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span><span class="vid-card-cap"><b>' + esc(t("media.playOn").replace("{p}", p.label)) + "</b><small>" + esc(t("media.ext")) + "</small></span></a></figure>";
+    }
     const open = '<p class="vid-src"><a class="btn-text" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(t("media.open").replace("{p}", p.label)) + "</a></p>";
     if (!p.embed) return '<a class="vid-link" href="' + esc(p.url) + '" target="_blank" rel="noopener"><span class="vid-link-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span><span><b>' +
       esc(t("media.watch").replace("{p}", p.label)) + "</b><small>" + esc(t("media.ext")) + "</small></span></a>";
@@ -803,7 +809,7 @@
       document.title = f(n, "title") + " | CHARIS";
       const MM = window.CHARIS_MEDIA, vp = MM && n.video_url ? MM.parse(n.video_url) : null, gl = MM ? MM.list(n.gallery) : [];
       app.innerHTML = '<article class="sec"><div class="wrap narrow"><a class="back" href="#/latest">' + esc(t("back")) + '</a><p class="card-meta"><span class="card-cat">' + esc(n.category || t("type.news")) + "</span><time>" + fmtDate(n.date) + "</time></p>" +
-        '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (vp ? videoBlock(vp, f(n, "title")) : "") + (n.image_url && !(vp && vp.embed) ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
+        '<h1 class="article-h">' + esc(f(n, "title")) + "</h1>" + (vp ? videoBlock(vp, f(n, "title"), n.image_url || n.thumb_url || gl[0] || "") : "") + (n.image_url && !(vp && (vp.inline || vp.provider !== "link")) ? '<figure class="article-img">' + media(n.image_url, f(n, "title"), n.id, 1600) + "</figure>" : "") +
         '<div class="prose">' + paras(f(n, "body")) + "</div>" + galleryBlock(gl, f(n, "title")) + '<div class="share-row"><span>' + esc(t("share.this")) + "</span>" + shareBox(String(n.id), absHash("#/latest/" + encodeURIComponent(n.id)), f(n, "title")) +
         '<span class="cs-stats" data-stats-for="' + esc(String(n.id)) + '" data-stats-kind="news"></span></div></div></article>' + newsletter();
       bindNewsletter(); bindGallery();

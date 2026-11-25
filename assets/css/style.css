@@ -1644,3 +1644,15 @@ dialog.song-dlg::backdrop { background: rgba(8,30,28,.82); }
   .gal-thumbs button { width: 70px; }
   .vid-link { padding: 14px 16px; }
 }
+/* clean poster for social-platform videos */
+.vid-card a { position: absolute; inset: 0; display: grid; place-items: center; text-decoration: none; color: #fff; }
+.vid-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.25,.1,.2,1); }
+.vid-card-bg { position: absolute; inset: 0; background: radial-gradient(circle at 75% 20%, rgba(232,131,58,.35), transparent 45%), linear-gradient(135deg, #0B403C, #123E5C); }
+.vid-card a::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,30,28,0) 50%, rgba(8,30,28,.78) 100%); }
+.vid-card-cap { position: absolute; z-index: 1; left: 22px; right: 22px; bottom: 18px; display: grid; gap: 2px; }
+.vid-card-cap b { font-size: 17px; } .vid-card-cap small { font-size: 13.5px; color: #D5E4E1; }
+.vid-card .song-btn { z-index: 1; }
+.vid-card a:hover img { transform: scale(1.03); }
+.vid-card a:hover .song-btn, .vid-card a:focus-visible .song-btn { transform: scale(1.08); }
+.vid-card a:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+@media (max-width: 480px) { .vid-card-cap small { display: none; } .vid-card-cap { left: 16px; bottom: 12px; } .vid-card-cap b { font-size: 15px; } .vid-card .song-btn { width: 56px; height: 56px; } .vid-card .song-btn svg { width: 24px; height: 24px; } }
