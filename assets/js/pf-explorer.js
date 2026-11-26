@@ -189,7 +189,7 @@ window.CharisPFExplorer = function (host, ctx) {
       '<li><button type="button" class="pfx-item' + (st.sel === r.id ? " on" : "") + (r.image_url ? " has-thumb" : "") + '" data-pid="' + esc(r.id) + '" aria-pressed="' + (st.sel === r.id) + '" style="--svc:' + svcColor(r.service) + '">' +
       (r.image_url ? '<span class="pfx-thumb"><img src="' + esc(img(r.image_url, 240)) + '" alt="" loading="lazy" decoding="async"></span>' : "") +
       '<span class="pfx-item-tags"><span class="pf-svc">' + svcIcon(r.service, "ic-mini") + esc(serviceName(r.service)) + '</span><span class="pj-status st-' + esc(r.status || "") + '">' + esc(t("proj.st." + (r.status || "selesai"))) + "</span></span>" +
-      "<strong>" + esc(f(r, "title")) + '</strong><span class="pfx-item-meta"><span>' + svgI(IC.place, 14) + esc(areaText(r)) + "</span>" + (years(r) ? "<span>" + svgI(IC.time, 14) + esc(years(r)) + "</span>" : "") + "</span></button></li>").join("")
+      "<strong>" + esc(f(r, "title")) + '</strong><span class="pfx-item-meta"><span>' + svgI(IC.place, 14) + esc(areaText(r)) + "</span>" + (years(r) ? "<span>" + svgI(IC.time, 14) + esc(years(r)) + "</span>" : "") + (outLinks(r).length ? '<span class="pfx-links"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>' + outLinks(r).length + " " + esc(T2("luaran", "outputs")) + "</span>" : "") + "</span></button></li>").join("")
       : '<li class="state">' + esc(T2("Tidak ada proyek yang cocok. Ubah kata kunci atau filter.", "No matching projects. Change the keywords or filters.")) + "</li>";
     paintMain();
   }
@@ -206,8 +206,23 @@ window.CharisPFExplorer = function (host, ctx) {
   /* SDG goals with their targets, one entry per goal ("SDG 3.1, 3.2" gives goal 3 with targets 3.1 and 3.2) */
   const sdgList = r => { const by = {}; String(r.sdg || "").split(/[,;]/).map(x => x.trim()).filter(Boolean).forEach(x => { const m = /(\d{1,2})(?:\.(\w+))?/.exec(x); if (!m) return; const g = Number(m[1]); by[g] = by[g] || []; if (m[2]) by[g].push(m[1] + "." + m[2]); });
     return Object.keys(by).map(Number).sort((a, b) => a - b).map(g => ({ g, tgt: by[g].join(", ") })); };
+  /* output links: an icon per kind, a card per link */
+  const LK = {
+    doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>', pub: '<path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 9h6M9 13h6"/>',
+    video: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/>', dash: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 16v-3M11 16V9M15 16v-5M19 16v-7"/>',
+    data: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>', slides: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8M8 11l3-3 2 2 3-3"/>',
+    code: '<path d="M9 8l-4 4 4 4M15 8l4 4-4 4M13 6l-2 12"/>', repo: '<rect x="4" y="3" width="6" height="18" rx="1.5"/><rect x="12" y="6" width="8" height="15" rx="1.5"/><path d="M7 7v2M16 10v2"/>',
+    news: '<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2"/><path d="M8 9h5M8 13h5M8 16h3"/>', web: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9S14.5 18.3 12 21c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/>'
+  };
+  const outLinks = r => (window.CHARIS_MEDIA && window.CHARIS_MEDIA.links) ? window.CHARIS_MEDIA.links(r.output_links, T2("id", "en")) : [];
+  const linksHtml = L => !L.length ? "" : '<section class="pfp-sec pfp-links-sec"><h3>' + esc(T2("Link luaran", "Output links")) + '</h3><ul class="pfp-links">' + L.map(x => {
+      const ext = !/charisforhealth\.org/.test(x.host);
+      return '<li><a class="pfl k-' + x.kind + '" href="' + esc(x.url) + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + '><span class="pfl-ic" aria-hidden="true"><svg viewBox="0 0 24 24">' + LK[x.kind] + "</svg></span>" +
+        '<span class="pfl-t"><small>' + esc(x.kindLabel) + "</small><b>" + esc(x.label) + "</b><em>" + esc(x.host) + "</em></span>" +
+        '<span class="pfl-go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 16L16 8M10 8h6v6"/></svg></span>' + (ext ? '<span class="sr-only">' + esc(T2("(membuka tab baru)", "(opens a new tab)")) + "</span>" : "") + "</a></li>";
+    }).join("") + "</ul></section>";
   function profile(r) {
-    const nm = named(r);
+    const nm = named(r), oL = outLinks(r);
     const pubs = String(r.related_publications || "").split(",").map(x => x.trim()).filter(Boolean).map(pid => repo.find(p => p.id === pid)).filter(Boolean);
     const outs = chips(f(r, "outputs"));
     const cv = nm && pcov[r.id];
@@ -245,13 +260,13 @@ window.CharisPFExplorer = function (host, ctx) {
       '<ul class="pfp-facts"><li>' + svgI(IC.client) + "<span><small>" + esc(T2("Klien", "Client")) + "</small>" + esc(nm && r.client ? r.client : r.client_type || "") + "</span></li>" +
       "<li>" + svgI(IC.place) + "<span><small>" + esc(T2("Cakupan", "Coverage")) + "</small>" + esc(areaText(r)) + "</span></li>" +
       "<li>" + svgI(IC.time) + "<span><small>" + esc(T2("Periode", "Period")) + "</small>" + esc([years(r), r.duration_months ? r.duration_months + " " + t("proj.months") : ""].filter(Boolean).join(", ")) + "</span></li></ul>" +
-      '<div class="pfp-actions">' + pubs.map(p => '<a class="btn btn-sm" href="' + esc(p.url) + '">' + esc(t("pf.readPub")) + "</a>").join("") +
+      '<div class="pfp-actions">' + (oL.length ? '<a class="btn btn-sm" href="#" data-golinks>' + esc(T2("Link luaran", "Output links")) + " (" + oL.length + ")</a>" : "") + pubs.map(p => '<a class="btn btn-sm" href="' + esc(p.url) + '">' + esc(t("pf.readPub")) + "</a>").join("") +
       '<button type="button" class="btn btn-sm btn-ghost pfp-tomap">' + svgI(IC.map) + esc(T2("Lihat di peta utama", "View on the main map")) + "</button>" +
       shareBox(r.id, absHash("#/projects/" + encodeURIComponent(r.id)), f(r, "title")) +
       '<button type="button" class="pfp-close" aria-label="' + esc(T2("Tutup profil", "Close profile")) + '">' + svgI(IC.close, 18) + "</button></div></div></header>" +
       '<div class="pfp-body"><div class="pfp-main">' +
       '<section class="pfp-sec"><h3>' + esc(T2("Narasi singkat", "Brief narrative")) + '</h3><p class="pfp-lead">' + esc(f(r, "summary")) + "</p>" +
-      (nm && f(r, "testimonial") ? '<blockquote class="pj-quote"><p>' + esc(f(r, "testimonial")) + "</p>" + (r.testimonial_by ? "<cite>" + esc(r.testimonial_by) + "</cite>" : "") + "</blockquote>" : "") + "</section>" +
+      (nm && f(r, "testimonial") ? '<blockquote class="pj-quote"><p>' + esc(f(r, "testimonial")) + "</p>" + (r.testimonial_by ? "<cite>" + esc(r.testimonial_by) + "</cite>" : "") + "</blockquote>" : "") + "</section>" + linksHtml(oL) +
       '<section class="pfp-sec"><h3>' + esc(T2("Matriks proyek", "Project matrix")) + "</h3>" + matrix + "</section>" +
       (deliv ? '<section class="pfp-sec"><h3>' + esc(T2("Matriks keluaran", "Deliverables matrix")) + '</h3><p class="pfp-catsum">' + Object.entries(catSum).map(([k, v]) => '<span style="--c:' + v[1] + '"><b>' + v[0] + "</b>" + esc(k) + "</span>").join("") + "</p>" + deliv + "</section>" : "") +
       (r.disclosure === "C" ? '<p class="pfp-note">' + esc(T2("Nama klien, mitra, dan lokasi rinci tidak ditampilkan sesuai perjanjian kerahasiaan.", "Client, partner and detailed location names are withheld under a confidentiality agreement.")) + "</p>" : "") +
@@ -272,6 +287,7 @@ window.CharisPFExplorer = function (host, ctx) {
       if (b) mini.map.fitBounds(b, { padding: [16, 16], maxZoom: 6, animate: false });
     }
     profileHost.querySelector(".pfp-close").addEventListener("click", () => clearSel(true));
+    const gl = profileHost.querySelector("[data-golinks]"); if (gl) gl.addEventListener("click", e => { e.preventDefault(); profileHost.querySelector(".pfp-links-sec").scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" }); });
     profileHost.querySelector(".pfp-tomap").addEventListener("click", () => host.querySelector(".pfx-main").scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" }));
   }
   function select(id, how) {

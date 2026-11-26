@@ -53,5 +53,35 @@
   const parse0 = parse;
   parse = function (raw) { const p = parse0(raw); if (p) p.inline = !!(p.embed && INLINE[p.provider]); return p; };
   const list = s => String(s || "").split(/[\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x));
-  window.CHARIS_MEDIA = { parse, list, img, driveId };
+  /* project output links: one per line, "Title | https://link" (or just the link). The kind is read from the address and the title. */
+  const KINDS = {
+    doc: ["Dokumen", "Document"], pub: ["Publikasi", "Publication"], video: ["Video", "Video"], dash: ["Dasbor", "Dashboard"], data: ["Data", "Data"],
+    slides: ["Presentasi", "Presentation"], code: ["Kode sumber", "Source code"], repo: ["Repositori CHARIS", "CHARIS repository"], news: ["Berita atau media", "News or media"], web: ["Situs", "Website"]
+  };
+  function linkKind(url, label) {
+    const u = String(url).toLowerCase(), l = String(label || "").toLowerCase();
+    if (/charisforhealth\.org\/repositori|^\/?repositori\//.test(u)) return "repo";
+    if (/doi\.org|zenodo\.org|scholar\.|pubmed|researchgate|ssrn|osf\.io|journal|jurnal|ojs/.test(u)) return "pub";
+    if (/youtube\.|youtu\.be|vimeo\.|instagram\.com\/(reel|tv)|tiktok\.|fb\.watch|facebook\.com\/.*video/.test(u) || /video/.test(l)) return "video";
+    if (/lookerstudio|datastudio|tableau|powerbi|app\.powerbi|shinyapps|observablehq|flourish|arcgis|dashboard/.test(u) || /dasbor|dashboard/.test(l)) return "dash";
+    if (/docs\.google\.com\/presentation|\.pptx?(\?|$)|slideshare|canva\.com\/design/.test(u) || /presentasi|slide|paparan/.test(l)) return "slides";
+    if (/docs\.google\.com\/spreadsheets|\.xlsx?(\?|$)|\.csv(\?|$)|kaggle|data\.go\.id|satudata|dataverse|figshare/.test(u) || /dataset|data /.test(l + " ")) return "data";
+    if (/github\.com|gitlab|bitbucket|huggingface|cran\.r-project|pypi\.org/.test(u)) return "code";
+    if (/\.pdf(\?|$)|\.docx?(\?|$)|docs\.google\.com\/document|drive\.google\.com/.test(u) || /laporan|report|panduan|modul|pedoman|kebijakan|policy|brief|naskah/.test(l)) return "doc";
+    if (/kompas|detik|tempo|antaranews|cnn|kumparan|liputan6|tribun|jpnn|news|berita/.test(u) || /berita|liputan|media/.test(l)) return "news";
+    return "web";
+  }
+  function links(text, lang) {
+    const k = lang === "en" ? 1 : 0;
+    return String(text || "").split(/\n+/).map(line => {
+      line = line.trim(); if (!line) return null;
+      const m = line.match(/https?:\/\/\S+/); if (!m) return null;
+      const url = m[0].replace(/[),.;]+$/, ""), label = line.replace(m[0], "").replace(/^[\s|:\-]+|[\s|:\-]+$/g, "").trim();
+      let host = ""; try { host = new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return null; }
+      const kind = linkKind(url, label);
+      let auto = host; const d = url.match(/doi\.org\/(10\.[^\s?#]+)/i); if (d) auto = "DOI " + d[1];
+      return { url, label: label || auto, host, kind, kindLabel: KINDS[kind][k] };
+    }).filter(Boolean);
+  }
+  window.CHARIS_MEDIA = { parse, list, img, driveId, links, linkKind, KINDS };
 })();

@@ -62,11 +62,12 @@
     else if (kind === "textarea" || kind === "long") ctl = '<textarea class="in" id="' + id + '" data-f="' + key + '" rows="' + (kind === "long" ? 14 : 4) + '"' + dis + ">" + esc(val) + "</textarea>" + (kind === "long" ? '<small class="muted">Pisahkan paragraf dengan satu baris kosong.</small>' : "");
     else if (kind === "image") ctl = '<div class="nk-img"><span class="nk-thumb" id="' + id + '_t">' + (imgSrc(val, 400) ? '<img alt="" src="' + esc(imgSrc(val, 400)) + '">' : ic("clip")) + '</span><div style="display:grid;gap:6px;min-width:0"><input class="in" id="' + id + '" data-f="' + key + '" inputmode="url" placeholder="Tempel tautan Google Drive (akses: siapa saja yang memiliki link)" value="' + esc(val) + '"' + dis + ">" +
       (dis ? "" : '<label class="btn ghost small nk-up"><input type="file" accept="image/jpeg,image/png,image/webp" data-up="' + key + '" hidden>' + ic("plus") + "Unggah foto</label>") + "</div></div>";
+    else if (kind === "links") ctl = '<textarea class="in" id="' + id + '" data-f="' + key + '" rows="4" placeholder="Laporan akhir | https://drive.google.com/..."' + dis + ">" + esc(val) + '</textarea><ul class="nk-lnk" id="' + id + '_l"></ul>';
     else if (kind === "video") ctl = '<input class="in" id="' + id + '" data-f="' + key + '" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." value="' + esc(val) + '"' + dis + '><small class="nk-vchip" id="' + id + '_c"></small>';
     else if (kind === "gallery") ctl = '<textarea class="in" id="' + id + '" data-f="' + key + '" rows="3" placeholder="Satu tautan foto per baris"' + dis + ">" + esc(val) + '</textarea><div class="nk-gal" id="' + id + '_g"></div>' +
       (dis ? "" : '<label class="btn ghost small nk-up"><input type="file" accept="image/jpeg,image/png,image/webp" multiple data-gal="' + key + '" hidden>' + ic("plus") + "Unggah beberapa foto</label>");
     else ctl = '<input class="in" id="' + id + '" data-f="' + key + '" type="' + (kind === "date" ? "date" : kind === "number" ? "number" : "text") + '" value="' + esc(val) + '"' + dis + ">";
-    const wide = ["textarea", "long", "image", "video", "gallery"].includes(kind) || /^(title|summary|testimonial|official|areas|keywords)/.test(key);
+    const wide = ["textarea", "long", "image", "video", "gallery", "links"].includes(kind) || /^(title|summary|testimonial|official|areas|keywords)/.test(key);
     return '<label class="field nk-f' + (wide ? " full" : "") + '"><span>' + esc(label) + "</span>" + ctl + "</label>";
   }
 
@@ -85,7 +86,7 @@
     v.querySelectorAll("[data-lang]").forEach(b => (b.onclick = () => { ED.lang = b.dataset.lang; paintSeg(v); preview(); }));
     paintSeg(v);
     const form = $("nkForm");
-    form.addEventListener("input", e => { const f = e.target.dataset.f; if (!f) return; ED.d[f] = e.target.type === "checkbox" ? e.target.checked : e.target.value; if (f === "image_url" || f === "thumb_url") thumb(f); if (f === "gallery") gal(); if (f === "video_url") vchip(); changed(); });
+    form.addEventListener("input", e => { const f = e.target.dataset.f; if (!f) return; ED.d[f] = e.target.type === "checkbox" ? e.target.checked : e.target.value; if (f === "image_url" || f === "thumb_url") thumb(f); if (f === "gallery") gal(); if (f === "video_url") vchip(); if (f === "output_links") lnk(); changed(); });
     form.addEventListener("change", e => { if (e.target.dataset.up) upload(e.target); if (e.target.dataset.gal) uploadGal(e.target); });
     form.addEventListener("click", e => {
       const b = e.target.closest("[data-gi]"); if (!b) return; e.preventDefault();
@@ -93,7 +94,7 @@
       if (d === "x") u.splice(i, 1); else { const j = i + +d; [u[i], u[j]] = [u[j], u[i]]; }
       ED.d.gallery = u.join("\n"); $("nk_gallery").value = ED.d.gallery; gal(); changed();
     });
-    gal(); vchip();
+    gal(); vchip(); lnk();
     form.onsubmit = e => { e.preventDefault(); save(); };
     head(); preview();
     K.mountComments(k.id, people(k));
@@ -107,6 +108,11 @@
     const box = $("nk_gallery_g"); if (!box) return;
     const u = M.list(ED.d.gallery), ro = !canEdit(ED.k);
     box.innerHTML = u.map((x, i) => '<figure><img alt="" src="' + esc(M.img(x, 300)) + '"><span>' + (i + 1) + "</span>" + (ro ? "" : '<div><button type="button" data-gi="' + i + '" data-gd="-1" aria-label="Geser ke kiri"' + (i ? "" : " disabled") + '>‹</button><button type="button" data-gi="' + i + '" data-gd="1" aria-label="Geser ke kanan"' + (i < u.length - 1 ? "" : " disabled") + '>›</button><button type="button" data-gi="' + i + '" data-gd="x" aria-label="Hapus foto">×</button></div>') + "</figure>").join("");
+  }
+  function lnk() {
+    const ul = $("nk_output_links_l"); if (!ul || !M.links) return;
+    const L = M.links(ED.d.output_links), n = String(ED.d.output_links || "").split(/\n+/).filter(s => s.trim()).length;
+    ul.innerHTML = L.map(x => '<li><span class="k k-' + x.kind + '">' + esc(x.kindLabel) + "</span><b>" + esc(x.label) + "</b><small>" + esc(x.host) + "</small></li>").join("") + (n > L.length ? '<li class="bad">' + (n - L.length) + " baris belum berisi tautan https://</li>" : "");
   }
   function vchip() {
     const c = $("nk_video_url_c"); if (!c) return;

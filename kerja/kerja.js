@@ -57,7 +57,7 @@
 
   /* ---------- state ---------- */
   const S = { me: null, today: "", users: [], projects: [], milestones: [], tasks: [], ccount: {}, notifications: [], portfolio: [], repo: [], konten: [], hours: {}, summary: {} };
-  const EXPECTED = "2026-11-25-m1";
+  const EXPECTED = "2026-11-26-l1";
   const K = window.K = { S, esc, ic, ROLE, STATUS, STATUS_L, PRIO, PRIO_L, PSTATUS_L, MONTHS, MONTHS_L, views: {} };
 
   /* ---------- api ---------- */

@@ -266,13 +266,14 @@
     else if (kind === "image" || kind === "file") ctl = '<div class="upload"><input id="' + id + '" name="' + k + '" type="url" placeholder="Tempel link Google Drive atau unggah" value="' + esc(val) + '">' +
       '<label class="btn btn-outline sm">Unggah<input type="file" class="sr-only" data-target="' + id + '" accept="' + (kind === "image" ? "image/jpeg,image/png,image/webp" : "application/pdf,.docx,.pptx") + '"></label></div>' +
       (kind === "image" && val ? '<img class="thumb" src="' + esc(thumb(val)) + '" alt="">' : "");
+    else if (kind === "links") ctl = '<textarea id="' + id + '" name="' + k + '" rows="4" class="lnk-text" placeholder="Laporan akhir | https://drive.google.com/...&#10;Dasbor indikator | https://lookerstudio.google.com/...">' + esc(val) + '</textarea><ul class="lnk-prev" data-lnk="' + id + '"></ul>';
     else if (kind === "video") ctl = '<input id="' + id + '" name="' + k + '" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." value="' + esc(val) + '"><p class="vid-chip" data-vchip="' + id + '"></p>';
     else if (kind === "gallery") ctl = '<textarea id="' + id + '" name="' + k + '" rows="3" class="gal-text" placeholder="https://drive.google.com/file/d/...">' + esc(val) + '</textarea>' +
       '<div class="gal-grid" data-gal="' + id + '"></div><label class="btn btn-outline sm gal-up">Unggah beberapa foto<input type="file" class="sr-only" multiple data-gallery="' + id + '" accept="image/jpeg,image/png,image/webp"></label>';
     else if (kind === "privatefile") ctl = '<div class="upload"><input id="' + id + '" name="' + k + '" type="text" placeholder="ID file Google Drive (terisi otomatis setelah unggah)" value="' + esc(val) + '">' +
       '<label class="btn btn-outline sm">Unggah PDF<input type="file" class="sr-only" data-private="1" data-target="' + id + '" accept="application/pdf"></label></div>';
     else ctl = '<input id="' + id + '" name="' + k + '" type="' + (kind === "date" ? "date" : kind === "number" ? "number" : "text") + '" value="' + esc(val) + '">';
-    return '<div class="field' + (kind === "long" || kind === "gallery" || kind === "video" || kind === "readonly" && k === "message" ? " wide" : "") + '"><label for="' + id + '">' + esc(label) + "</label>" + ctl + "</div>";
+    return '<div class="field' + (kind === "long" || kind === "gallery" || kind === "video" || kind === "links" || kind === "readonly" && k === "message" ? " wide" : "") + '"><label for="' + id + '">' + esc(label) + "</label>" + ctl + "</div>";
   }
   function isOn(v) { return v === true || String(v).toUpperCase() === "TRUE"; }
   function thumb(url) { const m = String(url).match(/(?:\/d\/|id=)([\w-]{20,})/); return m ? "https://drive.google.com/thumbnail?id=" + m[1] + "&sz=w300" : url; }
@@ -292,9 +293,16 @@
       '<button type="button" data-gmove="' + i + '" data-d="-1" aria-label="Geser ke kiri"' + (i ? "" : " disabled") + '>‹</button><button type="button" data-gmove="' + i + '" data-d="1" aria-label="Geser ke kanan"' + (i < urls.length - 1 ? "" : " disabled") + '>›</button>' +
       '<button type="button" data-gdel="' + i + '" aria-label="Hapus foto">×</button></div></figure>').join("") + (urls.length ? '<p class="gal-n">' + urls.length + " foto, tampil berurutan sebagai carousel</p>" : "");
   }
+  function paintLinks(ta) {
+    const ul = document.querySelector('[data-lnk="' + ta.id + '"]'); if (!ul || !window.CHARIS_MEDIA) return;
+    const lines = ta.value.split(/\n+/).filter(s => s.trim()), L = window.CHARIS_MEDIA.links(ta.value);
+    ul.innerHTML = L.map(x => '<li><span class="lnk-k k-' + x.kind + '">' + esc(x.kindLabel) + "</span><b>" + esc(x.label) + "</b><small>" + esc(x.host) + "</small></li>").join("") +
+      (lines.length > L.length ? '<li class="lnk-bad">' + (lines.length - L.length) + " baris belum berisi tautan https:// dan tidak akan tampil</li>" : "");
+  }
   const galFix = (ta, fn) => { const M = window.CHARIS_MEDIA, u = M.list(ta.value); fn(u); ta.value = u.join("\n"); paintGallery(ta); };
   $("dlgBody").addEventListener("input", e => {
     if (e.target.matches(".gal-text")) paintGallery(e.target);
+    if (e.target.matches(".lnk-text")) paintLinks(e.target);
     if (e.target.matches('input[type=url][name="video_url"]')) paintVideo(e.target);
   });
   $("dlgBody").addEventListener("click", e => {
@@ -306,11 +314,12 @@
   function openEdit(row) {
     editing = row; const d = DEF[type];
     $("dlgTitle").textContent = (row ? (type === "inquiries" ? "Detail pesan" : "Edit ") : "Tambah ") + (type === "inquiries" ? "" : d.title.toLowerCase());
-    $("dlgBody").innerHTML = d.fields.map(f => input(f, row ? row[f[0]] : (f[2] === "bool" ? f[0] !== "featured" : f[2] === "date" ? new Date().toISOString().slice(0, 10) : ""))).join("");
+    $("dlgBody").innerHTML = d.fields.map(f => input(f, row ? row[f[0]] : (f[2] === "bool" ? f[0] === "published" : f[2] === "date" ? new Date().toISOString().slice(0, 10) : ""))).join("");
     $("delBtn").hidden = !row || !!d.decide; $("dlgStatus").textContent = "";
     $("saveBtn").textContent = d.decide ? "Proses keputusan" : d.readonly ? "Tutup" : "Simpan";
     $("saveBtn").hidden = d.decide && row && row.status !== "menunggu" ? false : false;
     $("dlgBody").querySelectorAll(".gal-text").forEach(paintGallery);
+    $("dlgBody").querySelectorAll(".lnk-text").forEach(paintLinks);
     $("dlgBody").querySelectorAll('input[name="video_url"]').forEach(paintVideo);
     dlg.showModal();
     const first = $("dlgBody").querySelector("input:not([type=checkbox]),textarea,select"); if (first) first.focus();

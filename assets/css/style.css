@@ -1656,3 +1656,24 @@ dialog.song-dlg::backdrop { background: rgba(8,30,28,.82); }
 .vid-card a:hover .song-btn, .vid-card a:focus-visible .song-btn { transform: scale(1.08); }
 .vid-card a:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 @media (max-width: 480px) { .vid-card-cap small { display: none; } .vid-card-cap { left: 16px; bottom: 12px; } .vid-card-cap b { font-size: 15px; } .vid-card .song-btn { width: 56px; height: 56px; } .vid-card .song-btn svg { width: 24px; height: 24px; } }
+
+/* ============================================================
+   Portofolio: link luaran
+   ============================================================ */
+.pfp-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.pfl { --k: #0E5A55; display: grid; grid-template-columns: 44px minmax(0, 1fr) 22px; gap: 12px; align-items: center; padding: 12px 14px; height: 100%; background: #fff; border: 1px solid #DCE6E3; border-left: 4px solid var(--k); border-radius: 12px; color: var(--ink); text-decoration: none; transition: transform .25s, box-shadow .25s, border-color .25s; }
+.pfl:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(20,40,38,.1); border-color: var(--k); }
+.pfl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.pfl-ic { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 11px; background: var(--k); color: #fff; }
+.pfl-ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pfl-t { display: grid; min-width: 0; }
+.pfl-t small { font-size: 12px; font-weight: 700; color: var(--k); }
+.pfl-t b { font-size: 15px; line-height: 1.35; font-weight: 700; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.pfl-t em { font-style: normal; font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pfl-go svg { width: 20px; height: 20px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+.pfl:hover .pfl-go svg { stroke: var(--k); }
+.pfl.k-doc { --k: #0E5A55; } .pfl.k-pub { --k: #34538F; } .pfl.k-video { --k: #C0392B; } .pfl.k-dash { --k: #6B4FA0; } .pfl.k-data { --k: #2D8C7F; }
+.pfl.k-slides { --k: #C9692A; } .pfl.k-code { --k: #24303A; } .pfl.k-repo { --k: #0B403C; } .pfl.k-news { --k: #B7791F; } .pfl.k-web { --k: #52615E; }
+.pfx-links { display: inline-flex; align-items: center; gap: 4px; color: #0E5A55; font-weight: 700; }
+.pfx-links svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+@media (max-width: 640px) { .pfp-links { grid-template-columns: 1fr; } }

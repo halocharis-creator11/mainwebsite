@@ -245,3 +245,10 @@ dialog form { display: flex; flex-direction: column; max-height: calc(100vh - 2r
 .gal-grid figure button[data-gdel] { color: #B3261E; }
 .gal-n { grid-column: 1 / -1; margin: 0; font-size: 12.5px; color: var(--muted, #5B6B68); }
 .gal-up { margin-top: 2px; }
+/* project output links */
+.lnk-text { font-size: 13px; }
+.lnk-prev { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.lnk-prev li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid #E1E8E6; border-radius: 8px; font-size: 13px; }
+.lnk-prev b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; } .lnk-prev small { color: #6B7B79; }
+.lnk-k { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #E6F0EE; color: #0E5A55; white-space: nowrap; }
+.lnk-prev .lnk-bad { display: block; color: #9A5B12; border-style: dashed; }
