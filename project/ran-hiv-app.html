@@ -4,8 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b5c63">
-<title>RAN HIV & IMS Navigator</title>
-<link rel="artifact-thumbnail" href="thumb.png">
+<title>RAN HIV & IMS Navigator · CHARIS</title>
+<meta name="description" content="Alat interaktif untuk menavigasi RAN HIV dan IMS 2026–2029, membaca target 514 kab/kota, membandingkan wilayah, memetakan sumber dana, dan menyusun draf RAD.">
+<meta name="author" content="Ngakan Putu Anom Harjana, CHARIS">
+<link rel="canonical" href="https://charisforhealth.org/project/ran-hiv-app">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CHARIS">
+<meta property="og:title" content="RAN HIV &amp; IMS Navigator: Dari RAN 2026–2029 ke RAD">
+<meta property="og:description" content="Navigasi RAN, target daerah, dashboard peta, simulasi, sumber daya, dan penyusun draf RAD.">
+<meta property="og:url" content="https://charisforhealth.org/project/ran-hiv-app">
+<meta property="og:image" content="https://charisforhealth.org/project/ran-hiv-app/thumb.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Ccircle cx='17' cy='17' r='17' fill='%230b5c63'/%3E%3Cpath d='M17 7c-3 0-5 2.3-5 5.2 0 3.2 2.2 6.6 5 10.3 2.8-3.7 5-7.1 5-10.3C22 9.3 20 7 17 7z' fill='none' stroke='%23ff5a67' stroke-width='2.6'/%3E%3Cpath d='M12.6 18.6 8 27M21.4 18.6 26 27' stroke='%23ff5a67' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<script>
+/* ===== KONFIGURASI PEMANTAUAN =====
+   Tempel URL Web App Google Apps Script (berakhiran /exec) di antara tanda kutip.
+   Kosongkan bila pemantauan belum dipakai. */
+window.RAN_STATS_URL = 'https://script.google.com/macros/s/AKfycbzDKdnZkwf7a8frJHGKhdME1gGlTYck3T5nqI77cgTTaUehuo0Q4NQX0hsoULP6okl_Eg/exec';
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -314,7 +331,7 @@ nav.bottom button.on{color:var(--teal2)}
 .licrow{display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap}.licrow a{word-break:break-all}
 .ccb{display:inline-flex;border-radius:6px;overflow:hidden;text-decoration:none;font-weight:800;font-size:13px;border:1.5px solid #222;flex:none}.ccb1{background:#222;color:#fff;padding:4px 7px}.ccb2{background:#fff;color:#222;padding:4px 8px}
 .shbtn{min-height:40px}
-#statBox .grid{grid-template-columns:repeat(3,minmax(0,1fr))}#statBox .kpi b{font-size:24px}
+#statBox .g4s{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}@media(min-width:700px){#statBox .g4s{grid-template-columns:repeat(4,minmax(0,1fr))}}#statBox .kpi b{font-size:24px}
 .view:not(.entered) .card,.view:not(.entered) .subcard,.view:not(.entered) .srcard{animation:popIn .45s ease-out both}
 .glow{animation:glowPulse 3.2s ease-in-out infinite}
 svg rect.bar{transform-box:fill-box;transform-origin:50% 100%;animation:grow .8s cubic-bezier(.2,.8,.2,1) both}
@@ -411,7 +428,7 @@ nav.bottom .hasdot:after{top:8px;right:calc(50% - 18px);box-shadow:0 0 0 2px var
   </div>
   <p>Sumber data: RAN Program Penanggulangan HIV AIDS dan IMS 2026–2029 (versi 25 September 2026); Lampiran Target dan Indikator (Juli 2026); Target HIV Tahun 2026–2029 per kab/kota (Kemenkes); Surat Kemenkes PM.02.02/C.III/2901/2026 tanggal 21 Agustus 2026; Usulan Outline RAD 2026–2029 (19 Agustus 2026). Angka resmi ditampilkan apa adanya. Perhitungan biaya daerah, status traffic light, dan pemetaan aktor bersifat indikatif untuk perencanaan dan advokasi.</p>
   <p class="fcite"><b>Cara mengutip:</b> Harjana, N. P. A. (2026). RAN HIV &amp; IMS Navigator: Dari RAN 2026–2029 ke RAD [Aplikasi web interaktif]. CHARIS. <a href="#kutip">Format lain</a> · Lisensi <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a></p>
-  <p class="fstat">Dibuka <b data-stat="opens">–</b> kali · <b data-stat="readers">–</b> pembaca tercatat · dibagikan <b data-stat="shares">–</b> kali · <a href="#kutip">Bagikan</a></p>
+  <p class="fstat">Kunjungan <b data-stat="opens">–</b> · pengunjung unik <b data-stat="readers">–</b> · dibagikan <b data-stat="shares">–</b> kali · <a href="#kutip">Bagikan</a>. Aplikasi mencatat statistik kunjungan secara anonim, tanpa nama, email, atau alamat IP.</p>
   <div class="btnrow" id="offlineRow"><button class="ghost small" id="btnOffline" type="button">Unduh versi offline (.html)</button></div>
 </div></footer>
 <nav class="bottom" id="bnav" aria-label="Navigasi bawah">
@@ -707,7 +724,7 @@ C.tours = {
     ['#citeBox','Cara mengutip','Pilih format APA, Vancouver, atau BibTeX, lalu salin.'],
     ['#licBox','Lisensi CC BY 4.0','Boleh dibagikan dan diadaptasi dengan atribusi. Materi pihak ketiga tetap mengikuti ketentuan pemiliknya.'],
     ['#shareBox','Bagikan','Salin tautan atau bagikan ke WhatsApp, Telegram, LinkedIn, X, Facebook, atau email.'],
-    ['#statBox','Pemantauan','Jumlah dibuka, pembaca tercatat, dan dibagikan per kanal. Angka minimum; lihat cara kerjanya.']
+    ['#statBox','Pemantauan pembaca','Kunjungan, pengunjung unik, tren 7 hari, modul terpopuler, bagikan, dan unduhan. Data anonim dari Google Sheets.']
   ],
   siklus: [
     ['#siklusBox','Siklus tahunan','Enam tahapan perencanaan dan penganggaran daerah. Ketuk tahapan untuk rinciannya.'],
@@ -858,8 +875,6 @@ var IC = {}; Object.keys(IP).forEach(function (k) { IC[k] = svgI(IP[k], k === 'c
 /* ---------- util UI ---------- */
 var toastT;
 function toast(m) { var t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 2800); }
-var DL = null;
-try { if (window.claude && window.claude.use) window.claude.use('downloads').then(function (x) { DL = x; }).catch(function () {}); } catch (e) {}
 function saveFile(name, data, mime) {
   function fallback() {
     try {
@@ -869,14 +884,8 @@ function saveFile(name, data, mime) {
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 6000); toast('Unduhan dimulai: ' + name);
     } catch (e) { toast('Unduhan tidak tersedia di tampilan ini.'); }
   }
-  if (DL) {
-    DL.save({filename: name, data: data}).then(function () { toast('Berkas disimpan: ' + name); }).catch(function (e) {
-      if (e && e.code === 'declined') toast('Unduhan dibatalkan');
-      else if (e && e.code === 'rate_limited') toast('Tunggu sebentar lalu coba lagi');
-      else if (e && e.code === 'host_unavailable') toast('Aplikasi ini tidak bisa menyimpan berkas. Buka di peramban atau komputer.');
-      else fallback();
-    });
-  } else fallback();
+  try { if (typeof track === 'function') track('download', String(name).split('.').pop()); } catch (e) {}
+  fallback();
 }
 function copyText(t) {
   function old() { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Tersalin'); } catch (x) { toast('Gagal menyalin'); } ta.remove(); }
@@ -1830,7 +1839,7 @@ function bindDash(root) {
 }
 
 /* ================= KUTIP, LISENSI, BAGIKAN, PEMANTAUAN ================= */
-var CANON = 'https://claude.ai/artifact/LnuzsCYSJfVTN2R8fcmC4f';
+var CANON = 'https://charisforhealth.org/project/ran-hiv-app';
 var CCURL = 'https://creativecommons.org/licenses/by/4.0/';
 var TITLE = 'RAN HIV & IMS Navigator: Dari RAN 2026–2029 ke RAD';
 var BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -1852,51 +1861,60 @@ var SHARE = [
 ];
 var SHLBL = {salin: 'Salin tautan'}; SHARE.forEach(function (s) { SHLBL[s[0]] = s[1]; });
 
-/* ---------- pemantauan: tiap pembaca menulis satu dokumen miliknya di stats/<id> ---------- */
-var STATS = {db: null, uid: null, docs: [], ok: false, state: 'loading', mine: null, writing: false, pending: false};
+/* ---------- pemantauan anonim via Google Apps Script + Google Sheets ---------- */
+var STATS_URL = String(window.RAN_STATS_URL || '').trim();
+if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(STATS_URL)) STATS_URL = '';
+var STATS = {state: STATS_URL ? 'loading' : 'off', data: null};
+function rid() { var s = ''; for (var i = 0; i < 4; i++) s += Math.floor(Math.random() * 0x10000).toString(16); return s + Date.now().toString(36); }
+function visitorId() { try { var v = localStorage.getItem('ranhiv-vid'); if (!v) { v = 'v' + rid(); localStorage.setItem('ranhiv-vid', v); } return v; } catch (e) { return 'v-na'; } }
+function sessionId() { try { var s = sessionStorage.getItem('ranhiv-sid'); if (!s) { s = 's' + rid(); sessionStorage.setItem('ranhiv-sid', s); } return s; } catch (e) { return 's-na'; } }
+function track(ev, detail) {
+  if (!STATS_URL || location.protocol === 'file:') return;
+  try {
+    var p = JSON.stringify({ev: ev, d: String(detail || '').slice(0, 60), v: visitorId(), s: sessionId(), m: (typeof curView === 'function' ? curView() : ''), r: (document.referrer || '').slice(0, 200), w: window.innerWidth || 0, l: (navigator.language || '').slice(0, 12)});
+    if (navigator.sendBeacon && navigator.sendBeacon(STATS_URL, new Blob([p], {type: 'text/plain;charset=utf-8'}))) return;
+    fetch(STATS_URL, {method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: p, keepalive: true}).catch(function () {});
+  } catch (e) {}
+}
+function recordShare(ch) { track('share', ch); setTimeout(loadStats, 2500); }
 function statSum() {
-  var t = {opens: 0, readers: 0, shares: 0, ch: {}};
-  STATS.docs.forEach(function (d) { if (!d) return; t.readers++; t.opens += +d.opens || 0; var sh = d.shares || {}; Object.keys(sh).forEach(function (k) { var n = +sh[k] || 0; t.shares += n; t.ch[k] = (t.ch[k] || 0) + n; }); });
-  return t;
+  var d = STATS.data || {};
+  var sh = d.shares || {}, tot = 0; Object.keys(sh).forEach(function (k) { tot += +sh[k] || 0; });
+  return {opens: +d.opens || 0, readers: +d.visitors || 0, shares: tot, ch: sh, views: d.views || {}, downloads: d.downloads || {}, today: +d.today || 0, last7: d.last7 || [], updated: d.updated || ''};
 }
 function paintStats() {
   var t = statSum(), st = STATS.state;
   $$('[data-stat]').forEach(function (el) {
     var k = el.getAttribute('data-stat');
     if (st !== 'ok') { el.textContent = '–'; return; }
-    el.textContent = k === 'opens' ? fmt(t.opens) : k === 'readers' ? fmt(t.readers) : k === 'shares' ? fmt(t.shares) : fmt(t.ch[k] || 0);
+    el.textContent = k === 'opens' ? fmt(t.opens) : k === 'readers' ? fmt(t.readers) : k === 'shares' ? fmt(t.shares) : k === 'today' ? fmt(t.today) : fmt(t.ch[k] || 0);
   });
   $$('[data-statnote]').forEach(function (el) {
-    el.textContent = st === 'ok' ? (STATS.mine ? 'Kunjungan Anda ikut tercatat.' : 'Kunjungan Anda tidak tercatat karena akses Anda hanya melihat; angka tetap bisa dibaca.') :
-      st === 'offline' ? 'Pemantauan tidak tersedia di versi offline.' : st === 'na' ? 'Pemantauan tidak tersedia di tampilan ini (misalnya belum masuk akun).' : st === 'slow' ? 'Data pemantauan belum dapat dijangkau.' : 'Memuat data pemantauan…';
+    el.textContent = st === 'ok' ? ('Diperbarui ' + (t.updated || 'baru saja') + ' (WIB).') : st === 'off' ? 'Pemantauan belum diaktifkan pada salinan ini.' : st === 'err' ? 'Data pemantauan belum dapat dijangkau. Coba lagi nanti.' : 'Memuat data pemantauan…';
   });
-  var bx = $('#statBars'); if (bx && st === 'ok') { var mx = 1; Object.keys(SHLBL).forEach(function (k) { mx = Math.max(mx, t.ch[k] || 0); }); bx.innerHTML = Object.keys(SHLBL).map(function (k) { return '<div class="row"><span>' + esc(SHLBL[k]) + '</span><div class="track"><div class="fill" style="width:' + ((t.ch[k] || 0) / mx * 100) + '%;background:#0f7d84"></div></div><span class="val">' + fmt(t.ch[k] || 0) + ' kali</span></div>'; }).join(''); }
+  var bar = function (o, lbl) { var ks = Object.keys(o).filter(function (k) { return +o[k] > 0; }).sort(function (a, b) { return o[b] - o[a]; }); if (!ks.length) return '<p class="mute" style="font-size:13px">Belum ada data.</p>'; var mx = +o[ks[0]] || 1; return ks.slice(0, 12).map(function (k) { return '<div class="row"><span>' + esc(lbl(k)) + '</span><div class="track"><div class="fill" style="width:' + (o[k] / mx * 100) + '%;background:#0f7d84"></div></div><span class="val">' + fmt(o[k]) + '</span></div>'; }).join(''); };
+  var vlbl = function (k) { return (typeof VIEWS !== 'undefined' && VIEWS[k]) ? VIEWS[k][3] : k; };
+  var b1 = $('#statBars'); if (b1) b1.innerHTML = st === 'ok' ? bar(t.ch, function (k) { return SHLBL[k] || k; }) : '';
+  var b2 = $('#statViews'); if (b2) b2.innerHTML = st === 'ok' ? bar(t.views, vlbl) : '';
+  var b3 = $('#statDl'); if (b3) b3.innerHTML = st === 'ok' ? bar(t.downloads, function (k) { return 'Berkas .' + k; }) : '';
+  var f = $('#statTrend'); if (f && st === 'ok' && t.last7.length) barChart(f, {cats: t.last7.map(function (x) { return x[0].slice(5).split('-').reverse().join('/'); }), series: [{name: 'Kunjungan', color: '#0f7d84', vals: t.last7.map(function (x) { return +x[1] || 0; })}], labels: true, lfmt: fmt, label: 'Kunjungan 7 hari terakhir'});
 }
-function flushMine() {
-  if (!STATS.db || !STATS.uid || !STATS.mine) return;
-  if (STATS.writing) { STATS.pending = true; return; }
-  STATS.writing = true;
-  STATS.db.doc('stats/' + STATS.uid).set(clone(STATS.mine)).then(function () { STATS.writing = false; if (STATS.pending) { STATS.pending = false; flushMine(); } }).catch(function () { STATS.writing = false; STATS.mine = null; paintStats(); });
+var statsLoading = false;
+function loadStats() {
+  if (!STATS_URL || location.protocol === 'file:' || statsLoading) { if (location.protocol === 'file:' && STATS_URL) { STATS.state = 'off'; paintStats(); } return; }
+  statsLoading = true;
+  var done = false, timer = setTimeout(function () { if (!done) { STATS.state = STATS.data ? 'ok' : 'err'; statsLoading = false; paintStats(); } }, 10000);
+  fetch(STATS_URL + (STATS_URL.indexOf('?') < 0 ? '?' : '&') + 'action=stats&_=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) {
+    done = true; clearTimeout(timer); statsLoading = false;
+    if (j && j.ok) { STATS.data = j; STATS.state = 'ok'; } else STATS.state = STATS.data ? 'ok' : 'err';
+    paintStats();
+  }).catch(function () { done = true; clearTimeout(timer); statsLoading = false; STATS.state = STATS.data ? 'ok' : 'err'; paintStats(); });
 }
-function recordShare(ch) { if (!STATS.mine) return; STATS.mine.shares = STATS.mine.shares || {}; STATS.mine.shares[ch] = (STATS.mine.shares[ch] || 0) + 1; STATS.mine.last = new Date().toISOString(); flushMine(); }
 function statsInit() {
-  if (!(window.claude && window.claude.use)) { STATS.state = 'offline'; paintStats(); return; }
-  Promise.all([window.claude.use('db'), window.claude.use('user')]).then(function (r) {
-    var db = r[0], u = r[1];
-    if (!db) { STATS.state = 'na'; paintStats(); return; }
-    STATS.db = db;
-    var timer = setTimeout(function () { if (!STATS.ok) { STATS.state = 'slow'; paintStats(); } }, 10000);
-    db.collection('stats').onSnapshot(function (s) { STATS.docs = s.docs.map(function (d) { return d.data(); }); if (!s.metadata.fromCache) { clearTimeout(timer); STATS.ok = true; } STATS.state = 'ok'; paintStats(); }, function () { clearTimeout(timer); STATS.state = 'na'; paintStats(); });
-    (u ? u.id() : Promise.resolve(null)).then(function (id) {
-      if (!id) { paintStats(); return; }
-      STATS.uid = id;
-      var ref = db.doc('stats/' + id);
-      ref.get().then(function (snap) {
-        var d = snap.exists ? clone(snap.data()) : {opens: 0, shares: {}, first: new Date().toISOString()};
-        d.opens = (+d.opens || 0) + 1; d.last = new Date().toISOString(); STATS.mine = d; flushMine(); paintStats();
-      }).catch(function () { paintStats(); });
-    });
-  }).catch(function () { STATS.state = 'na'; paintStats(); });
+  try { if (!sessionStorage.getItem('ranhiv-open')) { sessionStorage.setItem('ranhiv-open', '1'); track('open', document.referrer ? 'rujukan' : 'langsung'); } } catch (e) { track('open', ''); }
+  var lastV = curView(); track('view', lastV);
+  window.addEventListener('hashchange', function () { var v = curView(); if (v !== lastV) { lastV = v; track('view', v); } });
+  loadStats();
 }
 function ccBadge() { return '<a class="ccb" href="' + CCURL + '" rel="license"><span class="ccb1">CC</span><span class="ccb2">BY 4.0</span></a>'; }
 function vKutip() {
@@ -1913,10 +1931,13 @@ function vKutip() {
     '<p class="refs"><b>Materi pihak ketiga tetap tunduk pada ketentuan pemiliknya:</b> isi RAN, Lampiran Target dan Indikator, tabel target kab/kota, dan surat edaran milik Kementerian Kesehatan RI; batas wilayah peta dari geoBoundaries (BPS, WFP, OCHA ROAP melalui HDX) berlisensi CC BY 3.0 IGO; logo Kemenkes dan CHARIS tidak termasuk dalam lisensi CC BY 4.0.</p></div></div>' +
     '<div class="grid g2" style="align-items:start;margin-top:16px"><div class="card" id="shareBox"><h2>Bagikan</h2><div class="field"><label for="shUrl">Tautan aplikasi</label><input id="shUrl" type="text" readonly value="' + esc(CANON) + '"></div>' +
     '<div class="btnrow" style="margin-top:10px"><button type="button" class="small" id="shCopy">Salin tautan</button>' + SHARE.map(function (s) { return '<a class="btn ghost small shbtn" data-share="' + s[0] + '" href="' + esc(s[2](txt, CANON)) + '" target="_blank" rel="noopener">' + esc(s[1]) + '</a>'; }).join('') + '</div>' +
-    '<p class="note">Penerima perlu akses ke tautan ini. Atur siapa yang dapat membuka aplikasi lewat tombol Bagikan di claude.ai. Bila email tidak terbuka, salin tautan dan kirim manual.</p></div>' +
-    '<div class="card" id="statBox"><h2>Pemantauan baca dan bagikan</h2><div class="grid g3"><div class="kpi"><b data-stat="opens">–</b><span>kali dibuka</span></div><div class="kpi"><b data-stat="readers">–</b><span>pembaca tercatat</span></div><div class="kpi"><b data-stat="shares">–</b><span>kali dibagikan</span></div></div>' +
-    '<h3 style="margin-top:12px">Dibagikan per kanal</h3><div class="bars" id="statBars"></div><p class="mute" data-statnote style="font-size:13px"></p>' +
-    '<p class="note">Cara kerja: setiap pembaca yang masuk akun dan punya akses Kontributor ke atas (termasuk anggota organisasi yang sama) mencatat satu baris miliknya: jumlah ia membuka aplikasi dan menekan tombol berbagi di halaman ini. Pembaca dengan akses hanya-lihat, pengunjung dari luar organisasi, pengunjung yang belum masuk akun, dan versi offline tidak tercatat, sehingga angka ini adalah angka minimum. Pembagian lewat tombol Bagikan milik claude.ai atau salin manual dari bilah alamat juga tidak terhitung. Tidak ada nama atau email yang disimpan.</p></div></div></div></section>';
+    '<p class="note">Bila aplikasi email tidak terbuka, salin tautan dan kirim manual.</p></div>' +
+    '<div class="card" id="statBox"><h2>Pemantauan pembaca</h2><div class="grid g4s"><div class="kpi"><b data-stat="opens">–</b><span>kunjungan</span></div><div class="kpi"><b data-stat="readers">–</b><span>pengunjung unik</span></div><div class="kpi"><b data-stat="today">–</b><span>kunjungan hari ini</span></div><div class="kpi"><b data-stat="shares">–</b><span>kali dibagikan</span></div></div>' +
+    '<h3 style="margin-top:14px">Kunjungan 7 hari terakhir</h3><div class="fig" id="statTrend" style="height:200px"></div>' +
+    '<h3 style="margin-top:14px">Modul yang paling sering dibuka</h3><div class="bars" id="statViews"></div>' +
+    '<h3 style="margin-top:14px">Dibagikan per kanal</h3><div class="bars" id="statBars"></div>' +
+    '<h3 style="margin-top:14px">Unduhan</h3><div class="bars" id="statDl"></div><p class="mute" data-statnote style="font-size:13px"></p>' +
+    '<p class="note">Statistik anonim. Setiap peramban mendapat kode acak (tanpa nama, email, atau alamat IP) untuk menghitung pengunjung unik. Satu kunjungan = satu sesi peramban. Yang dicatat: kunjungan, modul yang dibuka, tombol bagikan di halaman ini, dan unduhan. Versi offline tidak tercatat.</p></div></div></div></section>';
 }
 function bindKutip(root) {
   var c = cites(), cur = 'apa';
@@ -1924,7 +1945,7 @@ function bindKutip(root) {
   $('#citeCopy', root).onclick = function () { copyText(c[cur]); };
   $('#shCopy', root).onclick = function () { copyText(CANON); recordShare('salin'); };
   $$('[data-share]', root).forEach(function (a) { a.addEventListener('click', function () { recordShare(a.dataset.share); }); });
-  paintStats();
+  paintStats(); loadStats();
 }
 
 /* ================= RAN ke RAD ================= */
