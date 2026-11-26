@@ -645,6 +645,7 @@ C.tiles = [
   ['peta','Peta RAN','7 strategi, 106 aksi','map','green'],
   ['indikator','Indikator','Definisi & target','gauge','blue'],
   ['daerah','Target Daerah','514 kab/kota','pin','red'],
+  ['distribusi','Distribusi Faskes','Bagi target ke layanan','building','teal'],
   ['dashboard','Dashboard Peta','Data di peta Indonesia','mapdash','teal'],
   ['bandingkan','Bandingkan','Hingga 5 wilayah','compare','purple'],
   ['simulasi','Simulasi','Cek kaskade & gap','sliders','amber'],
@@ -656,6 +657,13 @@ C.tiles = [
   ['tur','Petunjuk','Tur singkat semua modul','bulb','amber']
 ];
 C.tours = {
+  distribusi: [
+    ['#dTarget','Target yang dibagi','Total target kab/kota dari lampiran Kemenkes. Jumlah target semua faskes selalu sama dengan angka ini.'],
+    ['#dSteps','Empat langkah','Data faskes, aturan dan strategi, hasil distribusi, lalu skenario dan unduhan.'],
+    ['#dOpts','Masukkan data faskes','Unduh template Excel, isi, lalu unggah kembali. Bisa juga mengisi langsung di tabel atau mencoba data contoh fiktif.'],
+    ['#dWhat','Data yang perlu disiapkan','Ekspor SIHA 12 bulan per faskes, sasaran wilayah kerja, dan kapasitas. Arti setiap kolom ada di Panduan data.'],
+    ['#dHelpBtns','Panduan dan rumus','Panduan data menjelaskan setiap kolom. Rumus & sumber menjelaskan setiap parameter perhitungan beserta rujukannya.']
+  ],
   beranda: [
     ['#tiles','Menu kotak','Semua fitur ada di sini. Ketuk satu kotak untuk membuka modul. Di ponsel, menu yang sama ada di tombol Menu pada bilah bawah.'],
     ['#heroViz','Kaskade nasional','Gambaran capaian 95-95-95 nasional 2025 dibanding target 2029. Tahap yang bocor menurunkan hasil akhir.'],
@@ -686,6 +694,7 @@ C.tours = {
   daerah: [
     ['#areaChip','Wilayah aktif','Ketuk untuk mengganti provinsi, kab/kota, dan tahun.'],
     ['#kpis','Angka kunci','Estimasi ODHIV, populasi kunci, target tes dan temuan wilayah ini.'],
+    ['#toDist','Distribusikan ke faskes','Bagi target wilayah ini ke Puskesmas, RS, klinik, Lapas, dan layanan komunitas dengan simulasi strategi.'],
     ['#figCascBox','Target kaskade','Target 2026–2029 dalam jumlah orang, lengkap dengan label.'],
     ['#posBox','Di mana ODHIV ditemukan','Positivitas per populasi untuk mengarahkan tes.'],
     ['#childBox','Perbandingan wilayah','Ketuk baris untuk pindah wilayah.']
@@ -1462,7 +1471,7 @@ function vDaerah() {
   var denom = chRows.reduce(function (s, r) { return s + r.od; }, 0);
   var chk = areaChecks(S.area), cs = cascSeries(v);
   return '<section class="band"><div class="wrap"><div class="sectionhead"><div class="titleic">' + FI('pin', 'red', 52) + '<div><h1>Target ' + esc(areaName()) + '</h1><p class="mute">Estimasi dan target program HIV 2026–2029 dari Kemenkes (lampiran Surat 21 Agustus 2026).</p></div></div>' +
-    '<div class="btnrow"><button type="button" class="ghost small" id="csvArea">Unduh target wilayah (.csv)</button>' + (lv !== 'kab' ? '<button type="button" class="ghost small" id="csvChild">Rincian ' + (lv === 'nas' ? 'provinsi' : 'kab/kota') + ' (.csv)</button>' : '') + '</div></div>' +
+    '<div class="btnrow"><a class="btn small" href="#distribusi" id="toDist">Distribusikan ke faskes</a><button type="button" class="ghost small" id="csvArea">Unduh target wilayah (.csv)</button>' + (lv !== 'kab' ? '<button type="button" class="ghost small" id="csvChild">Rincian ' + (lv === 'nas' ? 'provinsi' : 'kab/kota') + ' (.csv)</button>' : '') + '</div></div>' +
     (chk.a.length || chk.b.length ? '<div class="alert amber"><b>Perlu konfirmasi data:</b> ' + (chk.a.length ? chk.a.length + ' sel target temuan lebih besar dari target tes populasi yang sama' : '') + (chk.a.length && chk.b.length ? '; ' : '') + (chk.b.length ? chk.b.length + ' tahun dengan jumlah temuan per populasi ≠ total' : '') + '. Angka ditampilkan apa adanya sesuai tabel Kemenkes.</div>' : '') +
     '<div class="grid g4" id="kpis">' + kpi(g(v, 'odhiv', y), 'Estimasi ODHIV ' + y) + '<div class="card kpi"><b data-count="' + kp + '">' + fmt(kp) + '</b><span>Estimasi populasi kunci 2025: LSL ' + fmt(v[0]) + ', PSP ' + fmt(v[1]) + ', waria ' + fmt(v[2]) + ', penasun ' + fmt(v[3]) + '</span></div>' +
     kpi(g(v, 'tes', y), 'Target tes HIV ' + y) + kpi(g(v, 'found', y), 'Target ODHIV baru ditemukan ' + y + ' · PrEP ' + fmt(g(v, 'prep', y))) + '</div></div></section>' +
@@ -1948,6 +1957,679 @@ function bindKutip(root) {
   paintStats(); loadStats();
 }
 
+/* ================= DISTRIBUSI TARGET KE FASKES: DATA, XLSX, MESIN ALOKASI ================= */
+var PK = ['lsl','psp','waria','penasun','bumil','tbc','ims','wbp','paskp','pasodhiv','pelanggan','hepatitis','catin','anak','rentan']; // urutan = POPS
+var JENIS = {PKM: 'Puskesmas', RSU: 'RS pemerintah', RSS: 'RS swasta', KLINIK: 'Klinik swasta', LAPAS: 'Faskes Lapas/Rutan', KOMUNITAS: 'Layanan berbasis komunitas'};
+// Kolom template: [kunci, label, kelompok, wajib, definisi, sumber]
+var FCOLS = [
+  ['kode','Kode faskes','id',0,'Kode faskes SIHA/SATUSEHAT bila ada. Boleh kosong.','SIHA / ASPAK'],
+  ['nama','Nama faskes','id',1,'Nama faskes yang menyediakan layanan HIV.','Daftar layanan SIHA'],
+  ['jenis','Jenis','id',1,'PKM = Puskesmas, RSU = RS pemerintah, RSS = RS swasta, KLINIK = klinik swasta, LAPAS = faskes Lapas/Rutan, KOMUNITAS = layanan berbasis komunitas (PLK/CBS).','Daftar layanan SIHA'],
+  ['kecamatan','Kecamatan','id',0,'Lokasi faskes. Dipakai untuk mengarahkan rujukan ODHIV ke faskes PDP terdekat (kecamatan yang sama).','Data Dinkes'],
+  ['pdp','Layanan PDP (1/0)','id',1,'1 bila faskes memberikan ARV (layanan PDP); 0 bila tidak.','SIHA (layanan PDP)'],
+  ['prep','Layanan PrEP (1/0)','id',0,'1 bila faskes/komunitas melayani PrEP.','SIHA (layanan PrEP)'],
+  ['rujuk_balik','Menerima rujuk balik (1/0)','id',0,'1 bila Puskesmas PDP siap menerima ODHIV stabil yang dirujuk balik dari RS.','Kesepakatan Dinkes'],
+].concat(PK.map(function (k, i) { return ['t_' + k, 'Tes HIV ' + POPS[i], 'tes', 0, 'Jumlah orang ' + POPS[i].toLowerCase() + ' yang dites HIV dan menerima hasil dalam 12 bulan terakhir.', 'SIHA: laporan tes HIV per populasi']; }))
+  .concat(PK.map(function (k, i) { return ['p_' + k, 'Positif ' + POPS[i], 'pos', 0, 'Jumlah ' + POPS[i].toLowerCase() + ' dengan hasil HIV positif (terdiagnosis) dalam 12 bulan terakhir.', 'SIHA: laporan tes HIV per populasi']; }))
+  .concat([
+  ['art_aktif','ODHIV on ART aktif','art',0,'ODHIV yang masih menerima ARV di faskes ini pada akhir periode (kohort aktif).','SIHA: laporan PDP / kohort ART'],
+  ['art_baru','Mulai ARV 12 bulan','art',0,'ODHIV yang mulai ARV di faskes ini dalam 12 bulan terakhir.','SIHA: laporan PDP'],
+  ['vl_tes','Dites VL 12 bulan','art',0,'ODHIV on ART yang dites viral load dalam 12 bulan terakhir.','SIHA: laporan VL'],
+  ['vl_supresi','VL tersupresi','art',0,'ODHIV yang hasil VL-nya tersupresi dalam 12 bulan terakhir.','SIHA: laporan VL'],
+  ['ltfu','LTFU 12 bulan','art',0,'ODHIV yang hilang dari pengobatan (lost to follow-up) dalam 12 bulan terakhir.','SIHA: laporan PDP'],
+  ['prep_user','Pengguna PrEP 12 bulan','art',0,'Orang yang menerima PrEP minimal satu kali dalam 12 bulan terakhir.','SIHA: laporan PrEP'],
+  ['sas_bumil','Sasaran ibu hamil','sas',0,'Sasaran ibu hamil di wilayah kerja Puskesmas tahun target.','PWS KIA / data sasaran Dinkes'],
+  ['sas_tbc','Notifikasi pasien TBC','sas',0,'Pasien TBC yang ternotifikasi di faskes ini (12 bulan terakhir atau proyeksi tahun target).','SITB'],
+  ['sas_catin','Sasaran calon pengantin','sas',0,'Perkiraan calon pengantin di wilayah kerja (data KUA/CKG).','KUA / CKG / Dinkes'],
+  ['est_lsl','Estimasi LSL wilayah kerja','sas',0,'Hasil pemetaan atau estimasi LSL di wilayah kerja faskes.','Pemetaan populasi kunci / komunitas'],
+  ['est_psp','Estimasi PSP wilayah kerja','sas',0,'Hasil pemetaan atau estimasi PSP di wilayah kerja faskes.','Pemetaan populasi kunci / komunitas'],
+  ['est_waria','Estimasi waria wilayah kerja','sas',0,'Hasil pemetaan atau estimasi waria di wilayah kerja faskes.','Pemetaan populasi kunci / komunitas'],
+  ['est_penasun','Estimasi penasun wilayah kerja','sas',0,'Hasil pemetaan atau estimasi penasun di wilayah kerja faskes.','Pemetaan populasi kunci / komunitas'],
+  ['kap_tes','Kapasitas tes per tahun','kap',0,'Jumlah tes HIV maksimum yang realistis per tahun (nakes, jam layanan, reagen). Kosong = tanpa batas.','Penilaian Dinkes / faskes'],
+  ['kap_art','Kapasitas ODHIV on ART','kap',0,'Jumlah ODHIV maksimum yang dapat dilayani PDP. Kosong = tanpa batas.','Penilaian Dinkes / faskes'],
+  ['nakes','Nakes terlatih HIV','kap',0,'Jumlah tenaga medis/kesehatan terlatih layanan HIV (informasi pendukung).','Data SDMK / pelatihan']
+]);
+var FGRP = [['id','Identitas & layanan'],['tes','Tes HIV per populasi'],['pos','Positif per populasi'],['art','Pengobatan & PrEP'],['sas','Sasaran & estimasi'],['kap','Kapasitas']];
+var FTXT = {kode: 1, nama: 1, jenis: 1, kecamatan: 1};
+var UNIV = {bumil: 'sas_bumil', tbc: 'sas_tbc', catin: 'sas_catin'};
+var UNIVC = {bumil: 'S1.1.16', tbc: 'S1.1.5', catin: 'S1.1.18'};
+var BMAP = {bumil: 'sas_bumil', tbc: 'sas_tbc', catin: 'sas_catin', lsl: 'est_lsl', psp: 'est_psp', waria: 'est_waria', penasun: 'est_penasun'};
+var ELIG = {
+  PKM: function () { return true; },
+  RSU: function (k) { return k !== 'catin'; }, RSS: function (k) { return k !== 'catin'; },
+  KLINIK: function (k) { return k !== 'catin' && k !== 'wbp'; },
+  LAPAS: function (k) { return k === 'wbp'; },
+  KOMUNITAS: function (k) { return ['lsl','psp','waria','penasun','paskp','pasodhiv','pelanggan'].indexOf(k) >= 0; }
+};
+var DDEF = {w: {H: 40, B: 25, E: 25, K: 10}, wa: {C: 70, N: 30}, wp: {H: 60, B: 40}, univ: true, univMin: true, cap: true, lapasOnly: true, komOnly: true, desen: 0, pola: 'rata', polaV: [], shrink: 50};
+function num(v) { if (v == null || v === '') return 0; var n = +String(v).replace(/\./g, '').replace(',', '.'); return isFinite(n) && n > 0 ? n : 0; }
+function fv(f, k) { return num(f[k]); }
+
+/* ---------- XLSX: penulis & pembaca minimal ---------- */
+function colL(i) { var s = ''; i++; while (i > 0) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+function zipFiles(files, mime) { var b = zipStore(files); return new Blob([b], {type: mime}); }
+function xlsxBuild(sheets) {
+  // sheets: [{name, rows:[[cell]], widths:[], header:n, freeze:{r,c}, valid:[{col,list,from,to}]}], cell: string|number|{v,s}
+  var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="3"><font><sz val="10"/><name val="Calibri"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="10"/><name val="Calibri"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0B5C63"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE3F1F1"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF3DC"/></patternFill></fill></fills><borders count="2"><border/><border><left style="thin"><color rgb="FFB9CFCC"/></left><right style="thin"><color rgb="FFB9CFCC"/></right><top style="thin"><color rgb="FFB9CFCC"/></top><bottom style="thin"><color rgb="FFB9CFCC"/></bottom></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="6"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  var wb = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + sheets.map(function (s, i) { return '<sheet name="' + xe(s.name) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join('') + '</sheets></workbook>';
+  var wbr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map(function (s, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') + '<Relationship Id="rIdS" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  var files = [
+    ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map(function (s, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>'],
+    ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml', wb], ['xl/_rels/workbook.xml.rels', wbr], ['xl/styles.xml', styles]
+  ];
+  sheets.forEach(function (s, i) {
+    var x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
+    if (s.freeze) x += '<sheetViews><sheetView workbookViewId="0"><pane xSplit="' + s.freeze.c + '" ySplit="' + s.freeze.r + '" topLeftCell="' + colL(s.freeze.c) + (s.freeze.r + 1) + '" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>';
+    if (s.widths) x += '<cols>' + s.widths.map(function (w, c) { return '<col min="' + (c + 1) + '" max="' + (c + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols>';
+    x += '<sheetData>' + s.rows.map(function (row, r) { return '<row r="' + (r + 1) + '">' + row.map(function (cell, c) {
+      if (cell == null || cell === '') { var st0 = r < (s.header || 0) ? (r === 0 ? 1 : 2) : (s.inputStyle && r >= (s.header || 0) ? 5 : 0); return st0 ? '<c r="' + colL(c) + (r + 1) + '" s="' + st0 + '"/>' : ''; }
+      var v = cell, st = r < (s.header || 0) ? (r === 0 ? 1 : 2) : 0; if (typeof cell === 'object') { v = cell.v; st = cell.s; }
+      var ref = colL(c) + (r + 1);
+      if (typeof v === 'number' && isFinite(v)) return '<c r="' + ref + '"' + (st ? ' s="' + st + '"' : '') + '><v>' + v + '</v></c>';
+      return '<c r="' + ref + '" t="inlineStr"' + (st ? ' s="' + st + '"' : '') + '><is><t xml:space="preserve">' + xe(v) + '</t></is></c>';
+    }).join('') + '</row>'; }).join('') + '</sheetData>';
+    if (s.valid && s.valid.length) x += '<dataValidations count="' + s.valid.length + '">' + s.valid.map(function (d) { return '<dataValidation type="list" allowBlank="1" sqref="' + colL(d.col) + d.from + ':' + colL(d.col) + d.to + '"><formula1>"' + xe(d.list) + '"</formula1></dataValidation>'; }).join('') + '</dataValidations>';
+    x += '</worksheet>';
+    files.push(['xl/worksheets/sheet' + (i + 1) + '.xml', x]);
+  });
+  var blob = zipStore(files);
+  return new Blob([blob], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function u8(buf, o, n) { var v = 0; for (var i = n - 1; i >= 0; i--) v = v * 256 + buf[o + i]; return v; }
+function inflateRaw(bytes) {
+  if (typeof DecompressionStream === 'undefined') return Promise.reject(new Error('Peramban ini belum mendukung pembacaan .xlsx. Simpan sebagai CSV lalu unggah.'));
+  var ds = new DecompressionStream('deflate-raw'), w = ds.writable.getWriter(); w.write(bytes); w.close();
+  return new Response(ds.readable).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+}
+function unzip(buf) {
+  var b = new Uint8Array(buf), eo = -1;
+  for (var i = b.length - 22; i >= Math.max(0, b.length - 65557); i--) if (b[i] === 0x50 && b[i + 1] === 0x4b && b[i + 2] === 5 && b[i + 3] === 6) { eo = i; break; }
+  if (eo < 0) return Promise.reject(new Error('Berkas bukan .xlsx yang valid.'));
+  var n = u8(b, eo + 10, 2), off = u8(b, eo + 16, 4), out = {}, jobs = [], td = new TextDecoder('utf-8');
+  for (var k = 0; k < n; k++) {
+    var meth = u8(b, off + 10, 2), csz = u8(b, off + 20, 4), nl = u8(b, off + 28, 2), xl = u8(b, off + 30, 2), cl = u8(b, off + 32, 2), lo = u8(b, off + 42, 4);
+    var name = td.decode(b.subarray(off + 46, off + 46 + nl));
+    var ds = lo + 30 + u8(b, lo + 26, 2) + u8(b, lo + 28, 2), data = b.subarray(ds, ds + csz);
+    (function (name, meth, data) { jobs.push((meth === 0 ? Promise.resolve(data) : inflateRaw(data)).then(function (d) { out[name] = td.decode(d); })); })(name, meth, data);
+    off += 46 + nl + xl + cl;
+  }
+  return Promise.all(jobs).then(function () { return out; });
+}
+function readXlsx(buf) {
+  return unzip(buf).then(function (z) {
+    var P = new DOMParser(), X = function (s) { return P.parseFromString(s, 'application/xml'); };
+    var ss = []; if (z['xl/sharedStrings.xml']) { var sd = X(z['xl/sharedStrings.xml']); Array.prototype.forEach.call(sd.getElementsByTagName('si'), function (si) { var t = ''; Array.prototype.forEach.call(si.getElementsByTagName('t'), function (x) { t += x.textContent; }); ss.push(t); }); }
+    var wb = X(z['xl/workbook.xml']), rels = X(z['xl/_rels/workbook.xml.rels']), rmap = {};
+    Array.prototype.forEach.call(rels.getElementsByTagName('Relationship'), function (r) { rmap[r.getAttribute('Id')] = r.getAttribute('Target'); });
+    var sheets = Array.prototype.map.call(wb.getElementsByTagName('sheet'), function (s) { var rid = s.getAttribute('r:id') || s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'); var t = rmap[rid] || ''; t = t.replace(/^\//, '').replace(/^xl\//, ''); return {name: s.getAttribute('name'), path: 'xl/' + t}; });
+    var pick = sheets.filter(function (s) { return /data_?faskes/i.test(s.name); })[0] || sheets[0];
+    var doc = X(z[pick.path] || ''), rows = [];
+    Array.prototype.forEach.call(doc.getElementsByTagName('row'), function (row) {
+      var r = +row.getAttribute('r') - 1, arr = rows[r] = [];
+      Array.prototype.forEach.call(row.getElementsByTagName('c'), function (c) {
+        var ref = c.getAttribute('r') || '', col = 0, m = ref.match(/^[A-Z]+/); if (m) for (var i = 0; i < m[0].length; i++) col = col * 26 + (m[0].charCodeAt(i) - 64); col--;
+        var t = c.getAttribute('t'), v = c.getElementsByTagName('v')[0], val = '';
+        if (t === 's') val = ss[+(v ? v.textContent : 0)] || ''; else if (t === 'inlineStr') { var tt = c.getElementsByTagName('t'); val = Array.prototype.map.call(tt, function (x) { return x.textContent; }).join(''); } else val = v ? v.textContent : '';
+        arr[col] = val;
+      });
+    });
+    return rows.map(function (r) { return r || []; });
+  });
+}
+function parseCSV(txt) {
+  txt = txt.replace(/^﻿/, ''); var sep = (txt.split('\n')[0].match(/;/g) || []).length >= (txt.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+  var rows = [], row = [], cur = '', q = false;
+  for (var i = 0; i < txt.length; i++) { var ch = txt[i];
+    if (q) { if (ch === '"') { if (txt[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true; else if (ch === sep) { row.push(cur); cur = ''; } else if (ch === '\n' || ch === '\r') { if (ch === '\r' && txt[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; } else cur += ch; }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+function rowsToFac(rows) {
+  var keys = FCOLS.map(function (c) { return c[0]; }), hi = -1, map = {};
+  for (var r = 0; r < Math.min(rows.length, 8); r++) { var row = rows[r] || [], hits = 0; row.forEach(function (v) { if (keys.indexOf(String(v).trim()) >= 0) hits++; }); if (hits >= 3) { hi = r; break; } }
+  if (hi < 0) throw new Error('Baris kode kolom tidak ditemukan. Gunakan template dari aplikasi (baris ke-2 berisi kode kolom seperti nama, jenis, pdp).');
+  rows[hi].forEach(function (v, c) { var k = String(v).trim(); if (keys.indexOf(k) >= 0) map[k] = c; });
+  var fac = [], warn = [];
+  for (var i = hi + 1; i < rows.length; i++) {
+    var row = rows[i] || [], nm = map.nama != null ? String(row[map.nama] || '').trim() : '';
+    if (!nm || /^contoh:/i.test(nm)) continue;
+    var f = {};
+    keys.forEach(function (k) { var v = map[k] != null ? row[map[k]] : ''; f[k] = FTXT[k] ? String(v == null ? '' : v).trim() : (v === '' || v == null ? '' : num(v)); });
+    f.jenis = String(f.jenis || 'PKM').toUpperCase().replace(/\s+/g, ''); if (!JENIS[f.jenis]) { warn.push(nm + ': jenis "' + f.jenis + '" tidak dikenal, dianggap PKM.'); f.jenis = 'PKM'; }
+    fac.push(f);
+  }
+  return {fac: fac, warn: warn};
+}
+function templateXlsx(withData, facs) {
+  var keys = FCOLS.map(function (c) { return c[0]; });
+  var rows = [FCOLS.map(function (c) { return c[1] + (c[3] ? ' *' : ''); }), keys];
+  var data = withData && facs && facs.length ? facs : [];
+  data.forEach(function (f) { rows.push(keys.map(function (k) { var v = f[k]; return FTXT[k] ? (v || '') : (v === '' || v == null ? '' : +v); })); });
+  if (!data.length) { rows.push(['', 'Contoh: Puskesmas Mawar', 'PKM', 'Kecamatan A', 1, 0, 1]); for (var e = 0; e < 40; e++) rows.push([]); }
+  var guide = [['Kolom', 'Kode', 'Kelompok', 'Wajib', 'Definisi dan cara mengisi', 'Sumber data']].concat(FCOLS.map(function (c) { return [c[1], c[0], (FGRP.filter(function (g) { return g[0] === c[2]; })[0] || ['', ''])[1], c[3] ? 'Wajib' : 'Opsional', c[4], c[5]]; }));
+  guide.push([], ['Catatan umum', '', '', '', 'Periode data historis: 12 bulan terakhir yang lengkap (misalnya Oktober tahun lalu sampai September tahun ini). Isi angka saja, tanpa titik ribuan. Jangan mengubah baris ke-2 (kode kolom). Baris berawalan "Contoh:" diabaikan. Kolom kosong dianggap 0 atau tidak tersedia.', ''],
+    ['Jenis faskes', '', '', '', 'PKM, RSU, RSS, KLINIK, LAPAS, KOMUNITAS', '']);
+  var w = FCOLS.map(function (c) { return FTXT[c[0]] ? (c[0] === 'nama' ? 30 : 16) : 13; });
+  return xlsxBuild([
+    {name: 'Data_Faskes', rows: rows, header: 2, widths: w, freeze: {r: 2, c: 3}, inputStyle: !data.length, valid: [{col: 2, list: Object.keys(JENIS).join(','), from: 3, to: 500}, {col: 4, list: '1,0', from: 3, to: 500}, {col: 5, list: '1,0', from: 3, to: 500}, {col: 6, list: '1,0', from: 3, to: 500}]},
+    {name: 'Petunjuk', rows: guide, header: 1, widths: [28, 14, 22, 10, 70, 32]},
+    {name: 'Daftar_Jenis', rows: [['Kode', 'Arti', 'Target yang diterima']].concat([['PKM', 'Puskesmas', 'Semua populasi; PDP & PrEP bila layanan tersedia'], ['RSU', 'RS pemerintah', 'Semua populasi kecuali catin'], ['RSS', 'RS swasta', 'Semua populasi kecuali catin'], ['KLINIK', 'Klinik swasta', 'Semua kecuali catin dan WBP'], ['LAPAS', 'Faskes Lapas/Rutan', 'Hanya WBP (bila aturan aktif)'], ['KOMUNITAS', 'Layanan berbasis komunitas', 'Populasi kunci, pasangan, pelanggan PS, PrEP (bila aturan aktif)']]), header: 1, widths: [14, 28, 60]}
+  ]);
+}
+
+/* ---------- data contoh fiktif (deterministik) ---------- */
+function rng(seed) { var s = seed % 2147483647; if (s <= 0) s += 2147483646; return function () { s = s * 16807 % 2147483647; return (s - 1) / 2147483646; }; }
+function demoFac(a, y) {
+  var v = areaVals(a), R = rng(20260 + (a.length * 97) + (+a.slice(2) || 7)), yi = y - 2026, fac = [];
+  var nP = 25, kec = 12;
+  for (var i = 0; i < nP; i++) fac.push({kode: 'PKM' + String(i + 1).padStart(2, '0'), nama: 'Puskesmas Contoh ' + String(i + 1).padStart(2, '0'), jenis: 'PKM', kecamatan: 'Kecamatan ' + (1 + i % kec), pdp: i < 8 ? 1 : 0, prep: i < 3 ? 1 : 0, rujuk_balik: i < 6 ? 1 : 0});
+  fac.push({kode: 'RSU01', nama: 'RSUD Contoh', jenis: 'RSU', kecamatan: 'Kecamatan 1', pdp: 1, prep: 1, rujuk_balik: 0});
+  fac.push({kode: 'RSS01', nama: 'RS Swasta Contoh A', jenis: 'RSS', kecamatan: 'Kecamatan 2', pdp: 1, prep: 0, rujuk_balik: 0});
+  fac.push({kode: 'RSS02', nama: 'RS Swasta Contoh B', jenis: 'RSS', kecamatan: 'Kecamatan 3', pdp: 0, prep: 0, rujuk_balik: 0});
+  fac.push({kode: 'KLN01', nama: 'Klinik Contoh', jenis: 'KLINIK', kecamatan: 'Kecamatan 4', pdp: 0, prep: 0, rujuk_balik: 0});
+  fac.push({kode: 'LPS01', nama: 'Klinik Lapas Contoh', jenis: 'LAPAS', kecamatan: 'Kecamatan 5', pdp: 0, prep: 0, rujuk_balik: 0});
+  fac.push({kode: 'KOM01', nama: 'Layanan Komunitas Contoh', jenis: 'KOMUNITAS', kecamatan: 'Kecamatan 1', pdp: 0, prep: 1, rujuk_balik: 0});
+  var split = function (total, keyF, wf) { var ws = fac.map(function (f) { return ELIG[f.jenis](keyF) ? wf(f) * (0.4 + R() * 1.2) : 0; }), s = ws.reduce(function (x, z) { return x + z; }, 0) || 1; return ws.map(function (w) { return Math.round(total * w / s); }); };
+  var big = function (f) { return f.jenis === 'RSU' ? 6 : f.jenis === 'RSS' ? 2.5 : f.jenis === 'KOMUNITAS' ? 3 : f.jenis === 'KLINIK' ? 1.2 : f.jenis === 'LAPAS' ? 1 : (f.pdp ? 1.8 : 1); };
+  PK.forEach(function (k, p) {
+    var T = Math.round(v[36 + p * 4 + yi] * 0.75), F = v[100 + p * 4 + yi], yk = T > 0 ? Math.min(0.5, F / Math.max(1, v[36 + p * 4 + yi])) : 0;
+    var ts = split(T, k, big);
+    fac.forEach(function (f, j) { f['t_' + k] = ts[j]; var yy = yk * (0.3 + R() * 2.2) * (f.jenis === 'KOMUNITAS' || f.jenis === 'RSU' ? 1.4 : 1); f['p_' + k] = Math.min(ts[j], Math.round(ts[j] * yy)); });
+  });
+  var A = Math.round(g(v, 't2', y) * 0.85), pdp = fac.filter(function (f) { return f.pdp; });
+  var aw = pdp.map(function (f) { return f.jenis === 'RSU' ? 45 : f.jenis === 'RSS' ? 15 : 40 / 8 * (0.5 + R()); }), as = aw.reduce(function (x, z) { return x + z; }, 0);
+  pdp.forEach(function (f, j) { f.art_aktif = Math.round(A * aw[j] / as); f.art_baru = Math.round(g(v, 'init', y) * 0.8 * aw[j] / as); f.vl_tes = Math.round(f.art_aktif * (0.45 + R() * 0.3)); f.vl_supresi = Math.round(f.vl_tes * (0.82 + R() * 0.12)); f.ltfu = Math.round(f.art_aktif * (0.06 + R() * 0.08)); f.kap_art = Math.round(f.art_aktif * 1.5 + 20); });
+  var bum = split(Math.round(v[52 + yi] / Math.max(0.01, (IND['S1.1.16'].v[yi + 1][2] || 100) / 100) * 0.97), 'bumil', function (f) { return f.jenis === 'PKM' ? 1 : 0; }), tb = split(Math.round(v[56 + yi] / 0.95 * 0.97), 'tbc', big), ct = split(Math.round(v[84 + yi] * 0.97), 'catin', function (f) { return f.jenis === 'PKM' ? 1 : 0; });
+  ['lsl','psp','waria','penasun'].forEach(function (k, q) { var e = split(v[q], k, function (f) { return f.jenis === 'PKM' ? (R() < .55 ? 1 : 0.05) : 0; }); fac.forEach(function (f, j) { f['est_' + k] = e[j]; }); });
+  fac.forEach(function (f, j) {
+    f.sas_bumil = bum[j]; f.sas_tbc = tb[j]; f.sas_catin = ct[j];
+    var tt = PK.reduce(function (s, k) { return s + (f['t_' + k] || 0); }, 0); f.kap_tes = Math.round(tt * (1.3 + R() * 0.6) + 100); f.nakes = 1 + Math.round(R() * 5);
+    f.prep_user = f.prep ? Math.round(g(v, 'prep', y) * 0.5 * (f.jenis === 'KOMUNITAS' ? 0.4 : f.jenis === 'RSU' ? 0.35 : 0.08)) : 0;
+    ['art_aktif','art_baru','vl_tes','vl_supresi','ltfu','kap_art'].forEach(function (k) { if (f[k] == null) f[k] = ''; });
+  });
+  return fac;
+}
+
+/* ---------- mesin alokasi ---------- */
+function lrRound(vals, total) { // pembulatan sisa terbesar agar jumlah = total
+  var fl = vals.map(function (x) { return Math.floor(x); }), rem = Math.round(total) - fl.reduce(function (a, b) { return a + b; }, 0);
+  var idx = vals.map(function (x, i) { return [x - Math.floor(x), i]; }).sort(function (a, b) { return b[0] - a[0]; });
+  for (var k = 0; k < idx.length && rem > 0; k++) { if (vals[idx[k][1]] > 0 || idx.every(function (q) { return vals[q[1]] === 0; })) { fl[idx[k][1]]++; rem--; } }
+  return fl;
+}
+function share(arr) { var s = arr.reduce(function (a, b) { return a + b; }, 0); return s > 0 ? arr.map(function (x) { return x / s; }) : null; }
+function waterfill(total, w, cap, mins) { // alokasi total ∝ w dengan batas bawah mins dan atas cap
+  var n = w.length, x = new Array(n).fill(0), fixed = new Array(n).fill(false), left = total;
+  if (mins) { for (var i = 0; i < n; i++) { x[i] = Math.min(mins[i] || 0, cap ? cap[i] : Infinity); } left = total - x.reduce(function (a, b) { return a + b; }, 0); if (left < 0) return {x: x, over: -left, under: 0}; }
+  for (var it = 0; it < 30 && left > 1e-9; it++) {
+    var ws = 0; for (i = 0; i < n; i++) if (!fixed[i] && w[i] > 0) ws += w[i];
+    if (ws <= 0) break;
+    var spill = 0;
+    for (i = 0; i < n; i++) { if (fixed[i] || w[i] <= 0) continue; var add = left * w[i] / ws, c = cap ? cap[i] : Infinity; if (x[i] + add > c) { spill += x[i] + add - c; x[i] = c; fixed[i] = true; } else x[i] += add; }
+    left = spill;
+  }
+  return {x: x, over: 0, under: left > 1e-6 ? left : 0};
+}
+function distCompute(fac, a, y, st) {
+  var v = areaVals(a), yi = y - 2026, n = fac.length, out = {fac: fac, warn: [], info: []};
+  var w = st.w, sw = function (o) { var t = 0; Object.keys(o).forEach(function (k) { t += +o[k] || 0; }); return t || 1; };
+  var hasLapas = fac.some(function (f) { return f.jenis === 'LAPAS'; });
+  var elig = function (f, k) { if (f.jenis === 'LAPAS') return st.lapasOnly ? k === 'wbp' : ELIG.PKM(k); if (f.jenis === 'KOMUNITAS') return st.komOnly ? ELIG.KOMUNITAS(k) : true; if (k === 'wbp' && st.lapasOnly && hasLapas) return false; return ELIG[f.jenis](k); };
+  out.T = {}; out.F = {}; out.proj = {}; out.ys = {}; out.method = {}; out.minHit = {};
+  // 1) tes per populasi
+  PK.forEach(function (k, p) {
+    var TK = v[36 + p * 4 + yi], FK = v[100 + p * 4 + yi], ybar = TK > 0 ? FK / TK : 0;
+    var E = fac.map(function (f) { return elig(f, k); });
+    var t = fac.map(function (f, i) { return E[i] ? fv(f, 't_' + k) : 0; }), pz = fac.map(function (f, i) { return E[i] ? Math.min(fv(f, 'p_' + k), fv(f, 't_' + k) || fv(f, 'p_' + k)) : 0; });
+    var m = st.shrink || 50, ys = fac.map(function (f, i) { return (pz[i] + m * ybar) / (t[i] + m); }); // yield tersmooth (empirical Bayes)
+    var comp = {H: share(t), E: share(t.map(function (x, i) { return x * ys[i]; }).map(function (x, i) { return t[i] > 0 ? x : 0; })), K: share(fac.map(function (f, i) { return E[i] ? fv(f, 'kap_tes') : 0; })), B: BMAP[k] ? share(fac.map(function (f, i) { return E[i] ? (k === 'paskp' ? 0 : fv(f, BMAP[k])) : 0; })) : null};
+    if (k === 'paskp') comp.B = share(fac.map(function (f, i) { return E[i] ? fv(f, 'est_lsl') + fv(f, 'est_psp') + fv(f, 'est_waria') + fv(f, 'est_penasun') : 0; }));
+    var wt, meth;
+    if (st.univ && UNIV[k] && comp.B) { wt = comp.B; meth = 'Sasaran (populasi universal)'; }
+    else {
+      var used = ['H', 'B', 'E', 'K'].filter(function (c) { return comp[c] && (+w[c] || 0) > 0; }), tw = used.reduce(function (s, c) { return s + (+w[c] || 0); }, 0);
+      if (!used.length) { var any = ['H', 'B', 'E', 'K'].filter(function (c) { return comp[c]; }); used = any.length ? [any[0]] : []; tw = 1; }
+      wt = fac.map(function (f, i) { return E[i] ? used.reduce(function (s, c) { return s + (comp[c][i] || 0) * ((used.length === 1 && tw === 1) ? 1 : (+w[c] || 0) / tw); }, 0) : 0; });
+      if (!used.length) { var ne = E.filter(Boolean).length; wt = E.map(function (e) { return e ? 1 / ne : 0; }); meth = 'Rata (tanpa data)'; } else meth = used.map(function (c) { return {H: 'historis', B: 'beban', E: 'yield', K: 'kapasitas'}[c] + ' ' + Math.round((used.length === 1 && tw === 1 ? 100 : (+w[c] || 0) / tw * 100)) + '%'; }).join(', ');
+    }
+    var mins = null;
+    if (st.univMin && UNIV[k]) { var cov = (IND[UNIVC[k]].v[yi + 1][2] || 0) / 100; mins = fac.map(function (f, i) { return E[i] ? fv(f, UNIV[k]) * cov : 0; }); if (mins.every(function (x) { return !x; })) mins = null; }
+    if (mins) { var sm = mins.reduce(function (s, x) { return s + x; }, 0); if (sm > TK) { out.warn.push('Tes ' + POPS[p] + ': sasaran faskes × cakupan target (' + fmt(sm) + ') melebihi target kab/kota (' + fmt(TK) + '). Minimum per faskes diperkecil secara proporsional agar total tetap sama dengan target. Periksa kembali data sasaran.'); mins = mins.map(function (x) { return x * TK / sm; }); } }
+    var wf = waterfill(TK, wt, null, mins);
+    out.T[k] = lrRound(wf.x, TK);
+    out.method[k] = meth; out.minHit[k] = !!mins;
+    out.ys[k] = ys;
+    if (TK > 0 && !E.some(Boolean)) out.warn.push('Tes ' + POPS[p] + ': tidak ada faskes yang memenuhi syarat menerima target ini.');
+  });
+  // batas kapasitas tes total per faskes
+  out.capHit = [];
+  if (st.cap) {
+    for (var it = 0; it < 12; it++) {
+      var tot = fac.map(function (f, i) { return PK.reduce(function (s, k) { return s + out.T[k][i]; }, 0); }), over = false;
+      fac.forEach(function (f, i) { var c = fv(f, 'kap_tes'); if (c > 0 && tot[i] > c + 0.5) { over = true; var r = c / tot[i]; PK.forEach(function (k) { var d = out.T[k][i] * (1 - r); out.T[k][i] -= d; var others = fac.map(function (g2, j) { return j !== i && elig(g2, k) && (!fv(g2, 'kap_tes') || tot[j] < fv(g2, 'kap_tes')) ? Math.max(out.T[k][j], 1) : 0; }), so = others.reduce(function (s, x) { return s + x; }, 0); if (so > 0) others.forEach(function (x, j) { out.T[k][j] += d * x / so; }); else out.T[k][i] += d; }); if (out.capHit.indexOf(i) < 0) out.capHit.push(i); } });
+      if (!over) break;
+    }
+    PK.forEach(function (k) { var TK = out.T[k].reduce(function (s, x) { return s + x; }, 0); out.T[k] = lrRound(out.T[k], TK); });
+    var tot2 = fac.map(function (f, i) { return PK.reduce(function (s, k) { return s + out.T[k][i]; }, 0); }), sCap = fac.reduce(function (s, f) { return s + (fv(f, 'kap_tes') || Infinity); }, 0);
+    if (isFinite(sCap) && sCap < g(v, 'tes', y)) out.warn.push('Total kapasitas tes semua faskes (' + fmt(sCap) + ') lebih kecil dari target tes kab/kota (' + fmt(g(v, 'tes', y)) + '). Sebagian faskes tetap melebihi kapasitas.');
+    out.capOver = fac.map(function (f, i) { var c = fv(f, 'kap_tes'); return c > 0 && tot2[i] > c; });
+  } else out.capOver = fac.map(function () { return false; });
+  PK.forEach(function (k, p) {
+    var TK = v[36 + p * 4 + yi], FK = v[100 + p * 4 + yi], ys = out.ys[k];
+    var pj = out.T[k].map(function (x, i) { return x * ys[i]; }), spj = pj.reduce(function (s, x3) { return s + x3; }, 0);
+    out.proj[k] = spj;
+    out.F[k] = FK > 0 ? lrRound(spj > 0 ? pj.map(function (x) { return FK * x / spj; }) : out.T[k].map(function (x) { return FK * x / Math.max(1, TK); }), FK) : fac.map(function () { return 0; });
+  });
+  out.tes = fac.map(function (f, i) { return PK.reduce(function (s, k) { return s + out.T[k][i]; }, 0); });
+  out.found = fac.map(function (f, i) { return PK.reduce(function (s, k) { return s + out.F[k][i]; }, 0); });
+  out.tesHist = fac.map(function (f) { return PK.reduce(function (s, k) { return s + fv(f, 't_' + k); }, 0); });
+  out.posHist = fac.map(function (f) { return PK.reduce(function (s, k) { return s + fv(f, 'p_' + k); }, 0); });
+  out.projFound = PK.reduce(function (s, k) { return s + out.proj[k]; }, 0);
+  // 2) mulai ARV: temuan diarahkan ke faskes PDP (kecamatan sama bila ada)
+  var pdpIdx = fac.map(function (f, i) { return f.pdp ? i : -1; }).filter(function (i) { return i >= 0; });
+  out.linked = fac.map(function () { return 0; });
+  if (!pdpIdx.length) out.warn.push('Tidak ada faskes PDP (kolom pdp = 1). Target pengobatan tidak dapat dibagi.');
+  var coh = function (i) { return fv(fac[i], 'art_aktif') + 1; };
+  fac.forEach(function (f, i) {
+    if (f.pdp) { out.linked[i] += out.found[i]; return; }
+    var near = pdpIdx.filter(function (j) { return f.kecamatan && fac[j].kecamatan === f.kecamatan; }), set = near.length ? near : pdpIdx, sc = set.reduce(function (s, j) { return s + coh(j); }, 0);
+    set.forEach(function (j) { out.linked[j] += out.found[i] * coh(j) / sc; });
+  });
+  var IK = g(v, 'init', y), AK = g(v, 't2', y), VK = g(v, 'vl', y), SK = g(v, 't3', y);
+  out.init = pdpIdx.length ? lrRound(fac.map(function (f, i) { return f.pdp ? IK * out.linked[i] / Math.max(1e-9, out.linked.reduce(function (s, x) { return s + x; }, 0)) : 0; }), IK) : fac.map(function () { return 0; });
+  if (pdpIdx.length && out.linked.reduce(function (s, x) { return s + x; }, 0) === 0) out.init = lrRound(fac.map(function (f) { return f.pdp ? IK / pdpIdx.length : 0; }), IK);
+  // 3) ODHIV on ART: kohort + inisiasi, dengan skenario desentralisasi (rujuk balik RS -> Puskesmas)
+  var shC = share(fac.map(function (f) { return f.pdp ? fv(f, 'art_aktif') : 0; })), shN = share(out.init.map(function (x, i) { return fac[i].pdp ? x : 0; }));
+  var wC = shC ? st.wa.C : 0, wN = shN ? st.wa.N : 0, wT = wC + wN;
+  var base = fac.map(function (f, i) { if (!f.pdp) return 0; return wT > 0 ? ((shC ? shC[i] : 0) * wC + (shN ? shN[i] : 0) * wN) / wT : 1; });
+  if (!shC) out.info.push('Kolom art_aktif kosong: ODHIV on ART dibagi menurut proyeksi mulai ARV.');
+  var rs = pdpIdx.filter(function (i) { return /^RS/.test(fac[i].jenis); }), rb = pdpIdx.filter(function (i) { return fac[i].jenis === 'PKM' && +fac[i].rujuk_balik === 1; });
+  out.moved = 0;
+  if (st.desen > 0 && rs.length && rb.length) { var mv = 0, bs = base.reduce(function (s, x) { return s + x; }, 0) || 1; rs.forEach(function (i) { var d = base[i] * st.desen / 100; base[i] -= d; mv += d; }); var rbs = rb.reduce(function (s, j) { return s + coh(j); }, 0); rb.forEach(function (j) { base[j] += mv * coh(j) / rbs; }); out.moved = AK * mv / bs; }
+  else if (st.desen > 0) out.warn.push('Skenario desentralisasi tidak dapat dijalankan: perlu RS PDP dan Puskesmas PDP dengan rujuk_balik = 1.');
+  var capA = st.cap ? fac.map(function (f) { var c = fv(f, 'kap_art'); return c > 0 ? c : Infinity; }) : null;
+  var wfA = waterfill(AK, base, capA, null); if (wfA.under > 0.5) out.warn.push('Kapasitas PDP tidak cukup: ' + fmt(wfA.under) + ' ODHIV on ART tidak tertampung. Tambah faskes PDP atau naikkan kapasitas.');
+  out.art = lrRound(wfA.x, Math.round(wfA.x.reduce(function (s, x) { return s + x; }, 0)));
+  out.vl = lrRound(out.art.map(function (x) { return x * VK / Math.max(1, AK); }), VK);
+  out.sup = lrRound(out.vl.map(function (x) { return x * SK / Math.max(1, VK); }), SK);
+  // 4) PrEP
+  var PrK = g(v, 'prep', y), pe = fac.map(function (f) { return +f.prep === 1; });
+  var cH = share(fac.map(function (f, i) { return pe[i] ? fv(f, 'prep_user') : 0; })), cB = share(fac.map(function (f, i) { return pe[i] ? fv(f, 'est_lsl') + fv(f, 'est_psp') + fv(f, 'est_waria') : 0; }));
+  var wp = fac.map(function (f, i) { if (!pe[i]) return 0; var a2 = cH ? (st.wp.H || 0) : 0, b2 = cB ? (st.wp.B || 0) : 0, t2 = a2 + b2; return t2 > 0 ? ((cH ? cH[i] : 0) * a2 + (cB ? cB[i] : 0) * b2) / t2 : 1; });
+  if (PrK > 0 && !pe.some(Boolean)) out.warn.push('Tidak ada faskes dengan layanan PrEP (kolom prep = 1). Target PrEP ' + fmt(PrK) + ' belum terbagi.');
+  out.prep = pe.some(Boolean) ? lrRound(waterfill(PrK, wp, null, null).x, PrK) : fac.map(function () { return 0; });
+  // ringkasan
+  var pkmArt = function (arr) { var s = arr.reduce(function (x, z) { return x + z; }, 0); return s > 0 ? fac.reduce(function (x, f, i) { return x + (f.jenis === 'PKM' ? arr[i] : 0); }, 0) / s : null; };
+  out.sum = {tes: out.tes.reduce(function (s, x) { return s + x; }, 0), found: out.found.reduce(function (s, x) { return s + x; }, 0), init: out.init.reduce(function (s, x) { return s + x; }, 0), art: out.art.reduce(function (s, x) { return s + x; }, 0), vl: out.vl.reduce(function (s, x) { return s + x; }, 0), sup: out.sup.reduce(function (s, x) { return s + x; }, 0), prep: out.prep.reduce(function (s, x) { return s + x; }, 0),
+    K: {tes: g(v, 'tes', y), found: g(v, 'found', y), init: IK, art: AK, vl: VK, sup: SK, prep: PrK}, pkmArtNow: pkmArt(fac.map(function (f) { return fv(f, 'art_aktif'); })), pkmArt: pkmArt(out.art), projFound: out.projFound, capN: out.capOver.filter(Boolean).length};
+  return out;
+}
+function monthW(st) {
+  if (st.pola === 'bertahap') { var w = []; for (var m = 0; m < 12; m++) w.push(0.8 + 0.4 * m / 11); return share(w); }
+  if (st.pola === 'pola' && st.polaV && st.polaV.filter(function (x) { return +x > 0; }).length === 12) return share(st.polaV.map(function (x) { return +x; }));
+  return new Array(12).fill(1 / 12);
+}
+
+/* ================= DISTRIBUSI TARGET KE FASKES: TAMPILAN ================= */
+var FKEY = 'ranhiv-faskes-v1', DS = {};
+try { DS = JSON.parse(localStorage.getItem(FKEY) || '{}') || {}; } catch (e) { DS = {}; }
+function dsSave() { try { localStorage.setItem(FKEY, JSON.stringify(DS)); } catch (e) { toast('Penyimpanan peramban penuh. Unduh template berisi data agar tidak hilang.'); } }
+function dget() {
+  var d = DS[S.area];
+  if (!d) d = DS[S.area] = {fac: [], src: '', file: '', st: clone(DDEF), scen: []};
+  Object.keys(DDEF).forEach(function (k) { if (d.st[k] == null) d.st[k] = clone(DDEF[k]); });
+  return d;
+}
+var BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+var DGRP_HELP = {
+  id: 'Identitas setiap faskes yang memberi layanan HIV di kab/kota: Puskesmas, RS pemerintah dan swasta, klinik, faskes Lapas/Rutan, dan layanan berbasis komunitas. Minimal isi nama, jenis, dan apakah faskes melayani PDP (ARV).',
+  tes: 'Jumlah orang yang dites HIV dan menerima hasil dalam 12 bulan terakhir, dipilah menurut populasi seperti di SIHA. Ini dasar "porsi historis" dan "yield". Kosongkan populasi yang tidak dilayani.',
+  pos: 'Jumlah hasil HIV positif (reaktif yang terkonfirmasi) per populasi dalam 12 bulan yang sama. Angka positif tidak boleh melebihi jumlah tes populasi yang sama.',
+  art: 'Data pengobatan untuk faskes PDP: kohort ODHIV on ART aktif pada akhir periode, ODHIV yang mulai ARV, dites viral load, tersupresi, LTFU, serta pengguna PrEP.',
+  sas: 'Sasaran di wilayah kerja untuk membagi populasi universal secara adil: ibu hamil (PWS KIA), notifikasi pasien TBC (SITB), calon pengantin (KUA/CKG), dan hasil pemetaan populasi kunci.',
+  kap: 'Batas realistis layanan per tahun. Bila diisi, target faskes tidak melebihi kapasitas dan kelebihannya dialihkan ke faskes lain. Kosong berarti tanpa batas.'
+};
+var PRESET = {seimbang: [{H: 40, B: 25, E: 25, K: 10}, 'Seimbang (bawaan)'], historis: [{H: 100, B: 0, E: 0, K: 0}, 'Ikuti volume historis'], beban: [{H: 0, B: 100, E: 0, K: 0}, 'Ikuti sasaran/estimasi'], yield: [{H: 30, B: 0, E: 70, K: 0}, 'Kejar yield tertinggi'], kapasitas: [{H: 40, B: 0, E: 0, K: 60}, 'Ikuti kapasitas']};
+
+function facChecks(fac) {
+  var out = [];
+  if (!fac.some(function (f) { return +f.pdp === 1; })) out.push(['red', 'Belum ada faskes dengan pdp = 1. Target mulai ARV dan ODHIV on ART tidak dapat dibagi.']);
+  var noHist = fac.filter(function (f) { return !PK.some(function (k) { return fv(f, 't_' + k); }); }).length;
+  if (noHist === fac.length) out.push(['amber', 'Belum ada data tes historis (kolom Tes per populasi). Pembagian memakai sasaran/estimasi dan kapasitas; bila keduanya juga kosong, target dibagi rata.']);
+  else if (noHist) out.push(['gray', noHist + ' faskes tanpa data tes historis. Faskes ini hanya mendapat target dari bobot beban dan kapasitas.']);
+  fac.forEach(function (f) {
+    var bad = PK.filter(function (k) { return fv(f, 'p_' + k) > fv(f, 't_' + k) && fv(f, 't_' + k) > 0; });
+    if (bad.length) out.push(['amber', esc(f.nama) + ': jumlah positif melebihi jumlah tes pada ' + bad.map(function (k) { return POPS[PK.indexOf(k)]; }).join(', ') + '.']);
+    if (fv(f, 'vl_supresi') > fv(f, 'vl_tes') && fv(f, 'vl_tes') > 0) out.push(['amber', esc(f.nama) + ': VL tersupresi melebihi jumlah dites VL.']);
+    if (fv(f, 'art_aktif') > 0 && +f.pdp !== 1) out.push(['amber', esc(f.nama) + ': punya ODHIV on ART tetapi kolom pdp bukan 1.']);
+  });
+  return out;
+}
+function dSrcLabel(d) { return d.src === 'demo' ? 'data contoh fiktif' : d.src === 'upload' ? 'unggahan ' + (d.file || 'berkas') : d.src === 'manual' ? 'isian langsung' : ''; }
+
+function vDist() {
+  var lv = areaLevel(), y = S.year;
+  var head = '<section class="band"><div class="wrap"><div class="sectionhead"><div class="titleic">' + FI('building', 'teal', 52) + '<div><h1>Distribusi target ke faskes</h1><p class="mute">Bagi target kab/kota ' + y + ' ke setiap layanan, uji beberapa strategi, lalu unduh sebagai lampiran penetapan target layanan.</p></div></div>' +
+    '<div class="btnrow" id="dHelpBtns"><button type="button" class="ghost small" id="dGuide">Panduan data</button><button type="button" class="ghost small" id="dRumus">Rumus & sumber</button></div></div>';
+  if (lv === 'nas') return head + '<div class="card"><h3>Pilih kabupaten/kota</h3><p>Distribusi ke faskes dilakukan per kabupaten/kota, karena target RAN dari Kemenkes sudah dirinci sampai kab/kota. Pilih provinsi lalu kab/kota Anda.</p><button type="button" id="dPick">Pilih wilayah</button></div></div></section>';
+  if (lv === 'prov') {
+    var ch = children();
+    return head + '<div class="alert teal"><b>Peran provinsi.</b> Target per kab/kota sudah ditetapkan dalam lampiran Kemenkes, jadi provinsi tidak perlu membagi ulang. Provinsi mendampingi kab/kota membagi target ke faskes, memastikan RS rujukan provinsi ikut menerima target, dan memantau capaian. Pilih satu kab/kota untuk mulai.</div>' +
+      '<div class="tablebox"><table class="stack"><thead><tr><th>Kab/kota</th><th class="n">Tes</th><th class="n">ODHIV ditemukan</th><th class="n">Mulai ARV</th><th class="n">ODHIV on ART</th><th class="n">PrEP</th><th>Data faskes</th><th></th></tr></thead><tbody>' +
+      ch.map(function (c) { var w = areaVals(c[0]), dd = DS[c[0]]; return '<tr><td><b>' + esc(c[1]) + '</b></td><td class="n">' + fmt(g(w, 'tes', y)) + '</td><td class="n">' + fmt(g(w, 'found', y)) + '</td><td class="n">' + fmt(g(w, 'init', y)) + '</td><td class="n">' + fmt(g(w, 't2', y)) + '</td><td class="n">' + fmt(g(w, 'prep', y)) + '</td><td>' + (dd && dd.fac.length ? dd.fac.length + ' faskes' : '<span class="mute">belum</span>') + '</td><td><button type="button" class="small" data-darea="' + esc(c[0]) + '">Distribusikan</button></td></tr>'; }).join('') +
+      '</tbody></table></div></div></section>';
+  }
+  var d = dget(), step = S.distStep || 0;
+  return head + dTargetHTML() +
+    '<div class="chips scrollx" id="dSteps" role="tablist" style="margin:14px 0 6px">' + ['1. Data faskes', '2. Aturan & strategi', '3. Hasil distribusi', '4. Skenario & unduh'].map(function (t, i) { return '<button type="button" role="tab" class="chip' + (i === step ? ' on' : '') + '" data-dstep="' + i + '">' + t + '</button>'; }).join('') + '</div>' +
+    (d.src === 'demo' ? '<div class="alert amber" id="dDemoBan"><b>Data contoh fiktif.</b> Nama dan angka faskes dibuat otomatis untuk latihan, bukan data faskes sebenarnya. Ganti dengan data SIHA Anda sebelum dipakai untuk penetapan target.</div>' : '') +
+    '<div id="dBody"></div></div></section>';
+}
+function dTargetHTML() {
+  var v = areaVals(), y = S.year, rows = [
+    ['Tes HIV (semua populasi)', g(v, 'tes', y), 'S1.1.2'], ['ODHIV baru ditemukan', g(v, 'found', y), 'S1.2'], ['ODHIV mulai ARV', g(v, 'init', y), 'S2.1.1'],
+    ['ODHIV on ART', g(v, 't2', y), 'SU2'], ['ODHIV on ART dites VL', g(v, 'vl', y), 'S3.2.1'], ['ODHIV VL tersupresi', g(v, 't3', y), 'SU3'], ['Pengguna PrEP', g(v, 'prep', y), '']];
+  var sumT = PK.reduce(function (s, k, p) { return s + tesP(v, p, y); }, 0), sumF = PK.reduce(function (s, k, p) { return s + foundP(v, p, y); }, 0);
+  return '<div class="card" id="dTarget"><h3>Target ' + esc(areaName()) + ' ' + y + ' yang akan dibagi</h3><p class="mute" style="font-size:14px">Sumber: lampiran target kab/kota Kemenkes (Surat 21 Agustus 2026). Total ini tidak berubah; aplikasi hanya membaginya ke faskes. Ganti tahun lewat tombol wilayah di atas.</p>' +
+    '<div class="scroll"><table><thead><tr><th>Komponen</th><th class="n">Target</th><th>Kode</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td class="n"><b>' + fmt(r[1]) + '</b></td><td>' + (r[2] ? '<span class="tag teal">' + r[2] + '</span>' : '<span class="mute">lampiran</span>') + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+    (sumT !== g(v, 'tes', y) || sumF !== g(v, 'found', y) ? '<p class="note">Perlu konfirmasi: jumlah target per populasi (tes ' + fmt(sumT) + ', temuan ' + fmt(sumF) + ') berbeda dari total di lampiran. Distribusi memakai angka per populasi apa adanya.</p>' : '') + '</div>';
+}
+
+/* ---------- langkah 1: data ---------- */
+function dStepData(d) {
+  var grp = S.distGrp || 'id', cols = FCOLS.filter(function (c) { return c[2] === grp; }), chk = d.fac.length ? facChecks(d.fac) : [];
+  var reqTxt = FCOLS.filter(function (c) { return c[3]; }).map(function (c) { return c[1]; }).join(', ');
+  return '<div class="grid g4" id="dOpts">' +
+    '<div class="card"><h3>1. Unduh template</h3><p style="font-size:14px">Template Excel berisi kolom yang sama dengan isian di aplikasi, lengkap dengan lembar Petunjuk dan daftar pilihan jenis faskes.</p><div class="btnrow"><button type="button" class="small" id="dTpl">Template kosong (.xlsx)</button>' + (d.fac.length ? '<button type="button" class="ghost small" id="dTplData">Template berisi data saat ini</button>' : '') + '</div></div>' +
+    '<div class="card"><h3>2. Unggah template terisi</h3><p style="font-size:14px">Pilih berkas .xlsx dari template, atau .csv dengan baris kode kolom yang sama. Data faskes lama di wilayah ini akan diganti.</p><label class="btn small" for="dFile" style="display:inline-flex;cursor:pointer">Pilih berkas</label><input type="file" id="dFile" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="position:absolute;left:-9999px"></div>' +
+    '<div class="card"><h3>3. Isi langsung</h3><p style="font-size:14px">Ketik data di tabel di bawah. Tersimpan otomatis di peramban ini (tidak dikirim ke server).</p><button type="button" class="ghost small" id="dAdd">Tambah faskes</button></div>' +
+    '<div class="card"><h3>Atau coba contoh</h3><p style="font-size:14px">Isi 31 faskes fiktif (25 Puskesmas, 3 RS, klinik, Lapas, komunitas) yang angkanya disesuaikan dengan target wilayah ini.</p><button type="button" class="ghost small" id="dDemo">Muat data contoh</button></div></div>' +
+    '<div class="card" id="dWhat" style="margin-top:14px"><h3>Data apa yang perlu disiapkan</h3><ol style="font-size:15px;padding-left:20px;margin:6px 0">' +
+    '<li><b>Daftar faskes layanan HIV</b> di kab/kota (wajib: ' + esc(reqTxt) + '). Masukkan juga RS swasta, klinik, Lapas/Rutan, dan layanan komunitas yang melapor ke SIHA.</li>' +
+    '<li><b>Ekspor SIHA 12 bulan terakhir yang lengkap</b> per faskes: jumlah dites HIV dan jumlah positif menurut 15 populasi, ODHIV on ART aktif, mulai ARV, dites VL, VL tersupresi, LTFU, dan pengguna PrEP. Pakai periode yang sama untuk semua faskes.</li>' +
+    '<li><b>Sasaran wilayah kerja</b>: ibu hamil dari PWS KIA, notifikasi TBC dari SITB, calon pengantin dari KUA/CKG, dan hasil pemetaan populasi kunci bila ada. Dipakai untuk membagi populasi universal secara adil.</li>' +
+    '<li><b>Kapasitas</b> (opsional): perkiraan tes per tahun dan jumlah ODHIV yang sanggup dilayani PDP, dari penilaian Dinkes bersama faskes.</li></ol>' +
+    '<p class="note">Isi angka saja tanpa titik ribuan. Kolom kosong dianggap tidak tersedia, bukan nol. Data yang lebih lengkap membuat pembagian lebih tepat, tetapi hanya kolom wajib yang harus ada. Rincian setiap kolom ada di tombol Panduan data dan di lembar Petunjuk template.</p></div>' +
+    (d.fac.length ? '<div class="card" style="margin-top:14px"><h3>' + d.fac.length + ' faskes dimuat <span class="tag ' + (d.src === 'demo' ? 'amber' : 'green') + '">' + esc(dSrcLabel(d)) + '</span></h3>' + (chk.length ? chk.slice(0, 12).map(function (c) { return '<div class="alert ' + c[0] + '" style="font-size:14px;margin:6px 0">' + c[1] + '</div>'; }).join('') + (chk.length > 12 ? '<p class="mute">dan ' + (chk.length - 12) + ' catatan lain.</p>' : '') : '<p class="mute">Pemeriksaan dasar tidak menemukan masalah.</p>') + '<div class="btnrow"><button type="button" class="small" data-dstep-go="1">Lanjut ke aturan</button><button type="button" class="ghost small" id="dClear">Hapus semua data faskes</button></div></div>' : '') +
+    '<div class="card" id="dEdit" style="margin-top:14px"><h3>Tabel isian faskes</h3><div class="chips scrollx" id="dGrp" style="margin-bottom:8px">' + FGRP.map(function (gr) { return '<button type="button" class="chip' + (gr[0] === grp ? ' on' : '') + '" data-dgrp="' + gr[0] + '">' + gr[1] + '</button>'; }).join('') + '</div>' +
+    '<p style="font-size:14px;margin:4px 0 10px">' + DGRP_HELP[grp] + '</p>' +
+    (d.fac.length ? '<div class="tablebox" style="max-height:480px"><table class="dtab"><thead><tr>' + (grp !== 'id' ? '<th>Faskes</th>' : '') + cols.map(function (c) { return '<th title="' + esc(c[4]) + '">' + esc(c[1]) + (c[3] ? ' *' : '') + '</th>'; }).join('') + (grp === 'id' ? '<th></th>' : '') + '</tr></thead><tbody>' +
+      d.fac.map(function (f, i) { return '<tr>' + (grp !== 'id' ? '<td><b>' + esc(f.nama) + '</b></td>' : '') + cols.map(function (c) { return '<td>' + dCell(f, c[0], i) + '</td>'; }).join('') + (grp === 'id' ? '<td><button type="button" class="ghost small" data-ddel="' + i + '" aria-label="Hapus ' + esc(f.nama) + '">Hapus</button></td>' : '') + '</tr>'; }).join('') + '</tbody></table></div>' : '<p class="mute">Belum ada faskes. Unggah template, muat contoh, atau ketuk Tambah faskes.</p>') +
+    '<details style="margin-top:10px"><summary><b>Arti setiap kolom pada kelompok ini</b></summary><div class="scroll"><table><thead><tr><th>Kolom</th><th>Yang harus diisi</th><th>Sumber data</th></tr></thead><tbody>' + cols.map(function (c) { return '<tr><td><b>' + esc(c[1]) + '</b>' + (c[3] ? ' <span class="tag red">wajib</span>' : '') + '<br><code>' + c[0] + '</code></td><td>' + esc(c[4]) + '</td><td>' + esc(c[5]) + '</td></tr>'; }).join('') + '</tbody></table></div></details></div>';
+}
+function dCell(f, k, i) {
+  var v = f[k] == null ? '' : f[k];
+  if (k === 'jenis') return '<select data-di="' + i + '" data-dk="jenis" aria-label="Jenis">' + Object.keys(JENIS).map(function (j) { return '<option value="' + j + '"' + (j === v ? ' selected' : '') + '>' + j + ' · ' + JENIS[j] + '</option>'; }).join('') + '</select>';
+  if (k === 'pdp' || k === 'prep' || k === 'rujuk_balik') return '<select data-di="' + i + '" data-dk="' + k + '" aria-label="' + k + '"><option value="1"' + (+v === 1 ? ' selected' : '') + '>1 ya</option><option value="0"' + (+v !== 1 ? ' selected' : '') + '>0 tidak</option></select>';
+  if (FTXT[k]) return '<input type="text" data-di="' + i + '" data-dk="' + k + '" value="' + esc(v) + '" style="min-width:' + (k === 'nama' ? 190 : 110) + 'px" aria-label="' + k + '">';
+  return '<input type="text" inputmode="numeric" data-di="' + i + '" data-dk="' + k + '" value="' + (v === '' ? '' : nf(+v)) + '" style="width:92px;text-align:right" aria-label="' + k + '">';
+}
+
+/* ---------- langkah 2: aturan ---------- */
+function rng2(id, lab, val, max, help) { return '<div class="field"><label for="' + id + '">' + lab + ': <b id="' + id + 'V">' + val + '</b></label><input type="range" id="' + id + '" min="0" max="' + (max || 100) + '" step="5" value="' + val + '" style="width:100%">' + (help ? '<small>' + help + '</small>' : '') + '</div>'; }
+function tog(id, lab, on, help) { return '<label class="dtog" style="display:flex;gap:10px;align-items:flex-start;margin:10px 0;cursor:pointer"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + ' style="width:22px;height:22px;flex:none;margin-top:2px"><span><b>' + lab + '</b><br><small class="mute">' + help + '</small></span></label>'; }
+function dStepRules(d) {
+  var st = d.st, w = st.w;
+  return '<div class="grid g2"><div class="card" id="dW"><h3>A. Bobot pembagian target tes</h3><p style="font-size:14px">Target tes setiap populasi dibagi ke faskes menurut campuran empat komponen. Bobot dinormalkan otomatis; komponen tanpa data diabaikan.</p>' +
+    '<div class="chips" id="dPreset" style="margin-bottom:8px">' + Object.keys(PRESET).map(function (k) { var p = PRESET[k][0], on = ['H', 'B', 'E', 'K'].every(function (c) { return +w[c] === p[c]; }); return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-dpre="' + k + '">' + PRESET[k][1] + '</button>'; }).join('') + '</div>' +
+    rng2('dwH', 'H · Historis', w.H, 100, 'Porsi faskes dalam jumlah tes 12 bulan terakhir. Menjaga target tetap realistis bagi faskes.') +
+    rng2('dwB', 'B · Beban/sasaran', w.B, 100, 'Porsi sasaran atau estimasi populasi di wilayah kerja (ibu hamil, TBC, catin, populasi kunci). Mendorong faskes yang selama ini kurang menjangkau.') +
+    rng2('dwE', 'E · Efisiensi (yield)', w.E, 100, 'Porsi temuan yang diharapkan = tes historis × positivitas tersmooth. Mengarahkan tes ke faskes yang paling banyak menemukan ODHIV.') +
+    rng2('dwK', 'K · Kapasitas', w.K, 100, 'Porsi kapasitas tes per tahun. Berguna bila data historis belum lengkap.') + '</div>' +
+    '<div class="card" id="dRules"><h3>B. Aturan kelayakan dan batas</h3>' +
+    tog('dUniv', 'Populasi universal mengikuti sasaran', st.univ, 'Ibu hamil, pasien TBC, dan calon pengantin dibagi menurut sasaran wilayah kerja, bukan bobot di atas, karena semua sasaran wajib dites (SPM, triple eliminasi).') +
+    tog('dUnivMin', 'Minimum = sasaran × cakupan target RAN', st.univMin, 'Setiap faskes minimal mendapat sasarannya dikali target cakupan tahun ini (S1.1.16, S1.1.5, S1.1.18).') +
+    tog('dCap', 'Patuhi kapasitas faskes', st.cap, 'Bila target melebihi kolom kapasitas, kelebihannya dipindahkan ke faskes lain yang masih memiliki ruang.') +
+    tog('dLapas', 'Target WBP hanya di faskes Lapas/Rutan', st.lapasOnly, 'Bila ada faskes berjenis LAPAS, target tes warga binaan hanya diberikan ke sana, dan faskes Lapas hanya menerima target WBP.') +
+    tog('dKom', 'Layanan komunitas hanya untuk populasi kunci', st.komOnly, 'Layanan berjenis KOMUNITAS hanya menerima target LSL, PSP, waria, penasun, pasangan, dan pelanggan pekerja seks.') +
+    '<div class="field"><label for="dShrink">Penghalus positivitas (m)</label><select id="dShrink">' + [[0, '0 · pakai positivitas mentah'], [20, '20 · ringan'], [50, '50 · bawaan'], [100, '100 · kuat']].map(function (o) { return '<option value="' + o[0] + '"' + (+st.shrink === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><small>Faskes dengan tes sedikit cenderung punya positivitas ekstrem (misalnya 1 positif dari 3 tes = 33%). Nilai m menarik positivitas faskes kecil ke rata-rata kab/kota.</small></div></div>' +
+    '<div class="card" id="dArt"><h3>C. Pengobatan dan PrEP</h3>' +
+    rng2('dwC', 'Bobot kohort ARV saat ini', st.wa.C, 100, 'Porsi ODHIV on ART aktif per faskes PDP. Kohort yang sudah ada sebaiknya tetap dilayani di tempatnya.') +
+    rng2('dwN', 'Bobot ODHIV baru', st.wa.N, 100, 'Porsi proyeksi mulai ARV, dari temuan faskes sendiri dan rujukan faskes non-PDP di kecamatan yang sama.') +
+    rng2('dDesen', 'Rujuk balik RS ke Puskesmas', st.desen, 50, 'Persentase target ODHIV on ART di RS PDP yang dipindahkan ke Puskesmas PDP dengan rujuk_balik = 1 (sesuai arah RAN: RS menangani kasus lanjut, pasien stabil dirujuk balik).') +
+    rng2('dpH', 'PrEP: bobot pengguna historis', st.wp.H, 100, 'Porsi pengguna PrEP 12 bulan terakhir.') +
+    rng2('dpB', 'PrEP: bobot estimasi populasi kunci', st.wp.B, 100, 'Porsi estimasi LSL, PSP, dan waria di wilayah kerja faskes layanan PrEP.') + '</div>' +
+    '<div class="card" id="dPola"><h3>D. Pola bulanan</h3><p style="font-size:14px">Dipakai untuk memecah target tahunan menjadi target bulanan.</p><div class="chips" style="margin-bottom:8px">' + [['rata', 'Rata 12 bulan'], ['bertahap', 'Bertahap naik'], ['pola', 'Pola sendiri']].map(function (o) { return '<button type="button" class="chip' + (st.pola === o[0] ? ' on' : '') + '" data-dpola="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+    '<div id="dPolaV" style="display:' + (st.pola === 'pola' ? 'grid' : 'none') + ';grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">' + BULAN.map(function (b, i) { return '<label style="font-size:13px">' + b + '<input type="text" inputmode="numeric" data-dpv="' + i + '" value="' + esc(st.polaV[i] || '') + '" placeholder="100" style="width:100%"></label>'; }).join('') + '</div>' +
+    '<small class="mute">Rata: setiap bulan 1/12. Bertahap: bulan pertama 80% dan bulan terakhir 120% dari rata-rata, cocok bila layanan baru dibuka atau kegiatan dimulai bertahap. Pola sendiri: isi angka relatif 12 bulan, misalnya jumlah tes bulanan tahun lalu.</small>' +
+    '<div class="btnrow" style="margin-top:14px"><button type="button" data-dstep-go="2">Lihat hasil distribusi</button></div></div></div>';
+}
+
+/* ---------- langkah 3: hasil ---------- */
+var DMET = {tes: ['Tes HIV', 'tes', 'tesHist'], found: ['ODHIV ditemukan', 'found', 'posHist'], init: ['Mulai ARV', 'init', 'art_baru'], art: ['ODHIV on ART', 'art', 'art_aktif'], prep: ['PrEP', 'prep', 'prep_user']};
+function dHist(r, key, i) { var h = DMET[key][2]; return r[h] ? r[h][i] : fv(r.fac[i], h); }
+function dStepResult(d, r) {
+  if (!r) return '<div class="card"><p>Belum ada data faskes. Kembali ke langkah 1.</p><button type="button" data-dstep-go="0">Ke langkah 1</button></div>';
+  var s = r.sum, K = s.K, gap = s.projFound - K.found, fac = r.fac;
+  var met = S.distMet || 'tes';
+  return '<div class="grid g4" id="dKpi">' +
+    '<div class="card kpi"><b>' + fac.length + '</b><span>faskes menerima target. Semua total sama persis dengan target kab/kota.</span></div>' +
+    '<div class="card kpi"><b style="color:' + (gap >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt(s.projFound) + '</b><span>proyeksi temuan bila target tes faskes dicapai dengan positivitas historisnya, dibanding target temuan ' + fmt(s.found) + '. ' + (gap >= 0 ? 'Pola saat ini cukup.' : 'Kurang ' + fmt(-gap) + ': perlu tes yang lebih terarah (tes indeks, notifikasi pasangan).') + '</span></div>' +
+    '<div class="card kpi"><b>' + pct(s.pkmArtNow, 0) + ' → ' + pct(s.pkmArt, 0) + '</b><span>porsi ODHIV on ART yang dilayani Puskesmas (data historis → target)' + (r.moved ? '; ' + fmt(r.moved) + ' ODHIV dirujuk balik dari RS' : '') + '.</span></div>' +
+    '<div class="card kpi"><b style="color:' + (s.capN ? 'var(--amber)' : 'var(--green)') + '">' + s.capN + '</b><span>faskes dengan target tes melebihi kapasitasnya.</span></div></div>' +
+    (r.warn.length || r.info.length ? '<div class="alert amber" style="font-size:14px"><b>Perhatian</b><ul style="margin:4px 0;padding-left:18px">' + r.warn.concat(r.info).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div>' : '') +
+    '<div class="card" id="dFigBox" style="margin-top:14px"><h3>Target dibanding data 12 bulan terakhir (faskes dengan target terbesar)</h3><div class="chips" id="dMet" style="margin-bottom:8px">' + Object.keys(DMET).map(function (k) { return '<button type="button" class="chip' + (k === met ? ' on' : '') + '" data-dmet="' + k + '">' + DMET[k][0] + '</button>'; }).join('') + '</div><div class="fig" id="dFig" style="height:340px"></div><div id="dFigLeg"></div></div>' +
+    '<div class="card" id="dTab" style="margin-top:14px"><h3>Target ' + S.year + ' per faskes</h3><p class="mute" style="font-size:14px">Ketuk baris untuk melihat rincian per populasi dan target bulanan.</p><div class="tablebox" style="max-height:520px"><table class="stack"><thead><tr><th>Faskes</th><th>Jenis</th><th class="n">Tes 12 bln</th><th class="n">Target tes</th><th class="n">Perubahan</th><th class="n">Positivitas 12 bln</th><th class="n">Target temuan</th><th class="n">Mulai ARV</th><th class="n">On ART</th><th class="n">Dites VL</th><th class="n">Supresi</th><th class="n">PrEP</th></tr></thead><tbody>' +
+    fac.map(function (f, i) { var h = r.tesHist[i], ch = h ? r.tes[i] / h - 1 : null; return '<tr data-dfac="' + i + '" style="cursor:pointer"' + (r.capOver[i] ? ' class="hl"' : '') + '><td><b>' + esc(f.nama) + '</b>' + (r.capOver[i] ? ' <span class="tag amber">lewat kapasitas</span>' : '') + '</td><td>' + esc(f.jenis) + '</td><td class="n">' + fmt(h) + '</td><td class="n"><b>' + fmt(r.tes[i]) + '</b></td><td class="n">' + (ch == null ? 'baru' : (ch >= 0 ? '+' : '') + pct(ch, 0)) + '</td><td class="n">' + (h ? pct(r.posHist[i] / h, 1) : '–') + '</td><td class="n">' + fmt(r.found[i]) + '</td><td class="n">' + fmt(r.init[i]) + '</td><td class="n">' + fmt(r.art[i]) + '</td><td class="n">' + fmt(r.vl[i]) + '</td><td class="n">' + fmt(r.sup[i]) + '</td><td class="n">' + fmt(r.prep[i]) + '</td></tr>'; }).join('') +
+    '<tr style="font-weight:800"><td>Jumlah</td><td></td><td class="n">' + fmt(r.tesHist.reduce(function (a, b) { return a + b; }, 0)) + '</td><td class="n">' + fmt(s.tes) + '</td><td></td><td></td><td class="n">' + fmt(s.found) + '</td><td class="n">' + fmt(s.init) + '</td><td class="n">' + fmt(s.art) + '</td><td class="n">' + fmt(s.vl) + '</td><td class="n">' + fmt(s.sup) + '</td><td class="n">' + fmt(s.prep) + '</td></tr></tbody></table></div></div>' +
+    '<div class="card" id="dPop" style="margin-top:14px"><h3>Per populasi: metode dan uji kelayakan temuan</h3><div class="tablebox"><table class="stack"><thead><tr><th>Populasi</th><th class="n">Target tes</th><th class="n">Target temuan</th><th class="n">Positivitas target</th><th class="n">Proyeksi temuan (yield lokal)</th><th>Cara membagi</th></tr></thead><tbody>' +
+    PK.map(function (k, p) { var T = r.T[k].reduce(function (a, b) { return a + b; }, 0), F = r.F[k].reduce(function (a, b) { return a + b; }, 0), pr = r.proj[k]; if (!T && !F) return ''; return '<tr><td><b>' + POPS[p] + '</b></td><td class="n">' + fmt(T) + '</td><td class="n">' + fmt(F) + '</td><td class="n">' + (T ? pct(F / T, 2) : '–') + '</td><td class="n"' + (pr < F ? ' style="color:var(--red)"' : '') + '>' + fmt(pr) + '</td><td style="font-size:13px">' + esc(r.method[k]) + (r.minHit[k] ? '; minimum sasaran × cakupan' : '') + '</td></tr>'; }).join('') + '</tbody></table></div><p class="note">Proyeksi lebih kecil dari target temuan (merah) berarti positivitas faskes saat ini tidak cukup untuk mencapai target temuan dengan jumlah tes yang ditargetkan. Target temuan tetap dibagi menurut proyeksi agar adil, tetapi strategi penemuan perlu diperkuat.</p></div>' +
+    '<div class="btnrow" style="margin-top:14px"><button type="button" data-dstep-go="3">Simpan skenario dan unduh</button><button type="button" class="ghost" data-dstep-go="1">Ubah aturan</button></div>';
+}
+function dMonthly(x, st) { return lrRound(monthW(st).map(function (m) { return x * m; }), x); }
+function dFacSheet(d, r, i) {
+  var f = r.fac[i], mk = [['Tes HIV', r.tes[i]], ['ODHIV ditemukan', r.found[i]], ['Mulai ARV', r.init[i]], ['PrEP', r.prep[i]]];
+  openSheet(f.nama, '<p class="mute">' + esc(JENIS[f.jenis]) + (f.kecamatan ? ' · ' + esc(f.kecamatan) : '') + (+f.pdp === 1 ? ' · layanan PDP' : '') + (d.src === 'demo' ? ' · data contoh fiktif' : '') + '</p>' +
+    '<div class="tablebox"><table><thead><tr><th>Populasi</th><th class="n">Tes 12 bln</th><th class="n">Positif</th><th class="n">Positivitas tersmooth</th><th class="n">Target tes</th><th class="n">Target temuan</th></tr></thead><tbody>' +
+    PK.map(function (k, p) { var t = fv(f, 't_' + k), T = r.T[k][i], F = r.F[k][i]; if (!t && !T && !F) return ''; return '<tr><td>' + POPS[p] + '</td><td class="n">' + fmt(t) + '</td><td class="n">' + fmt(fv(f, 'p_' + k)) + '</td><td class="n">' + pct(r.ys[k][i], 2) + '</td><td class="n"><b>' + fmt(T) + '</b></td><td class="n">' + fmt(F) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+    '<h3 style="margin-top:14px">Target bulanan ' + S.year + '</h3><div class="tablebox"><table><thead><tr><th>Indikator</th>' + BULAN.map(function (b) { return '<th class="n">' + b + '</th>'; }).join('') + '<th class="n">Total</th></tr></thead><tbody>' +
+    mk.map(function (m) { return '<tr><td>' + m[0] + '</td>' + dMonthly(m[1], d.st).map(function (x) { return '<td class="n">' + fmt(x) + '</td>'; }).join('') + '<td class="n"><b>' + fmt(m[1]) + '</b></td></tr>'; }).join('') +
+    (+f.pdp === 1 ? '<tr><td>ODHIV on ART (akhir tahun)</td><td colspan="12" class="mute">Target kohort aktif pada akhir tahun, bukan dijumlah per bulan</td><td class="n"><b>' + fmt(r.art[i]) + '</b></td></tr>' : '') + '</tbody></table></div>');
+}
+
+/* ---------- langkah 4: skenario & unduh ---------- */
+function dStepScen(d, r) {
+  if (!r) return dStepResult(d, r);
+  var cur = dScenRow({nm: 'Pengaturan saat ini', st: d.st, sum: r.sum, moved: r.moved});
+  return '<div class="grid g2"><div class="card" id="dScen"><h3>Simpan dan bandingkan skenario</h3><p style="font-size:14px">Simpan hingga 5 skenario strategi (misalnya "Ikuti historis", "Kejar yield", "Rujuk balik 30%") untuk dibahas bersama faskes.</p>' +
+    '<div class="field"><label for="dScNm">Nama skenario</label><input id="dScNm" type="text" placeholder="contoh: Kejar yield + rujuk balik 20%" maxlength="60"></div><button type="button" class="small" id="dScSave">Simpan skenario</button>' +
+    '<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Skenario</th><th>Bobot H/B/E/K</th><th class="n">Rujuk balik</th><th class="n">Proyeksi temuan</th><th class="n">ART di Puskesmas</th><th class="n">Lewat kapasitas</th><th></th></tr></thead><tbody>' + cur +
+    d.scen.map(function (sc, j) { return dScenRow(sc, j); }).join('') + '</tbody></table></div></div>' +
+    '<div class="card" id="dDl"><h3>Unduh hasil</h3><div class="btnrow" style="flex-direction:column;align-items:stretch">' +
+    '<button type="button" id="dXlsx">Target per faskes lengkap (.xlsx)</button>' +
+    '<button type="button" class="ghost" id="dDocx">Draf lampiran penetapan target layanan (.docx)</button>' +
+    '<button type="button" class="ghost" id="dCsv">Target per faskes ringkas (.csv)</button>' +
+    '<button type="button" class="ghost" id="dTplData2">Template berisi data faskes (.xlsx)</button></div>' +
+    '<p class="note">Berkas Excel memuat lembar Ringkasan, Target tahunan, Tes per populasi, Temuan per populasi, Target bulanan, dan Asumsi. Draf Word disusun sebagai lampiran Keputusan Kepala Dinas Kesehatan; lengkapi nomor dan tanggal sebelum ditandatangani.</p></div></div>';
+}
+function dScenRow(sc, j) {
+  var s = sc.sum, w = sc.st.w;
+  return '<tr><td><b>' + esc(sc.nm) + '</b></td><td>' + [w.H, w.B, w.E, w.K].join('/') + '</td><td class="n">' + (sc.st.desen || 0) + '%</td><td class="n">' + fmt(s.projFound) + '</td><td class="n">' + pct(s.pkmArt, 0) + '</td><td class="n">' + s.capN + '</td><td>' + (j == null ? '' : '<button type="button" class="ghost small" data-dscl="' + j + '">Pakai</button> <button type="button" class="ghost small" data-dscd="' + j + '">Hapus</button>') + '</td></tr>';
+}
+
+/* ---------- unduhan ---------- */
+function dFname(ext) { return 'Target_Faskes_HIV_' + fileSlug() + '_' + S.year + '.' + ext; }
+function dAsumsiRows(d) {
+  var st = d.st;
+  return [['Parameter', 'Nilai', 'Keterangan'], ['Wilayah', areaName(), ''], ['Tahun target', S.year, 'Lampiran target kab/kota Kemenkes (Surat 21 Agustus 2026)'], ['Sumber data faskes', dSrcLabel(d), d.src === 'demo' ? 'DATA CONTOH FIKTIF, bukan data sebenarnya' : 'Periode 12 bulan terakhir'], ['Bobot historis (H)', st.w.H, 'Porsi tes 12 bulan terakhir'], ['Bobot beban/sasaran (B)', st.w.B, 'Porsi sasaran/estimasi wilayah kerja'], ['Bobot efisiensi (E)', st.w.E, 'Porsi temuan yang diharapkan (tes × positivitas tersmooth)'], ['Bobot kapasitas (K)', st.w.K, 'Porsi kapasitas tes'], ['Penghalus positivitas m', st.shrink, 'ŷ = (positif + m·ȳ)/(tes + m)'], ['Populasi universal ikut sasaran', st.univ ? 'Ya' : 'Tidak', 'Ibu hamil, TBC, catin'], ['Minimum sasaran × cakupan', st.univMin ? 'Ya' : 'Tidak', 'S1.1.16, S1.1.5, S1.1.18'], ['Patuhi kapasitas', st.cap ? 'Ya' : 'Tidak', ''], ['WBP hanya Lapas/Rutan', st.lapasOnly ? 'Ya' : 'Tidak', ''], ['Komunitas hanya populasi kunci', st.komOnly ? 'Ya' : 'Tidak', ''], ['Bobot kohort ARV / ODHIV baru', st.wa.C + ' / ' + st.wa.N, ''], ['Rujuk balik RS ke Puskesmas', st.desen + '%', ''], ['Bobot PrEP historis / estimasi', st.wp.H + ' / ' + st.wp.B, ''], ['Pola bulanan', {rata: 'Rata', bertahap: 'Bertahap naik', pola: 'Pola sendiri'}[st.pola], ''], ['Pembulatan', 'Sisa terbesar (Hamilton)', 'Jumlah faskes = target kab/kota'], ['Disiapkan dengan', 'RAN HIV & IMS Navigator · CHARIS · charisforhealth.org', 'CC BY 4.0']];
+}
+function dXlsx(d, r) {
+  var fac = r.fac, s = r.sum, hdr = ['Kode', 'Faskes', 'Jenis', 'Kecamatan'];
+  var id = function (f) { return [f.kode || '', f.nama, f.jenis, f.kecamatan || '']; };
+  var annual = [hdr.concat(['Tes 12 bln', 'Target tes', 'Positif 12 bln', 'Target ODHIV ditemukan', 'Target mulai ARV', 'Target ODHIV on ART', 'Target dites VL', 'Target VL tersupresi', 'Target PrEP', 'Lewat kapasitas'])].concat(fac.map(function (f, i) { return id(f).concat([r.tesHist[i], r.tes[i], r.posHist[i], r.found[i], r.init[i], r.art[i], r.vl[i], r.sup[i], r.prep[i], r.capOver[i] ? 'Ya' : '']); }));
+  annual.push(['', 'JUMLAH', '', '', r.tesHist.reduce(function (a, b) { return a + b; }, 0), s.tes, r.posHist.reduce(function (a, b) { return a + b; }, 0), s.found, s.init, s.art, s.vl, s.sup, s.prep, '']);
+  var popSheet = function (o) { var rows = [hdr.concat(POPS)].concat(fac.map(function (f, i) { return id(f).concat(PK.map(function (k) { return o[k][i]; })); })); rows.push(['', 'JUMLAH', '', ''].concat(PK.map(function (k) { return o[k].reduce(function (a, b) { return a + b; }, 0); }))); return rows; };
+  var mon = [hdr.concat(['Indikator']).concat(BULAN).concat(['Total'])];
+  fac.forEach(function (f, i) { [['Tes HIV', r.tes[i]], ['ODHIV ditemukan', r.found[i]], ['Mulai ARV', r.init[i]], ['PrEP', r.prep[i]]].forEach(function (m) { mon.push(id(f).concat([m[0]]).concat(dMonthly(m[1], d.st)).concat([m[1]])); }); });
+  var K = s.K, sum = [['Ringkasan distribusi target HIV ke faskes'], [areaName() + ' · tahun ' + S.year], d.src === 'demo' ? ['PERHATIAN: memakai DATA CONTOH FIKTIF'] : [''], ['Komponen', 'Target kab/kota', 'Jumlah target faskes'], ['Tes HIV', K.tes, s.tes], ['ODHIV ditemukan (total)', K.found, s.found], ['Mulai ARV', K.init, s.init], ['ODHIV on ART', K.art, s.art], ['Dites VL', K.vl, s.vl], ['VL tersupresi', K.sup, s.sup], ['PrEP', K.prep, s.prep], [''], ['Proyeksi temuan dengan positivitas historis', Math.round(s.projFound)], ['Porsi ODHIV on ART di Puskesmas (historis → target)', pct(s.pkmArtNow, 0) + ' → ' + pct(s.pkmArt, 0)], ['Faskes melebihi kapasitas tes', s.capN], [''], ['Catatan']].concat(r.warn.concat(r.info).map(function (w) { return [w]; }));
+  if (s.found !== K.found) sum.push(['Jumlah target temuan per populasi (' + s.found + ') berbeda dari total lampiran (' + K.found + '); angka per populasi dipakai apa adanya.']);
+  var w4 = [10, 30, 10, 16];
+  return xlsxBuild([
+    {name: 'Ringkasan', rows: sum, header: 0, widths: [52, 18, 20]},
+    {name: 'Target_Tahunan', rows: annual, header: 1, widths: w4.concat([12, 12, 12, 14, 12, 14, 12, 14, 12, 12]), freeze: {r: 1, c: 2}},
+    {name: 'Tes_per_Populasi', rows: popSheet(r.T), header: 1, widths: w4.concat(PK.map(function () { return 12; })), freeze: {r: 1, c: 2}},
+    {name: 'Temuan_per_Populasi', rows: popSheet(r.F), header: 1, widths: w4.concat(PK.map(function () { return 12; })), freeze: {r: 1, c: 2}},
+    {name: 'Target_Bulanan', rows: mon, header: 1, widths: w4.concat([18]).concat(BULAN.map(function () { return 8; })).concat([10]), freeze: {r: 1, c: 2}},
+    {name: 'Asumsi', rows: dAsumsiRows(d), header: 1, widths: [34, 30, 60]}
+  ]);
+}
+function dCsv(r) {
+  return toCSV([['Kode', 'Faskes', 'Jenis', 'Kecamatan', 'Target tes', 'Target ODHIV ditemukan', 'Target mulai ARV', 'Target ODHIV on ART', 'Target dites VL', 'Target VL tersupresi', 'Target PrEP']].concat(r.fac.map(function (f, i) { return [f.kode || '', f.nama, f.jenis, f.kecamatan || '', r.tes[i], r.found[i], r.init[i], r.art[i], r.vl[i], r.sup[i], r.prep[i]]; })));
+}
+function dDocBlocks(d, r) {
+  var s = r.sum, K = s.K, st = d.st, y = S.year, nm = areaName();
+  var B = [{t: 'h1', r: 'Lampiran Keputusan Kepala Dinas Kesehatan ' + nm}, {t: 'p', r: [['Nomor: ........  Tanggal: ........', {i: true}]]}, {t: 'h2', r: 'Target Layanan HIV per Fasilitas Pelayanan Kesehatan Tahun ' + y}];
+  if (d.src === 'demo') B.push({t: 'p', r: [['PERHATIAN: dokumen ini memakai DATA CONTOH FIKTIF untuk latihan. Ganti dengan data SIHA sebelum ditetapkan.', {b: true, color: 'B42318'}]]});
+  B.push({t: 'h3', r: 'A. Dasar'}, {t: 'ul', items: ['Rencana Aksi Nasional Penanggulangan HIV dan IMS 2026–2029 beserta lampiran target kabupaten/kota (Kementerian Kesehatan, Surat 21 Agustus 2026).', 'Peraturan Menteri Kesehatan Nomor 23 Tahun 2022 tentang Penanggulangan HIV, AIDS, dan IMS.', 'Peraturan Menteri Kesehatan Nomor 6 Tahun 2024 tentang Standar Teknis Pemenuhan Standar Pelayanan Minimal Kesehatan.']}, {t: 'lk', r: 'peraturan daerah, RPJMD/Renstra, dan keputusan lain yang relevan.'});
+  B.push({t: 'h3', r: 'B. Target kabupaten/kota tahun ' + y}, {t: 'table', rows: [['Komponen', 'Target ' + nm, 'Jumlah target faskes']].concat([['Tes HIV', K.tes, s.tes], ['ODHIV baru ditemukan', K.found, s.found], ['ODHIV mulai ARV', K.init, s.init], ['ODHIV on ART', K.art, s.art], ['ODHIV on ART dites VL', K.vl, s.vl], ['ODHIV VL tersupresi', K.sup, s.sup], ['Pengguna PrEP', K.prep, s.prep]].map(function (x) { return [x[0], fmt(x[1]), fmt(x[2])]; }))});
+  B.push({t: 'h3', r: 'C. Cara pembagian'}, {t: 'ul', items: [
+    'Data faskes: ' + dSrcLabel(d) + ', ' + r.fac.length + ' faskes, periode 12 bulan terakhir.',
+    'Target tes per populasi dibagi menurut bobot historis ' + st.w.H + ', beban/sasaran ' + st.w.B + ', efisiensi (yield) ' + st.w.E + ', dan kapasitas ' + st.w.K + '. Positivitas dihaluskan dengan m = ' + st.shrink + '.',
+    st.univ ? 'Ibu hamil, pasien TBC, dan calon pengantin dibagi menurut sasaran wilayah kerja' + (st.univMin ? ', minimal sasaran × target cakupan RAN.' : '.') : 'Populasi universal dibagi dengan bobot yang sama seperti populasi lain.',
+    'Target temuan dibagi sebanding dengan proyeksi temuan (target tes × positivitas faskes). Temuan di faskes non-PDP diarahkan ke faskes PDP terdekat untuk mulai ARV.',
+    'ODHIV on ART dibagi menurut kohort aktif (bobot ' + st.wa.C + ') dan ODHIV baru (bobot ' + st.wa.N + ')' + (st.desen ? ', dengan ' + st.desen + '% target RS dirujuk balik ke Puskesmas PDP.' : '.') + ' Target VL dan supresi mengikuti rasio target kab/kota.',
+    'Semua angka dibulatkan dengan metode sisa terbesar sehingga jumlah faskes sama dengan target kab/kota.']});
+  if (r.warn.length) B.push({t: 'p', r: [['Catatan: ', {b: true}], r.warn.join(' ')]});
+  B.push({t: 'land'}, {t: 'h3', r: 'D. Target tahunan per faskes'}, {t: 'table', sz: 16, rows: [['No', 'Faskes', 'Jenis', 'Tes HIV', 'ODHIV ditemukan', 'Mulai ARV', 'ODHIV on ART', 'Dites VL', 'VL supresi', 'PrEP']].concat(r.fac.map(function (f, i) { return [String(i + 1), f.nama, JENIS[f.jenis], fmt(r.tes[i]), fmt(r.found[i]), fmt(r.init[i]), fmt(r.art[i]), fmt(r.vl[i]), fmt(r.sup[i]), fmt(r.prep[i])]; })).concat([['', 'Jumlah', '', fmt(s.tes), fmt(s.found), fmt(s.init), fmt(s.art), fmt(s.vl), fmt(s.sup), fmt(s.prep)]])});
+  B.push({t: 'h3', r: 'E. Target tes HIV bulanan per faskes'}, {t: 'table', sz: 15, rows: [['Faskes'].concat(BULAN).concat(['Total'])].concat(r.fac.map(function (f, i) { return [f.nama].concat(dMonthly(r.tes[i], st).map(fmt)).concat([fmt(r.tes[i])]); }))});
+  B.push({t: 'port'}, {t: 'h3', r: 'F. Ketentuan pelaksanaan'}, {t: 'ol', items: ['Kepala faskes menjabarkan target ini ke dalam rencana kerja faskes dan melaporkan capaian setiap bulan melalui SIHA.', 'Faskes yang tidak menyediakan layanan PDP memastikan setiap ODHIV yang ditemukan dirujuk dan mulai ARV di faskes PDP.', 'Dinas Kesehatan mengevaluasi capaian setiap triwulan dan dapat menyesuaikan pembagian target antarfaskes tanpa mengubah target kabupaten/kota.']}, {t: 'lk', r: 'nama dan tanda tangan Kepala Dinas Kesehatan.'});
+  return B;
+}
+
+/* ---------- panduan & rumus ---------- */
+function dGuideSheet() {
+  openSheet('Panduan data faskes', '<p>Siapkan satu baris per faskes. Kolom bertanda <b>wajib</b> harus ada; kolom lain membuat pembagian lebih tepat. Periode data historis: 12 bulan terakhir yang lengkap, sama untuk semua faskes.</p>' +
+    '<ol style="padding-left:20px"><li>Unduh template kosong atau template berisi data dari langkah 1.</li><li>Tarik laporan SIHA per faskes (tes dan positif per populasi, PDP, VL, PrEP). Salin angkanya ke kolom yang sesuai di lembar <code>Data_Faskes</code>.</li><li>Tambahkan sasaran dari PWS KIA, SITB, dan KUA/CKG, serta hasil pemetaan populasi kunci bila ada.</li><li>Jangan mengubah baris ke-2 (kode kolom). Simpan sebagai .xlsx lalu unggah kembali. Bisa juga disimpan sebagai .csv.</li></ol>' +
+    FGRP.map(function (gr) { return '<h3>' + gr[1] + '</h3><p style="font-size:14px">' + DGRP_HELP[gr[0]] + '</p><div class="scroll"><table><thead><tr><th>Kolom</th><th>Yang harus diisi</th><th>Sumber</th></tr></thead><tbody>' + FCOLS.filter(function (c) { return c[2] === gr[0]; }).map(function (c) { return '<tr><td><b>' + esc(c[1]) + '</b>' + (c[3] ? ' <span class="tag red">wajib</span>' : '') + '<br><code>' + c[0] + '</code></td><td>' + esc(c[4]) + '</td><td>' + esc(c[5]) + '</td></tr>'; }).join('') + '</tbody></table></div>'; }).join('') +
+    '<p class="note">Data faskes disimpan hanya di peramban perangkat ini, tidak dikirim ke server. Hindari data identitas pasien; yang diperlukan hanya angka agregat per faskes.</p>');
+}
+function fx(t) { return '<div style="background:var(--bg2);border-radius:10px;padding:10px 12px;margin:8px 0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;overflow-x:auto;white-space:pre-wrap">' + t + '</div>'; }
+function prm(rows) { return '<div class="scroll"><table><thead><tr><th>Parameter</th><th>Arti</th><th>Sumber data</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td><b>' + r[0] + '</b></td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>'; }).join('') + '</tbody></table></div>'; }
+function dRumusSheet() {
+  openSheet('Rumus dan sumber', '<div class="alert teal" style="font-size:14px"><b>Posisi metode.</b> Target kab/kota berasal dari lampiran Kemenkes, yang dibangun dari estimasi ODHIV (model AEM yang hasilnya dimasukkan ke Spectrum/AIM, proses estimasi yang didukung UNAIDS) dan target 95-95-95. Kemenkes belum menerbitkan rumus baku untuk membagi target ke faskes. Aplikasi ini mengadaptasi pendekatan perencanaan tingkat layanan yang lazim dipakai (analisis volume dan yield layanan, penetapan target sub-nasional dan faskes) dengan satu prinsip: <b>jumlah target semua faskes selalu sama dengan target kab/kota</b>.</div>' +
+    '<h3>1. Target tes per populasi di faskes</h3>' + fx('T(f,p) = T(K,p) × W(f,p)\nW(f,p) = [wH·H(f,p) + wB·B(f,p) + wE·E(f,p) + wK·Kp(f)] ÷ (wH + wB + wE + wK)') +
+    prm([['T(K,p)', 'Target tes kab/kota untuk populasi p', 'Lampiran target Kemenkes (indikator S1.1.x)'], ['H(f,p)', 'Porsi tes historis: t(f,p) ÷ Σ t(·,p)', 'SIHA 12 bulan'], ['B(f,p)', 'Porsi sasaran/estimasi wilayah kerja', 'PWS KIA, SITB, KUA/CKG, pemetaan populasi kunci'], ['E(f,p)', 'Porsi temuan yang diharapkan: t(f,p)·ŷ(f,p) ÷ Σ', 'SIHA 12 bulan'], ['Kp(f)', 'Porsi kapasitas tes', 'Penilaian Dinkes/faskes'], ['wH, wB, wE, wK', 'Bobot pilihan pengguna; komponen tanpa data otomatis dikeluarkan dan bobot sisanya dinormalkan', 'Langkah 2']]) +
+    '<p style="font-size:14px">Hanya faskes yang memenuhi aturan kelayakan yang ikut (misalnya target WBP hanya di Lapas/Rutan, layanan komunitas hanya populasi kunci, catin hanya di Puskesmas).</p>' +
+    '<h3>2. Positivitas tersmooth (yield)</h3>' + fx('ŷ(f,p) = [pos(f,p) + m · ȳ(K,p)] ÷ [t(f,p) + m]\nȳ(K,p) = F(K,p) ÷ T(K,p)') +
+    prm([['pos, t', 'Jumlah positif dan dites 12 bulan di faskes', 'SIHA'], ['ȳ(K,p)', 'Positivitas target kab/kota untuk populasi p', 'Lampiran target (S1.2.x ÷ S1.1.x)'], ['m', 'Kekuatan penghalus. Makin besar, faskes kecil makin ditarik ke rata-rata kab/kota', 'Langkah 2 (bawaan 50)']]) +
+    '<p style="font-size:14px">Prinsipnya sama dengan penaksiran area kecil yang meminjam kekuatan dari rata-rata wilayah, seperti dipakai model Naomi untuk estimasi tingkat distrik.</p>' +
+    '<h3>3. Populasi universal (ibu hamil, TBC, catin)</h3>' + fx('min(f,p) = sasaran(f,p) × cakupan target RAN tahun ini\nT(f,p) = min(f,p) + [T(K,p) − Σ min] × B(f,p)') +
+    prm([['sasaran', 'Sasaran ibu hamil, notifikasi TBC, atau catin di wilayah kerja', 'PWS KIA, SITB, KUA/CKG'], ['cakupan', 'Target cakupan tes: ibu hamil S1.1.16, TBC S1.1.5, catin S1.1.18', 'Lampiran target']]) +
+    '<p style="font-size:14px">Bila Σ minimum melebihi target kab/kota, minimum diperkecil secara proporsional dan muncul peringatan untuk memeriksa data sasaran.</p>' +
+    '<h3>4. Batas kapasitas</h3>' + fx('Bila Σp T(f,p) > kap_tes(f): kelebihan dipindah ke faskes layak lain\nsebanding target mereka, diulang sampai tidak ada yang melebihi (water-filling)') +
+    '<h3>5. Target ODHIV ditemukan</h3>' + fx('F(f,p) = F(K,p) × [T(f,p)·ŷ(f,p)] ÷ Σf [T·ŷ]\nProyeksi temuan = Σf,p T(f,p)·ŷ(f,p)') +
+    prm([['F(K,p)', 'Target temuan kab/kota per populasi', 'Lampiran target (S1.2.x)'], ['Proyeksi', 'Temuan bila target tes dicapai dengan positivitas saat ini; bila < target, diperlukan tes yang lebih terarah', 'Hasil hitung']]) +
+    '<h3>6. Mulai ARV</h3>' + fx('L(j) = temuan faskes PDP j + Σ temuan faskes non-PDP yang dirujuk ke j\nI(j) = I(K) × L(j) ÷ Σ L') +
+    prm([['I(K)', 'Target ODHIV mulai ARV kab/kota', 'Lampiran target (S2.1.1)'], ['Rujukan', 'Temuan faskes non-PDP diarahkan ke PDP di kecamatan yang sama (atau semua PDP), sebanding kohort ARV', 'Kolom kecamatan, pdp, art_aktif']]) +
+    '<h3>7. ODHIV on ART, viral load, dan supresi</h3>' + fx('A(j) = A(K) × [wC·porsi kohort(j) + wN·porsi I(j)] ÷ (wC + wN)\nRujuk balik d%: d% bobot RS PDP dipindah ke Puskesmas PDP rujuk_balik = 1\nV(j) = A(j) × V(K) ÷ A(K)      S(j) = V(j) × S(K) ÷ V(K)') +
+    prm([['A(K), V(K), S(K)', 'Target ODHIV on ART, dites VL, dan VL tersupresi kab/kota', 'Lampiran target (SU2, S3.2.1, SU3)'], ['kohort(j)', 'ODHIV on ART aktif', 'SIHA PDP'], ['kap_art', 'Batas kohort yang sanggup dilayani; kelebihan dialihkan', 'Penilaian Dinkes/faskes']]) +
+    '<h3>8. PrEP</h3>' + fx('P(j) = P(K) × [wH·porsi pengguna PrEP(j) + wB·porsi estimasi LSL+PSP+waria(j)] ÷ (wH + wB)') +
+    '<h3>9. Pembulatan dan target bulanan</h3>' + fx('Pembulatan sisa terbesar: bulatkan ke bawah, lalu sisa dibagikan ke pecahan terbesar\nx(f,bulan) = x(f) × w(bulan); rata w = 1/12; bertahap 0,8 → 1,2; atau pola pengguna') +
+    '<h3>Referensi</h3><ol style="font-size:13.5px;padding-left:20px">' +
+    '<li>Kementerian Kesehatan RI. Rencana Aksi Nasional Penanggulangan HIV dan IMS 2026–2029 dan lampiran target kabupaten/kota (Surat 21 Agustus 2026).</li>' +
+    '<li>Peraturan Menteri Kesehatan Nomor 23 Tahun 2022 tentang Penanggulangan HIV, AIDS, dan IMS. Berita Negara 2022 No. 831. Catatan: basis data peraturan BPK mencatat peraturan ini dicabut sebagian oleh Permenkes 3/2026, kecuali Pasal 41 beserta Lampiran; periksa status terbaru.</li>' +
+    '<li>Peraturan Menteri Kesehatan Nomor 6 Tahun 2024 tentang Standar Teknis Pemenuhan Standar Pelayanan Minimal Kesehatan (pelayanan orang dengan risiko terinfeksi HIV).</li>' +
+    '<li>WHO. Consolidated guidelines on person-centred HIV strategic information: strengthening routine data for impact. Geneva: WHO; 2022. ISBN 978-92-4-005531-5.</li>' +
+    '<li>WHO. Consolidated guidelines on HIV testing services. Geneva: WHO; 2019. ISBN 978-92-4-155058-1.</li>' +
+    '<li>Brown T, Peerapatanapokin W, Siripong N, Puckett R. The AIDS Epidemic Model 2023 for estimating HIV trends and transmission dynamics in Asian epidemic settings. J Acquir Immune Defic Syndr. 2024;95(1S). PMC10769178.</li>' +
+    '<li>Stover J, Glaubius R. Methods and assumptions for estimating key HIV indicators in the UNAIDS annual estimates process (Spectrum DemProj dan AIM). J Acquir Immune Defic Syndr. 2024;95(1S). PMC10769177.</li>' +
+    '<li>Updated data and methods for the 2023 UNAIDS HIV estimates. J Acquir Immune Defic Syndr. 2024;95(1S):e1–e4. doi:10.1097/QAI.0000000000003344.</li>' +
+    '<li>Eaton JW, Dwyer-Lindgren L, Gutreuter S, dkk. Naomi: a new modelling tool for estimating HIV epidemic indicators at the district level in sub-Saharan Africa. J Int AIDS Soc. 2021;24(S5):e25788. doi:10.1002/jia2.25788.</li>' +
+    '<li>PEPFAR. Country Operational Plan (COP) Guidance 2019, bagian 3.4.2 Site Yield and Volume Analysis for HTS, PMTCT, and Treatment; COP Guidance 2016, bagian 5.4.1 Site and Sub-national Level Targets.</li></ol>' +
+    '<p class="note">Penjelasan praktis dan rumus pembagian disusun oleh CHARIS sebagai alat bantu perencanaan. Hasilnya adalah usulan yang perlu dibahas dengan faskes sebelum ditetapkan.</p>');
+}
+
+/* ---------- pengikat ---------- */
+function bindDist(root) {
+  var b; if ((b = $('#dGuide', root))) b.onclick = dGuideSheet; if ((b = $('#dRumus', root))) b.onclick = dRumusSheet;
+  if ((b = $('#dPick', root))) b.onclick = areaSheet;
+  $$('[data-darea]', root).forEach(function (x) { x.onclick = function () { setArea(x.dataset.darea); }; });
+  if (areaLevel() !== 'kab') return;
+  var d = dget(), body = $('#dBody', root), res = null;
+  var calc = function () { res = d.fac.length ? distCompute(d.fac, S.area, S.year, d.st) : null; return res; };
+  var go = function (i) { S.distStep = i; save(); $$('[data-dstep]', root).forEach(function (c) { c.classList.toggle('on', +c.dataset.dstep === i); }); draw(); var t = $('#dSteps', root); if (t && t.getBoundingClientRect().top < 0) t.scrollIntoView({block: 'start'}); };
+  var reset = function () { DS[S.area] = d; dsSave(); render(); };
+  $$('[data-dstep]', root).forEach(function (c) { c.onclick = function () { go(+c.dataset.dstep); }; });
+  function draw() {
+    var st = S.distStep || 0; ROS.splice(0).forEach(function (r) { r.disconnect(); });
+    body.innerHTML = st === 0 ? dStepData(d) : st === 1 ? dStepRules(d) : st === 2 ? dStepResult(d, calc()) : dStepScen(d, calc());
+    $$('[data-dstep-go]', body).forEach(function (x) { x.onclick = function () { go(+x.dataset.dstepGo); }; });
+    if (st === 0) bindData(); else if (st === 1) bindRules(); else if (st === 2) bindRes(); else bindScen();
+  }
+  function bindData() {
+    $('#dTpl', body).onclick = function () { saveFile('Template_Data_Faskes_HIV.xlsx', templateXlsx(false), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); };
+    var t = $('#dTplData', body); if (t) t.onclick = function () { saveFile('Data_Faskes_HIV_' + fileSlug() + '.xlsx', templateXlsx(true, d.fac), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); };
+    $('#dDemo', body).onclick = function () { if (d.fac.length && d.src !== 'demo' && !window.confirm('Ganti data faskes saat ini dengan data contoh fiktif?')) return; d.fac = demoFac(S.area, S.year); d.src = 'demo'; d.file = ''; reset(); toast('Data contoh fiktif dimuat'); };
+    $('#dAdd', body).onclick = function () { d.fac.push({kode: '', nama: 'Faskes baru ' + (d.fac.length + 1), jenis: 'PKM', kecamatan: '', pdp: 0, prep: 0, rujuk_balik: 0}); if (d.src !== 'upload') d.src = 'manual'; S.distGrp = 'id'; dsSave(); draw(); var e = $('#dEdit', body); if (e) e.scrollIntoView({block: 'start'}); };
+    var cl = $('#dClear', body); if (cl) cl.onclick = function () { if (!window.confirm('Hapus semua data faskes untuk ' + areaShort() + '?')) return; d.fac = []; d.src = ''; d.scen = []; reset(); };
+    $('#dFile', body).onchange = function (e) {
+      var f = e.target.files[0]; if (!f) return; var isCsv = /\.csv$/i.test(f.name);
+      var rd = new FileReader();
+      rd.onload = function () {
+        (isCsv ? Promise.resolve(parseCSV(String(rd.result))) : readXlsx(rd.result)).then(function (rows) {
+          var o = rowsToFac(rows); if (!o.fac.length) throw new Error('Tidak ada baris faskes yang terisi.');
+          d.fac = o.fac; d.src = 'upload'; d.file = f.name; d.scen = []; reset();
+          toast(o.fac.length + ' faskes dimuat dari ' + f.name + (o.warn.length ? ' (' + o.warn.length + ' catatan)' : ''));
+          if (o.warn.length) setTimeout(function () { openSheet('Catatan unggahan', '<ul>' + o.warn.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>'); }, 300);
+        }).catch(function (err) { toast('Gagal membaca berkas: ' + err.message); });
+      };
+      if (isCsv) rd.readAsText(f, 'utf-8'); else rd.readAsArrayBuffer(f);
+    };
+    $$('[data-dgrp]', body).forEach(function (c) { c.onclick = function () { S.distGrp = c.dataset.dgrp; save(); draw(); var e = $('#dEdit', body); if (e) e.scrollIntoView({block: 'start'}); }; });
+    var tm; $$('[data-di]', body).forEach(function (inp) {
+      var upd = function () {
+        var i = +inp.dataset.di, k = inp.dataset.dk, f = d.fac[i]; if (!f) return;
+        if (inp.tagName === 'SELECT') f[k] = k === 'jenis' ? inp.value : +inp.value;
+        else if (FTXT[k]) f[k] = inp.value.trim();
+        else { var dg = digits(inp.value); f[k] = dg === '' ? '' : +dg; inp.value = dg === '' ? '' : nf(+dg); }
+        if (d.src === '') d.src = 'manual'; clearTimeout(tm); tm = setTimeout(dsSave, 400);
+      };
+      inp.addEventListener(inp.tagName === 'SELECT' ? 'change' : 'input', upd);
+    });
+    $$('[data-ddel]', body).forEach(function (x) { x.onclick = function () { var i = +x.dataset.ddel; if (!window.confirm('Hapus ' + d.fac[i].nama + '?')) return; d.fac.splice(i, 1); dsSave(); draw(); }; });
+  }
+  function bindRules() {
+    var st = d.st, sv = function () { dsSave(); };
+    var link = function (id, set) { var e = $('#' + id, body); if (!e) return; e.oninput = function () { $('#' + id + 'V', body).textContent = e.value; set(+e.value); sv(); if (/^dw[HBEK]$/.test(id)) $$('[data-dpre]', body).forEach(function (c) { var p = PRESET[c.dataset.dpre][0]; c.classList.toggle('on', ['H', 'B', 'E', 'K'].every(function (q) { return +st.w[q] === p[q]; })); }); }; };
+    ['H', 'B', 'E', 'K'].forEach(function (q) { link('dw' + q, function (v) { st.w[q] = v; }); });
+    link('dwC', function (v) { st.wa.C = v; }); link('dwN', function (v) { st.wa.N = v; }); link('dDesen', function (v) { st.desen = v; });
+    link('dpH', function (v) { st.wp.H = v; }); link('dpB', function (v) { st.wp.B = v; });
+    $$('[data-dpre]', body).forEach(function (c) { c.onclick = function () { st.w = clone(PRESET[c.dataset.dpre][0]); sv(); draw(); }; });
+    [['dUniv', 'univ'], ['dUnivMin', 'univMin'], ['dCap', 'cap'], ['dLapas', 'lapasOnly'], ['dKom', 'komOnly']].forEach(function (p) { var e = $('#' + p[0], body); e.onchange = function () { st[p[1]] = e.checked; sv(); }; });
+    $('#dShrink', body).onchange = function (e) { st.shrink = +e.target.value; sv(); };
+    $$('[data-dpola]', body).forEach(function (c) { c.onclick = function () { st.pola = c.dataset.dpola; sv(); $$('[data-dpola]', body).forEach(function (x) { x.classList.toggle('on', x === c); }); $('#dPolaV', body).style.display = st.pola === 'pola' ? 'grid' : 'none'; }; });
+    $$('[data-dpv]', body).forEach(function (e) { e.oninput = function () { st.polaV[+e.dataset.dpv] = digits(e.value); sv(); }; });
+  }
+  function bindRes() {
+    if (!res) return;
+    var drawFig = function () {
+      var k = S.distMet || 'tes', m = DMET[k], arr = res[m[1]], idx = arr.map(function (x, i) { return i; }).sort(function (a, b2) { return arr[b2] - arr[a]; }).slice(0, window.innerWidth < 560 ? 8 : 15);
+      barChart($('#dFig', body), {cats: idx.map(function (i) { var f = res.fac[i]; return f.kode ? String(f.kode).slice(0, 8) : f.nama.replace(/^Puskesmas /, 'PKM ').slice(0, 8); }), series: [{name: 'Data 12 bulan terakhir', vals: idx.map(function (i) { return dHist(res, k, i) || 0; }), color: '#9DB3B2'}, {name: 'Target ' + S.year, vals: idx.map(function (i) { return arr[i]; }), color: 'var(--teal2)'}], labels: true, label: m[0] + ' per faskes'});
+      $('#dFigLeg', body).innerHTML = '<div class="legend"><span><i style="background:#9DB3B2"></i>Data 12 bulan terakhir</span><span><i style="background:var(--teal2)"></i>Target ' + S.year + '</span></div>';
+    };
+    drawFig();
+    $$('[data-dmet]', body).forEach(function (c) { c.onclick = function () { S.distMet = c.dataset.dmet; save(); animNow(); $$('[data-dmet]', body).forEach(function (x) { x.classList.toggle('on', x === c); }); $('#dFig', body).innerHTML = ''; drawFig(); }; });
+    $$('[data-dfac]', body).forEach(function (tr) { tr.onclick = function () { dFacSheet(d, res, +tr.dataset.dfac); }; });
+  }
+  function bindScen() {
+    if (!res) return;
+    $('#dScSave', body).onclick = function () {
+      var nm = $('#dScNm', body).value.trim() || 'Skenario ' + (d.scen.length + 1);
+      if (d.scen.length >= 5) { toast('Maksimal 5 skenario. Hapus salah satu dahulu.'); return; }
+      d.scen.push({nm: nm, st: clone(d.st), sum: res.sum, moved: res.moved}); dsSave(); draw(); toast('Skenario disimpan');
+    };
+    $$('[data-dscl]', body).forEach(function (x) { x.onclick = function () { d.st = clone(d.scen[+x.dataset.dscl].st); dsSave(); draw(); toast('Skenario dipakai. Lihat langkah 3 untuk hasilnya.'); }; });
+    $$('[data-dscd]', body).forEach(function (x) { x.onclick = function () { d.scen.splice(+x.dataset.dscd, 1); dsSave(); draw(); }; });
+    $('#dXlsx', body).onclick = function () { try { saveFile(dFname('xlsx'), dXlsx(d, res), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); } catch (e) { toast('Gagal membuat Excel: ' + e.message); } };
+    $('#dCsv', body).onclick = function () { saveFile(dFname('csv'), dCsv(res), 'text/csv'); };
+    $('#dDocx', body).onclick = function () { saveDocx('Lampiran_Target_Layanan_HIV_' + fileSlug() + '_' + S.year + '.docx', dDocBlocks(d, res), 'Target layanan HIV per faskes ' + areaShort() + ' ' + S.year); };
+    $('#dTplData2', body).onclick = function () { saveFile('Data_Faskes_HIV_' + fileSlug() + '.xlsx', templateXlsx(true, d.fac), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); };
+  }
+  draw();
+}
+
 /* ================= RAN ke RAD ================= */
 var RSTEPS = ['Profil', 'Analisis situasi', 'Target daerah', 'Prioritas aksi', 'Matriks RAD', 'Draf & unduh'];
 var MCOLS = [['area','Area strategis'],['tujuan','Tujuan'],['sasaran','Sasaran'],['keg','Kegiatan'],['output','Output'],['ind','Indikator'],['target','Target tahunan'],['pj','Penanggung jawab'],['mitra','Mitra'],['lokasi','Lokasi'],['dana','Sumber pendanaan'],['timeline','Timeline']];
@@ -2070,7 +2752,7 @@ function bindRad(root) {
 
 /* ================= ROUTER & INIT ================= */
 function vSiklus() { return '<section class="band"><div class="wrap"><div class="titleic">' + FI('calendar', 'blue', 52) + '<h1 style="margin:0">Siklus dan alur perencanaan</h1></div><p class="mute">Kapan dan lewat dokumen apa RAN masuk ke perencanaan dan anggaran daerah.</p><div id="siklusBox">' + siklusHTML() + '</div></div></section>'; }
-var VIEWS = {beranda:[vBeranda, bindBeranda, 0, 'Beranda'], peran:[vPeran, bindPeran, 0, 'Peran Saya'], peta:[vPeta, bindPeta, 0, 'Peta RAN'], indikator:[vIndikator, bindIndikator, 1, 'Indikator'], daerah:[vDaerah, bindDaerah, 1, 'Target Daerah'], dashboard:[vDash, bindDash, 0, 'Dashboard Peta'], bandingkan:[vBanding, bindBanding, 1, 'Bandingkan'], simulasi:[vSimulasi, bindSimulasi, 1, 'Simulasi'], dana:[vDana, bindDana, 1, 'Sumber Daya'], siklus:[vSiklus, bindSiklus, 0, 'Siklus Perencanaan'], kutip:[vKutip, bindKutip, 0, 'Kutip & Bagikan'], rad:[vRad, bindRad, 1, 'RAN ke RAD'], glosarium:[vGlos, bindGlos, 0, 'Glosarium']};
+var VIEWS = {beranda:[vBeranda, bindBeranda, 0, 'Beranda'], peran:[vPeran, bindPeran, 0, 'Peran Saya'], peta:[vPeta, bindPeta, 0, 'Peta RAN'], indikator:[vIndikator, bindIndikator, 1, 'Indikator'], daerah:[vDaerah, bindDaerah, 1, 'Target Daerah'], distribusi:[vDist, bindDist, 1, 'Distribusi Faskes'], dashboard:[vDash, bindDash, 0, 'Dashboard Peta'], bandingkan:[vBanding, bindBanding, 1, 'Bandingkan'], simulasi:[vSimulasi, bindSimulasi, 1, 'Simulasi'], dana:[vDana, bindDana, 1, 'Sumber Daya'], siklus:[vSiklus, bindSiklus, 0, 'Siklus Perencanaan'], kutip:[vKutip, bindKutip, 0, 'Kutip & Bagikan'], rad:[vRad, bindRad, 1, 'RAN ke RAD'], glosarium:[vGlos, bindGlos, 0, 'Glosarium']};
 function curView() { var h = location.hash.slice(1); return VIEWS[h] ? h : 'beranda'; }
 function render() {
   ROS.splice(0).forEach(function (r) { r.disconnect(); });
