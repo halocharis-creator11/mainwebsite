@@ -692,7 +692,7 @@ C.tiles = [
   ['distribusi',_t(362),_t(363),'building','teal'],
   ['dashboard',_t(364),_t(365),'mapdash','teal'],
   ['bandingkan',_t(366),_t(367),'compare','purple'],
-  ['simulasi',_t(368),L('9 simulasi perencanaan','9 planning simulations'),'sliders','amber'],
+  ['simulasi',_t(368),L('10 simulasi perencanaan','10 planning simulations'),'sliders','amber'],
   ['dana',_t(369),_t(370),'coins','amber'],
   ['siklus',_t(371),_t(372),'calendar','blue'],
   ['rad',_t(373),_t(374),'doc','green'],
@@ -744,7 +744,7 @@ C.tours = {
     ['#childBox',_t(438),_t(439)]
   ],
   simulasi: [
-    ['#simCards',L('Sembilan simulasi','Nine simulations'),L('Pilih kartu: kaskade, anggaran, transisi donor, retensi, penemuan kasus, logistik, kontrak sosial, lintasan 2029, atau triple eliminasi.','Choose a card: cascade, budget, donor transition, retention, case finding, logistics, social contracting, path to 2029, or triple elimination.')],
+    ['#simCards',L('Sepuluh simulasi','Ten simulations'),L('Pilih kartu: kaskade, anggaran, transisi donor, retensi, penemuan kasus, logistik, kontrak sosial, lintasan 2029, triple eliminasi, atau paket intervensi & value for money.','Choose a card: cascade, budget, donor transition, retention, case finding, logistics, social contracting, path to 2029, triple elimination, or intervention packages & value for money.')],
     ['#sxIn',L('Isian dan asumsi','Inputs and assumptions'),L('Nilai awal diambil dari target wilayah. Ubah angka atau geser slider; hasil diperbarui langsung.','Starting values come from the area targets. Change figures or move sliders; results update immediately.')],
     ['#sxOut',L('Hasil','Results'),L('Angka kunci, grafik, dan tabel. Tombol Salin ringkasan menyalin satu kalimat untuk bahan advokasi.','Key figures, chart and table. Copy summary copies one sentence for advocacy material.')],
     ['#sxNote',L(_t(440),'Formulas and sources'),L('Setiap simulasi menjelaskan rumus, asumsi yang bisa diubah, dan sumber datanya.','Each simulation explains its formulas, editable assumptions and data sources.')],
@@ -2705,7 +2705,7 @@ function bindDist(root) {
   draw();
 }
 
-/* ================= PUSAT SIMULASI (9 simulasi) ================= */
+/* ================= PUSAT SIMULASI (10 simulasi) ================= */
 var SXL = [
   {k: 'kaskade', ic: 'sliders', tone: 'amber', t: L('Kaskade & titik bocor', 'Cascade & leaks'), d: L('Bandingkan capaian SIHA dengan target, beri status traffic light, temukan tahap yang paling bocor.', 'Compare SIHA achievements with targets, get a traffic-light status and find the leakiest step.'), g: L('Tujuan: tahu di mana masalah terbesar 95-95-95.', 'Purpose: know where the biggest 95-95-95 problem is.'), w: L('Dinkes', 'Health Office')},
   {k: 'anggaran', ic: 'budgetgoal', tone: 'teal', t: L('Anggaran → capaian', 'Budget → results'), d: L('Masukkan anggaran per domain atau potong X%, lihat berapa orang terjangkau, tes, dan ODHIV on ART yang bisa dibiayai.', 'Enter the budget per domain or cut it by X%, and see how many people reached, tests and PLHIV on ART can be funded.'), g: L('Tujuan: bahan advokasi saat pembahasan KUA-PPAS dan APBD.', 'Purpose: advocacy material for KUA-PPAS and APBD deliberations.'), w: L('Bappeda, DPRD, Dinkes', 'Bappeda, DPRD, Health Office')},
@@ -2715,7 +2715,8 @@ var SXL = [
   {k: 'logistik', ic: 'logistic', tone: 'purple', t: L('Logistik & SDM', 'Logistics & workforce'), d: L('Hitung kebutuhan reagen tes, cartridge VL, ARV, stok penyangga, kunjungan, dan tenaga dari target.', 'Calculate test reagents, VL cartridges, ARVs, buffer stock, visits and staff needed from the targets.'), g: L('Tujuan: mencegah stok kosong dan beban kerja berlebih.', 'Purpose: prevent stock-outs and overload.'), w: L('Dinkes (Farmasi), faskes', 'Health Office (Pharmacy), facilities')},
   {k: 'kontrak', ic: 'handshake', tone: 'teal', t: L('Kontrak sosial (swakelola)', 'Social contracting'), d: L('Dari anggaran swakelola/hibah, hitung jumlah petugas lapangan, jangkauan populasi kunci, rujukan tes, dan pendampingan ODHIV.', 'From a self-managed contract/grant budget, calculate field workers, key population reach, test referrals and PLHIV support.'), g: L('Tujuan: proposal komunitas yang terukur.', 'Purpose: measurable community proposals.'), w: L('Komunitas, Dinkes', 'Communities, Health Office')},
   {k: 'lintasan', ic: 'trajectory', tone: 'amber', t: L('Lintasan menuju 2029', 'Path to 2029'), d: L('Dari capaian sekarang, hitung pertumbuhan tahunan yang dibutuhkan dan target antara per tahun.', 'From current achievement, calculate the annual growth needed and interim targets per year.'), g: L('Tujuan: target tahunan RAD yang realistis.', 'Purpose: realistic annual RAD targets.'), w: L('Dinkes, Bappeda', 'Health Office, Bappeda')},
-  {k: 'tripel', ic: 'mombaby', tone: 'red', t: L('Triple eliminasi', 'Triple elimination'), d: L('Kaskade ibu hamil (dites, positif, diobati) dan perkiraan kasus HIV serta sifilis kongenital pada bayi yang tercegah.', 'Pregnant women cascade (tested, positive, treated) and estimated infant HIV and congenital syphilis cases averted.'), g: L('Tujuan: menunjukkan nilai skrining ANC.', 'Purpose: show the value of ANC screening.'), w: L('Dinkes (Kesga, P2P)', 'Health Office (Family Health, P2P)')}
+  {k: 'tripel', ic: 'mombaby', tone: 'red', t: L('Triple eliminasi', 'Triple elimination'), d: L('Kaskade ibu hamil (dites, positif, diobati) dan perkiraan kasus HIV serta sifilis kongenital pada bayi yang tercegah.', 'Pregnant women cascade (tested, positive, treated) and estimated infant HIV and congenital syphilis cases averted.'), g: L('Tujuan: menunjukkan nilai skrining ANC.', 'Purpose: show the value of ANC screening.'), w: L('Dinkes (Kesga, P2P)', 'Health Office (Family Health, P2P)')},
+  {k: 'paket', ic: 'budgetgoal', tone: 'green', t: L('Paket intervensi & value for money', 'Intervention packages & value for money'), d: L('Atur anggaran 14 paket dari penjangkauan sampai pelacakan LTFU, lihat capaian 95-95-95 dan target RAN sampai 2030, dan paket mana yang paling efisien.', 'Set budgets for 14 packages from outreach to LTFU tracing, see 95-95-95 and RAN targets to 2030, and which packages are most efficient.'), g: L('Tujuan: prioritas pendanaan dan bahan advokasi donor.', 'Purpose: funding priorities and donor advocacy.'), w: L('Dinkes, Bappeda, mitra/donor', 'Health Office, Bappeda, partners/donors')}
 ];
 function sxKey(k, perYear) { return k + '|' + S.area + (perYear ? '|' + S.year : ''); }
 function sxP(k, spec, perYear) {
@@ -2983,11 +2984,310 @@ SIM.tripel = {
   note: function () { return L('<p><b>Rumus.</b> Ibu positif = sasaran × prevalensi. Terdeteksi = ibu positif × cakupan skrining. Diobati = terdeteksi × cakupan pengobatan. Bayi terinfeksi = diobati × penularan dengan pengobatan + (ibu positif − diobati) × penularan tanpa pengobatan. Tercegah = bayi terinfeksi tanpa program − dengan program.</p><p><b>Sumber.</b> Cakupan tes HIV (S1.1.16), skrining sifilis (S1.1.21), temuan sifilis (S1.2.17), dan pengobatan sifilis (S2.1.8) dari lampiran target Kemenkes. Laju penularan adalah asumsi yang bisa diubah; rentang HIV tanpa intervensi mengikuti WHO. Kriteria validasi eliminasi mengikuti panduan global WHO. Hasil adalah perkiraan kasar untuk advokasi, bukan estimasi resmi; estimasi resmi infeksi anak berasal dari pemodelan Spectrum.</p>', '<p><b>Formula.</b> Positive mothers = target population × prevalence. Detected = positive mothers × screening coverage. Treated = detected × treatment coverage. Infants infected = treated × transmission with treatment + (positive mothers − treated) × transmission without treatment. Averted = infants infected without the programme − with the programme.</p><p><b>Sources.</b> HIV testing coverage (S1.1.16), syphilis screening (S1.1.21), syphilis case finding (S1.2.17) and syphilis treatment (S2.1.8) from the Ministry of Health target annex. Transmission rates are editable assumptions; the HIV range without intervention follows WHO. Elimination validation criteria follow WHO global guidance. Results are rough estimates for advocacy, not official estimates; official estimates of child infections come from Spectrum modelling.</p>'); }
 };
 
+
+/* ---------- 10. Paket intervensi & value for money ----------
+   Model kohort kaskade berbasis biaya. Data: (A) 9 KK dampingan GF di Tanah Papua = SIHA Jun 2026 + realisasi GF GC7;
+   (B) KK/provinsi lain di Tanah Papua = target RAN + tipologi Papua; (C) luar Papua = target RAN + capaian nasional 2025.
+   Unit cost pembanding: RAN Bab IV (NHA 2021–2024, Investment Case Analysis 2024). */
+var PKM = (function () {
+  var GF9 = {"472":{"N":5555,"D":3608,"A":1537,"VLt":487,"VLs":381,"t":[63,344,1827,97,8889],"p":[26,50,27,6,178],"art":172,"st":6051,"sf":710,"sx":530,"ast":1476,"asf":187,"asx":155,"tpt":301,"tpt6":200,"prep":0},"480":{"N":9082,"D":5489,"A":2695,"VLt":1440,"VLs":1227,"t":[49,424,3707,749,9161],"p":[13,81,35,25,299],"art":263,"st":7031,"sf":363,"sx":283,"ast":2907,"asf":96,"asx":72,"tpt":246,"tpt6":183,"prep":150},"481":{"N":3472,"D":2117,"A":822,"VLt":248,"VLs":194,"t":[23,169,1641,415,2486],"p":[16,50,26,25,121],"art":135,"st":3104,"sf":46,"sx":43,"ast":1378,"asf":19,"asx":18,"tpt":148,"tpt6":67,"prep":0},"482":{"N":599,"D":323,"A":170,"VLt":88,"VLs":87,"t":[4,336,875,213,1927],"p":[1,10,2,3,8],"art":20,"st":1910,"sf":77,"sx":57,"ast":818,"asf":37,"asx":25,"tpt":7,"tpt6":0,"prep":0},"488":{"N":1399,"D":882,"A":635,"VLt":50,"VLs":45,"t":[24,453,2993,919,14068],"p":[6,14,4,6,60],"art":49,"st":14349,"sf":123,"sx":98,"ast":2850,"asf":42,"asx":38,"tpt":2,"tpt6":2,"prep":0},"492":{"N":6916,"D":4592,"A":1904,"VLt":587,"VLs":543,"t":[48,458,1836,847,4100],"p":[19,84,31,24,339],"art":334,"st":6842,"sf":792,"sx":497,"ast":1867,"asf":119,"asx":69,"tpt":232,"tpt6":102,"prep":0},"495":{"N":4539,"D":3183,"A":1217,"VLt":530,"VLs":436,"t":[59,1031,3375,765,28427],"p":[13,74,16,15,115],"art":135,"st":18569,"sf":631,"sx":558,"ast":3384,"asf":206,"asx":180,"tpt":76,"tpt6":51,"prep":0},"500":{"N":3041,"D":1754,"A":982,"VLt":603,"VLs":532,"t":[15,150,1167,71,1707],"p":[4,24,7,1,77],"art":96,"st":2218,"sf":84,"sx":38,"ast":1158,"asf":25,"asx":13,"tpt":24,"tpt6":14,"prep":0},"513":{"N":2303,"D":1588,"A":822,"VLt":293,"VLs":251,"t":[32,234,2783,807,4058],"p":[7,30,25,25,99],"art":111,"st":6219,"sf":254,"sx":206,"ast":2795,"asf":106,"asx":79,"tpt":9,"tpt6":7,"prep":150}};
+  var PAPUA6 = ['Papua', 'Papua Barat', 'Papua Barat Daya', 'Papua Pegunungan', 'Papua Selatan', 'Papua Tengah'];
+  // tipologi awal (2025). Papua: RAN Gambar I-5 + kalibrasi 9 KK GF. Luar Papua: RAN 2025 nasional.
+  var TYP = {
+    papua: {p1: .47, p2: .41, vlc: .43, sup: .84, link: .63, ltfu: .13, ach: .8, y: {idx: .33, pitc: .116, anc: .009, kp: .027, umum: .017}, ancSif: .92, sifNon: 1.53, yAncSif: .045, yNonSif: .047, sifTx: .75, tpt: .10, tptAnn: .116, traced: .044, cost: 1},
+    luar: {p1: .67, p2: .72, vlc: .56, sup: .95, link: .795, ltfu: .07, ach: .6, y: {idx: .10, pitc: .03, anc: .003, kp: .03, umum: .003}, ancSif: .8, sifNon: .8, yAncSif: .0018, yNonSif: .011, sifTx: .83, tpt: .21, tptAnn: .15, traced: .02, cost: .75}
+  };
+  var MODP = {idx: [9, 13], pitc: [5, 6, 11], anc: [4], kp: [0, 1, 2, 3, 7, 8, 10], umum: [12, 14]};
+  var MODS = ['idx', 'pitc', 'anc', 'kp', 'umum'];
+  var PKG = [
+    {id: 'idx', no: 'P2a', grp: 0, n: L('Notifikasi pasangan & anak (index testing)', 'Partner & child notification (index testing)'), u: L('orang dites', 'people tested'), prog: 300000, kom: 30000},
+    {id: 'pitc', no: 'P2b', grp: 0, n: L('Tes atas inisiatif petugas: pasien TB, IMS, hepatitis', 'Provider-initiated testing: TB, STI, hepatitis patients'), u: L('orang dites', 'people tested'), prog: 35000, kom: 25000},
+    {id: 'anc', no: 'P2c', grp: 0, n: L('Triple eliminasi: tes ibu hamil', 'Triple elimination: testing pregnant women'), u: L('ibu hamil dites', 'pregnant women tested'), prog: 40000, kom: 75000},
+    {id: 'kp', no: 'P1', grp: 0, n: L('Penjangkauan & tes populasi kunci/risti', 'Outreach & testing for key/at-risk populations'), u: L('orang dites', 'people tested'), prog: 200000, kom: 30000},
+    {id: 'umum', no: 'P2d', grp: 0, n: L('Tes populasi umum, catin, mobile clinic', 'General population, couples, mobile clinic testing'), u: L('orang dites', 'people tested'), prog: 45000, kom: 25000},
+    {id: 'link', no: 'P3', grp: 1, n: L('Inisiasi ART cepat & pendampingan ODHIV baru', 'Rapid ART start & support for newly diagnosed'), u: L('ODHIV baru didampingi', 'newly diagnosed supported'), prog: 1500000, kom: 0},
+    {id: 'ret', no: 'P4', grp: 1, n: L('Retensi & kepatuhan (MMD, pendamping sebaya)', 'Retention & adherence (MMD, peer support)'), u: L('ODHIV on ART/tahun', 'PLHIV on ART/year'), prog: 500000, kom: 0},
+    {id: 'ltfu', no: 'P5', grp: 1, n: L('Pelacakan & penjangkauan kembali ODHIV LTFU', 'Tracing & re-engaging PLHIV lost to follow-up'), u: L('ODHIV dilacak', 'PLHIV traced'), prog: 500000, kom: 0},
+    {id: 'vl', no: 'P6', grp: 2, n: L('Pemeriksaan viral load & transport spesimen', 'Viral load testing & specimen transport'), u: L('tes VL', 'VL tests'), prog: 300000, kom: 400000},
+    {id: 'eac', no: 'P7', grp: 2, n: L('Konseling kepatuhan intensif (EAC) & VL tinggi', 'Enhanced adherence counselling (EAC) & high VL'), u: L('ODHIV VL tinggi ditangani', 'PLHIV with high VL managed'), prog: 800000, kom: 400000},
+    {id: 'sif', no: 'P8', grp: 3, n: L('Pengobatan sifilis & notifikasi pasangan', 'Syphilis treatment & partner notification'), u: L('kasus diobati', 'cases treated'), prog: 150000, kom: 120000},
+    {id: 'tpt', no: 'P9', grp: 3, n: L('TB-HIV: terapi pencegahan TB (TPT)', 'TB-HIV: TB preventive therapy (TPT)'), u: L('ODHIV mendapat TPT', 'PLHIV given TPT'), prog: 100000, kom: 300000},
+    {id: 'prev', no: 'P10', grp: 3, n: L('Pencegahan: PrEP, kondom, KIE remaja', 'Prevention: PrEP, condoms, youth IEC'), u: L('pengguna PrEP/tahun', 'PrEP users/year'), prog: 1000000, kom: 1500000},
+    {id: 'enab', no: 'P11', grp: 4, n: L('Penguatan sistem: mentoring/OJT, supervisi, data, validasi kohort', 'Systems: mentoring/OJT, supervision, data, cohort validation'), u: 'Rp', prog: 1, kom: 0}
+  ];
+  var IDS = PKG.map(function (p) { return p.id; });
+  var GRP = [L('Penjangkauan & tes', 'Outreach & testing'), L('Pengobatan, retensi & LTFU', 'Treatment, retention & LTFU'), L('Viral load & supresi', 'Viral load & suppression'), L('Sifilis, TB-HIV & pencegahan', 'Syphilis, TB-HIV & prevention'), L('Penguatan sistem', 'Systems strengthening')];
+  var DEF = {absorb: .85, enabShare: .15, enabFloor: .75, reDx: .3, linkF0: .25, linkMax: .92, retF0: .2, retEffect: .55, eacF0: .2, supMax: .93, retToSup: .03,
+    traceReturn: .3, traceRemove: .15, natReturn: .03, traceCapK: .5, vlMax: .95, mU: .035, mK: .04, mA: .015, tptMort: .3, beta: .05, prepInc: .03, prepEff: .75, sifTreatMax: .97,
+    capMult: {pitc: 2.5, kp: 3, umum: 2}, cohortClean: 0};
+  var STEPS = [{yr: 2026.5, lbl: L('Des 2026', 'Dec 2026'), dt: .5, ri: 0, base: true}, {yr: 2027, lbl: '2027', dt: 1, ri: 1}, {yr: 2028, lbl: '2028', dt: 1, ri: 2}, {yr: 2029, lbl: '2029', dt: 1, ri: 3}, {yr: 2030, lbl: '2030', dt: 1, ri: null}];
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  function tierOf(a) {
+    a = a || S.area;
+    var prov = areaProv(a), lv = areaLevel(a), pap = PAPUA6.indexOf(prov) >= 0;
+    if (lv === 'kab' && GF9[a.slice(2)]) return {t: 'A', pap: true};
+    var u = S.sim && S.sim[a];
+    var user = u && +u.t1 > 0 && +u.t2 > 0;
+    return {t: pap ? 'B' : 'C', pap: pap, user: !!user, nat: lv === 'nas'};
+  }
+  // ---- status awal wilayah ----
+  function base(a, as) {
+    a = a || S.area; as = as || {};
+    var v = areaVals(a), tr = tierOf(a), ty = clone(tr.pap ? TYP.papua : TYP.luar), b = {tier: tr, v: v};
+    Object.keys(as).forEach(function (k) { if (k in ty && typeof ty[k] === 'number' && as[k] != null) ty[k] = as[k]; });
+    b.ty = ty; b.tests = {}; b.pos = {}; b.y = {};
+    var w = 20;
+    if (tr.t === 'A') {
+      var g9 = GF9[a.slice(2)];
+      MODS.forEach(function (m, i) { b.tests[m] = 2 * g9.t[i]; b.pos[m] = 2 * g9.p[i]; b.y[m] = (b.pos[m] + ty.y[m] * w) / (b.tests[m] + w); });
+      b.N = g9.N; b.D = g9.D; b.A = g9.A; b.VLt = g9.VLt; b.VLs = g9.VLs;
+      b.newDx = 0; MODS.forEach(function (m) { b.newDx += b.pos[m]; });
+      b.L0 = Math.min(.95, 2 * g9.art / Math.max(1, b.newDx)); b.init0 = 2 * g9.art;
+      b.ancSifT = 2 * g9.ast; b.ancSifR = b.ancSifT / Math.max(1, b.tests.anc); b.sifYanc = g9.asf / Math.max(1, g9.ast);
+      b.nonSifT = 2 * (g9.st - g9.ast); b.sifYnon = (g9.sf - g9.asf) / Math.max(1, g9.st - g9.ast);
+      b.sifTx0 = 2 * g9.sx; b.ancSifTx0 = 2 * g9.asx;
+      if (as.link != null) b.L0 = as.link;
+      b.tptCum = g9.tpt; b.tptAnn = 2 * g9.tpt6; b.prep0 = g9.prep; b.traced0 = 560 * (g9.D - g9.A) / 12752;
+    } else {
+      b.N = g(v, 'odhiv', 2026);
+      var u = tr.user ? S.sim[a] : null;
+      b.D = u ? +u.t1 : b.N * ty.p1; b.A = u ? +u.t2 : b.D * ty.p2;
+      b.VLt = u && +u.vl > 0 ? +u.vl : b.A * ty.vlc; b.VLs = u && +u.t3 > 0 ? +u.t3 : b.VLt * ty.sup;
+      MODS.forEach(function (m) {
+        var t = 0, f = 0; MODP[m].forEach(function (pi) { t += tesP(v, pi, 2026); f += foundP(v, pi, 2026); });
+        b.tests[m] = t * ty.ach; b.y[m] = (f + ty.y[m] * w) / (t + w); b.pos[m] = b.tests[m] * b.y[m];
+      });
+      b.newDx = 0; MODS.forEach(function (m) { b.newDx += b.pos[m]; });
+      b.L0 = ty.link; b.init0 = b.newDx * b.L0;
+      b.ancSifR = ty.ancSif; b.ancSifT = b.tests.anc * ty.ancSif; b.sifYanc = ty.yAncSif;
+      b.nonSifT = ty.sifNon * (b.tests.pitc + b.tests.kp + b.tests.idx + .3 * b.tests.umum); b.sifYnon = ty.yNonSif;
+      b.sifTx0 = (b.ancSifT * b.sifYanc + b.nonSifT * b.sifYnon) * ty.sifTx; b.ancSifTx0 = b.ancSifT * b.sifYanc * ty.sifTx;
+      b.tptCum = b.A * ty.tpt; b.tptAnn = b.A * ty.tptAnn; b.prep0 = .5 * g(v, 'prep', 2026); b.traced0 = (b.D - b.A) * ty.traced;
+    }
+    b.K = Math.max(0, b.D - b.A); b.U = Math.max(0, b.N - b.D);
+    b.c0 = b.VLt / Math.max(1, b.A); b.s0 = b.VLs / Math.max(1, b.VLt);
+    b.sifF0 = b.ancSifT * b.sifYanc + b.nonSifT * b.sifYnon; b.ancSifF0 = b.ancSifT * b.sifYanc;
+    b.vol = {idx: b.tests.idx, pitc: b.tests.pitc, anc: b.tests.anc, kp: b.tests.kp, umum: b.tests.umum, link: DEF.linkF0 * b.newDx, ret: DEF.retF0 * b.A, ltfu: b.traced0,
+      vl: b.VLt, eac: DEF.eacF0 * (b.VLt - b.VLs), sif: b.sifTx0, tpt: b.tptAnn, prev: b.prep0};
+    return b;
+  }
+  function costP(p, b) { return p.id === 'enab' ? 1 : p.prog * b.ty.cost; }
+  function baseBud(b, P) {
+    var bud = {}, prog = 0;
+    PKG.forEach(function (p) { if (p.id === 'enab') return; bud[p.id] = b.vol[p.id] * costP(p, b) / P.absorb; prog += bud[p.id]; });
+    bud.enab = P.enabShare * prog; return bud;
+  }
+  function total(bud) { var s = 0; IDS.forEach(function (id) { s += bud[id] || 0; }); return s; }
+  function komNeed(bud, b, P) { var s = 0; PKG.forEach(function (p) { if (p.id !== 'enab') s += (bud[p.id] || 0) * P.absorb / costP(p, b) * p.kom; }); return s; }
+
+  // ---- simulasi ----
+  function run(b, bud, P) {
+    var bb = baseBud(b, P), v = b.v;
+    function mk(bd) {
+      var ps = 0; PKG.forEach(function (p) { if (p.id !== 'enab') ps += bd[p.id] || 0; });
+      var eff = ps > 0 ? Math.min(1, P.enabFloor + (1 - P.enabFloor) * (bd.enab || 0) / (P.enabShare * ps)) : P.enabFloor;
+      var f = function (id) { var p = PKG[IDS.indexOf(id)]; return (bd[id] || 0) * P.absorb * eff / costP(p, b); }; f.eff = eff; return f;
+    }
+    var uS = mk(bud), uB = mk(bb), st = {N: b.N, D: b.D, A: b.A, K: b.K, tc: b.tptCum}, c = b.c0, s = b.s0, last = b.newDx, U0 = Math.max(1, b.U);
+    var ran = function (ri) { if (ri == null) return null; var y = 2026 + ri; return {N: g(v, 'odhiv', y), D: g(v, 't1', y), A: g(v, 't2', y), vlT: g(v, 'vl', y), VLs: g(v, 't3', y), init: g(v, 'init', y), newDx: g(v, 'found', y), tests: g(v, 'tes', y), preg: g(v, 'bumil', y), prep: g(v, 'prep', y)}; };
+    var rows = [{yr: 2026, lbl: L('Awal', 'Start'), N: st.N, D: st.D, A: st.A, K: st.K, c: c, s: s, VLs: st.A * c * s, supT: st.A * s, vlT: b.VLt, newDx: b.newDx, init: b.init0, tests: b.tests.idx + b.tests.pitc + b.tests.anc + b.tests.kp + b.tests.umum, ancT: b.tests.anc, preg: g(v, 'bumil', 2026), sifF: b.sifF0, sifTx: b.sifTx0, ancSifF: b.ancSifF0, ancSifTx: b.ancSifTx0, tptCov: b.tptCum / Math.max(1, b.A), newInf: 0, averted: 0, prep: b.prep0}];
+    STEPS.forEach(function (sp) {
+      var un = sp.base ? uB : uS, dt = sp.dt;
+      if (sp.yr === 2027 && P.cohortClean > 0) { var rm = st.K * P.cohortClean; st.K -= rm; st.D -= rm; st.N -= rm; }
+      var U = Math.max(0, st.N - st.D), dep = Math.min(1.2, U / U0), preg = g(v, 'bumil', sp.ri != null ? 2026 + sp.ri : 2029);
+      var T = {}, pos = {}, tot = 0, tp = 0, capIdx = last + .3 * st.A;
+      MODS.forEach(function (m) {
+        var u = un(m);
+        if (m === 'idx') u = Math.min(u, capIdx); else if (m === 'anc') u = Math.min(u, Math.max(preg, b.tests.anc)); else u = Math.min(u, P.capMult[m] * Math.max(b.tests[m], 200));
+        var y = m === 'idx' ? b.y[m] * (.4 + .6 * dep) * (1 - .4 * u / Math.max(1, capIdx)) : b.y[m] * dep;
+        T[m] = u; pos[m] = u * y; tot += u; tp += pos[m];
+      });
+      if (tp * (1 - P.reDx) * dt > .5 * U) tp = .5 * U / ((1 - P.reDx) * dt);
+      var nd = tp, fL = Math.min(1, un('link') / Math.max(1, nd)), Lmax = Math.max(P.linkMax, b.L0 + .03), Lmin = Math.max(.2, (b.L0 - Lmax * P.linkF0) / (1 - P.linkF0));
+      var Lk = Math.min(Lmax, Lmin + (Lmax - Lmin) * fL), nT = nd * (1 - P.reDx), init = nT * Lk, reL = Math.min(st.K / dt, nd * P.reDx * Lk);
+      var fR = Math.min(1, un('ret') / Math.max(1, st.A)), ltf = b.ty.ltfu / (1 - P.retEffect * P.retF0) * (1 - P.retEffect * fR);
+      var trc = Math.min(un('ltfu'), P.traceCapK * st.K), ret = trc * P.traceReturn + (st.K - trc) * P.natReturn, rem = trc * P.traceRemove;
+      var tN = Math.min(un('tpt'), Math.max(0, st.A - st.tc * .9)); st.tc = Math.min(st.A + init * dt, st.tc + tN * dt);
+      var tc = Math.min(1, st.tc / Math.max(1, st.A)), mA = P.mA * (1 - P.tptMort * tc);
+      var lost = st.A * ltf, dA = st.A * mA, dK = st.K * P.mK, dU = U * P.mU;
+      var A1 = st.A + dt * (init + reL + ret - lost - dA), K1 = st.K + dt * (nT - init - reL - ret - rem + lost - dK);
+      var reach = Math.min(un('eac'), st.A * c * (1 - s)) / Math.max(1, st.A * (1 - s)), smax = Math.max(P.supMax, b.s0), r0 = P.eacF0 * b.c0, smin = Math.max(.5, (b.s0 - smax * r0) / (1 - r0));
+      s = Math.max(.5, Math.min(.99, smin + (smax - smin) * reach + P.retToSup * (fR - P.retF0)));
+      var pu = un('prev'), av = pu * P.prepInc * P.prepEff, ni = Math.max(0, P.beta * (U + st.K + st.A * (1 - s)) - av);
+      st.A = A1; st.K = Math.max(0, K1); st.D = st.A + st.K;
+      var R = ran(sp.ri); st.N = R ? Math.max(R.N, st.D + 1) : Math.max(g(v, 'odhiv', 2029) * g(v, 'odhiv', 2029) / Math.max(1, g(v, 'odhiv', 2028)), st.D + 1);
+      var vlT = Math.min(un('vl'), P.vlMax * st.A); c = vlT / Math.max(1, st.A);
+      var aT = T.anc * b.ancSifR, nT2 = b.nonSifT * (T.pitc + T.kp + T.idx + .3 * T.umum) / Math.max(1, b.tests.pitc + b.tests.kp + b.tests.idx + .3 * b.tests.umum);
+      var aF = aT * b.sifYanc, nF = nT2 * b.sifYnon, cap = un('sif'), aX = Math.min(P.sifTreatMax * aF, cap), nX = Math.min(P.sifTreatMax * nF, Math.max(0, cap - aX));
+      last = nd;
+      rows.push({yr: sp.yr, lbl: sp.lbl, ri: sp.ri, ran: R, N: st.N, D: st.D, A: st.A, K: st.K, c: c, s: s, VLs: st.A * c * s, supT: st.A * s, vlT: vlT, newDx: nd, init: init + reL, tests: tot, ancT: T.anc, preg: preg,
+        sifF: aF + nF, sifTx: aX + nX, ancSifF: aF, ancSifTx: aX, tptCov: tc, newInf: ni * dt, averted: av * dt, prep: pu, eff: un.eff});
+    });
+    rows.forEach(function (r) {
+      r.p1 = r.D / r.N; r.p2 = r.A / Math.max(1, r.D); r.p3 = r.VLs / Math.max(1, r.A); r.vlCov = r.vlT / Math.max(1, r.A); r.p3t = r.supT / Math.max(1, r.A);
+      r.ancCov = Math.min(1, r.ancT / Math.max(1, r.preg)); r.sifPct = r.sifTx / Math.max(1e-9, r.sifF); r.ancSifPct = r.ancSifTx / Math.max(1e-9, r.ancSifF);
+      if (r.ran) { r.ran.p1 = r.ran.D / r.ran.N; r.ran.p2 = r.ran.A / Math.max(1, r.ran.D); r.ran.p3 = r.ran.VLs / Math.max(1, r.ran.A); }
+    });
+    return rows;
+  }
+  function score(r) { return (Math.min(r.p1, .95) + Math.min(r.p2, .95) + Math.min(r.p3, .95)) / (3 * .95); }
+  function objective(r) { return .8 * score(r) + .2 * Math.min(r.ancCov, .95) / .95 + .1 * r.supT / r.N; }
+  function optimize(b, P, totalB, floorFrac) {
+    var bb = baseBud(b, P), fl = {}, bud;
+    IDS.forEach(function (id) { fl[id] = bb[id] * (floorFrac == null ? 1 : floorFrac); });
+    bud = clone(fl);
+    var sifC = PKG[IDS.indexOf('sif')], autoSif = function (bd) { for (var k = 0; k < 2; k++) { var rr = run(b, bd, P), mx = 0; rr.forEach(function (x, i) { if (i > 1) mx = Math.max(mx, x.sifF); }); bd.sif = Math.max(fl.sif, 1.05 * mx * costP(sifC, b) / P.absorb); } return bd; };
+    var val = function (bd) { autoSif(bd); var rr = run(b, bd, P); return objective(rr[rr.length - 1]); };
+    autoSif(bud); var spent = total(bud);
+    if (totalB <= spent) { var sc = totalB / spent; IDS.forEach(function (id) { bud[id] *= sc; }); return bud; }
+    var steps = 50, step = (totalB - spent) / steps, cur = val(bud);
+    for (var i = 0; i < steps; i++) {
+      var best = null, bg = -Infinity;
+      IDS.forEach(function (id) {
+        if (id === 'sif') return; var t = clone(bud);
+        if (id === 'enab') t.enab += step; else { t[id] += step / (1 + P.enabShare); t.enab += step * P.enabShare / (1 + P.enabShare); }
+        var gg = val(t) - cur; if (gg > bg) { bg = gg; best = id; }
+      });
+      if (best == null || bg <= 1e-9) best = 'enab';
+      if (best === 'enab') bud.enab += step; else { bud[best] += step / (1 + P.enabShare); bud.enab += step * P.enabShare / (1 + P.enabShare); }
+      cur = val(bud);
+    }
+    autoSif(bud); var over = total(bud) - totalB; if (over > 0) bud.enab = Math.max(fl.enab, bud.enab - over);
+    return bud;
+  }
+  function vfm(b, P, bud, inc) {
+    var r0 = run(b, bud, P), a0 = r0[r0.length - 1], cum = function (rr) { return rr.slice(2).reduce(function (s, x) { return s + x.newInf; }, 0); };
+    return PKG.filter(function (p) { return p.id !== 'enab'; }).map(function (p) {
+      var pi = inc * costP(p, b) / (costP(p, b) + p.kom) / (1 + P.enabShare), t = clone(bud);
+      t[p.id] = (t[p.id] || 0) + pi; t.enab = (t.enab || 0) + pi * P.enabShare;
+      var r = run(b, t, P), a = r[r.length - 1], dS = a.supT - a0.supT;
+      return {p: p, dD: a.D - a0.D, dA: a.A - a0.A, dS: dS, dSm: a.VLs - a0.VLs, d1: a.p1 - a0.p1, d2: a.p2 - a0.p2, d3: a.p3 - a0.p3, dSif: a.sifTx - a0.sifTx, dInf: cum(r0) - cum(r), cps: dS > .5 ? inc * 4 / dS : null};
+    }).sort(function (x, y) { return (x.cps == null ? 1e18 : x.cps) - (y.cps == null ? 1e18 : y.cps); });
+  }
+  return {GF9: GF9, PKG: PKG, IDS: IDS, GRP: GRP, DEF: DEF, TYP: TYP, tierOf: tierOf, base: base, baseBud: baseBud, total: total, komNeed: komNeed, run: run, optimize: optimize, vfm: vfm, score: score, costP: costP, clone: clone};
+})();
+
+SIM.paket = {
+  y: false, custom: true,
+  P: function (p) { var P = PKM.clone(PKM.DEF); ['absorb', 'reDx', 'traceReturn', 'cohortClean', 'beta'].forEach(function (k) { if (p.as && p.as[k] != null) P[k] = p.as[k]; }); return P; },
+  ctx: function (p) { var P = this.P(p), b = PKM.base(S.area, p.as || {}); return {P: P, b: b, bb: PKM.baseBud(b, P)}; },
+  get: function () {
+    S.sx = S.sx || {}; var key = sxKey('paket', false), p = S.sx[key];
+    if (!p || !p.bud) { var as0 = (p && p.as) || {}; p = S.sx[key] = {as: as0, pre: 'sq'}; var c = this.ctx(p); p.bud = c.bb; }
+    return p;
+  },
+  preset: function (p, k) {
+    var c = this.ctx(p), T = PKM.total(c.bb), m = {cut: .75, p25: 1.25, p50: 1.5}[k];
+    if (k === 'sq') p.bud = PKM.clone(c.bb);
+    else if (m) { p.bud = {}; PKM.IDS.forEach(function (id) { p.bud[id] = c.bb[id] * m; }); }
+    else if (k === 'opt') p.bud = PKM.optimize(c.b, c.P, T, .5);
+    else if (k === 'opt2') p.bud = PKM.optimize(c.b, c.P, T * 2, 1);
+    else if (k === 'ran') {
+      var ok = function (bd) { var r = PKM.run(c.b, bd, c.P)[4], R = r.ran; return r.D >= R.D && r.A >= R.A && r.VLs >= R.VLs; }, lo = .5, hi = 8, best = PKM.optimize(c.b, c.P, T * hi, 1);
+      if (!ok(best)) { p.bud = best; p.msg = L('Target RAN 2029 belum tercapai bahkan dengan 8× anggaran status quo. Lihat indikator yang tertinggal di tabel target.', 'The 2029 RAN targets are not met even with 8× the status quo budget. See the lagging indicators in the target table.'); }
+      else { for (var i = 0; i < 7; i++) { var mm = (lo + hi) / 2, bd = PKM.optimize(c.b, c.P, T * mm, mm < 1 ? .5 : 1); if (ok(bd)) { hi = mm; best = bd; } else lo = mm; } p.bud = best; p.msg = L('Anggaran minimum (alokasi optimal) untuk memenuhi target RAN 2029 tahu status, on ART, dan VL tersupresi: ', 'Minimum budget (optimal allocation) to meet the 2029 RAN targets for knowing status, on ART and VL suppressed: ') + rupiah(PKM.total(best)) + L(' per tahun (', ' per year (') + num1(hi, 1) + L('× status quo).', '× status quo).'); }
+    }
+    if (k !== 'ran') p.msg = '';
+    p.pre = k;
+  },
+  form: function (p) {
+    var c = this.ctx(p), tr = c.b.tier, bb = c.bb;
+    var tl = {A: [L('Data lengkap', 'Complete data'), 'green', L('SIHA Juni 2026 (kaskade, tes dan positivitas per populasi, linkage, VL, sifilis, TPT) dan realisasi hibah GF GC7 untuk 9 KK dampingan GF di Tanah Papua.', 'SIHA June 2026 (cascade, tests and positivity by population, linkage, VL, syphilis, TPT) and Global Fund GC7 expenditure for the 9 GF-supported districts in Tanah Papua.')],
+      B: [L('Data sebagian: tipologi Papua', 'Partial data: Papua typology'), 'amber', L('Target dan estimasi RAN wilayah ini, ditambah capaian kaskade Tanah Papua 2025 (RAN Gambar I-5: 47-41-36%) dan parameter yang dikalibrasi dari 9 KK GF. Epidemi meluas; biaya program memakai tarif Papua.', 'This area\'s RAN targets and estimates, plus the Tanah Papua 2025 cascade (RAN Figure I-5: 47-41-36%) and parameters calibrated on the 9 GF districts. Generalised epidemic; programme costs use Papua rates.')],
+      C: [L('Data minimal: rata-rata nasional', 'Minimal data: national averages'), 'red', L('Target dan estimasi RAN wilayah ini, ditambah capaian nasional 2025 (67% tahu status, 72% on ART, cakupan VL 56%, supresi 95% di antara yang dites; linkage 79,5%). Epidemi terkonsentrasi; biaya program 75% dari tarif Papua.', 'This area\'s RAN targets and estimates, plus the 2025 national cascade (67% know status, 72% on ART, 56% VL coverage, 95% suppressed among those tested; 79.5% linkage). Concentrated epidemic; programme costs at 75% of Papua rates.')]}[tr.t];
+    var badge = '<div class="alert ' + (tr.t === 'A' ? 'green' : tr.t === 'B' ? 'amber' : 'gray') + '" style="font-size:14px"><span class="tag ' + tl[1] + '">' + (tr.t === 'A' ? 'A' : tr.t === 'B' ? 'B' : 'C') + ' · ' + tl[0] + '</span> ' + (tr.user ? '<span class="tag teal">' + L('+ kaskade dari isian SIHA Anda', '+ cascade from your SIHA entries') + '</span>' : '') + '<br>' + tl[2] +
+      (tr.t !== 'A' ? '<br><b>' + L('Kalibrasi lokal:', 'Local calibration:') + '</b> ' + (tr.user ? L('kaskade awal memakai isian Anda di simulasi Kaskade.', 'the starting cascade uses your entries in the Cascade simulation.') : L('isi capaian SIHA di simulasi Kaskade (kartu 1); kaskade awal di sini otomatis ikut.', 'enter SIHA achievements in the Cascade simulation (card 1); the starting cascade here updates automatically.')) + ' <button type="button" class="small ghost" id="pkToK">' + L('Buka Kaskade', 'Open Cascade') + '</button>' : '') + '</div>';
+    var pres = [['sq', L('Status quo', 'Status quo')], ['cut', L('Dipotong 25%', 'Cut 25%')], ['p25', '+25%'], ['p50', '+50%'], ['opt', L('Realokasi optimal', 'Optimal reallocation')], ['opt2', L('2× optimal', '2× optimal')], ['ran', L('Minimum untuk target RAN 2029', 'Minimum for 2029 RAN targets')]];
+    var mx = function (id) { return Math.max(4 * bb[id], 50e6); };
+    var sl = '', gi = -1;
+    PKM.PKG.forEach(function (q) {
+      if (q.grp !== gi) { gi = q.grp; sl += '<h4 style="margin:14px 0 4px">' + PKM.GRP[gi] + '</h4>'; }
+      var m = mx(q.id), st = Math.max(1e6, Math.round(m / 300 / 1e6) * 1e6), val = p.bud[q.id] || 0;
+      sl += '<div class="field" style="margin:6px 0"><label for="pk_' + q.id + '" style="display:flex;justify-content:space-between;gap:8px"><span><span class="tag">' + q.no + '</span> ' + esc(q.n) + '</span><b id="pk_' + q.id + 'V" style="white-space:nowrap">' + rupiah(val) + '</b></label>' +
+        '<input type="range" id="pk_' + q.id + '" min="0" max="' + Math.round(m / 1e6) + '" step="' + Math.max(1, st / 1e6) + '" value="' + Math.round(val / 1e6) + '" style="width:100%;accent-color:var(--teal2)">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><small id="pk_' + q.id + 'U"></small><small>' + L('status quo ', 'status quo ') + rupiah(bb[q.id]) + '</small></div></div>';
+    });
+    var asf = [['absorb', L('Serapan anggaran', 'Budget absorption'), 50, 100, PKM.DEF.absorb], ['reDx', L('Porsi "ditemukan" yang sebenarnya tes ulang ODHIV lama', 'Share of "found" who are re-tests of known PLHIV'), 0, 60, PKM.DEF.reDx], ['traceReturn', L('ODHIV dilacak yang kembali ART', 'Traced PLHIV who return to ART'), 5, 70, PKM.DEF.traceReturn], ['cohortClean', L('Validasi kohort 2027: porsi pool tahu-status-tidak-ART yang ternyata meninggal/pindah', '2027 cohort validation: share of the know-status-not-on-ART pool found dead/moved'), 0, 50, 0], ['link', L('Linkage awal (mulai ART dari yang ditemukan)', 'Starting linkage (ART start among those found)'), 30, 98, c.b.ty.link], ['ltfu', L('Laju putus ART per tahun', 'ART drop-out per year'), 2, 30, c.b.ty.ltfu], ['cost', L('Indeks biaya program (Papua = 100)', 'Programme cost index (Papua = 100)'), 40, 150, c.b.ty.cost]];
+    var asHtml = '<details style="margin-top:12px"><summary><b>' + L('Asumsi utama (bisa diubah)', 'Key assumptions (editable)') + '</b></summary>' + asf.map(function (f) { var v0 = p.as[f[0]] != null ? p.as[f[0]] : f[4]; return '<div class="field" style="margin:6px 0"><label for="pka_' + f[0] + '">' + f[1] + ': <b><span id="pka_' + f[0] + 'V">' + Math.round(v0 * 100) + '</span>%</b></label><input type="range" id="pka_' + f[0] + '" min="' + f[2] + '" max="' + f[3] + '" value="' + Math.round(v0 * 100) + '" style="width:100%;accent-color:var(--teal2)"></div>'; }).join('') + '<button type="button" class="small ghost" id="pkAsR">' + L('Kembalikan asumsi', 'Reset assumptions') + '</button></details>';
+    return badge + '<div class="chips" style="margin:6px 0 4px">' + pres.map(function (x) { return '<button type="button" class="chip' + (p.pre === x[0] ? ' on' : '') + '" data-pkp="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+      (p.msg ? '<div class="alert teal" style="font-size:14px">' + esc(p.msg) + '</div>' : '') +
+      '<p style="font-size:14px;margin:8px 0 0">' + L('Anggaran komponen program per tahun mulai 2027. Komoditas (ARV, reagen, tes cepat, obat) dihitung terpisah sebagai kebutuhan pendamping APBN.', 'Programme-component budget per year from 2027. Commodities (ARVs, reagents, rapid tests, drugs) are calculated separately as APBN co-requirements.') + '</p>' + sl + asHtml;
+  },
+  bindForm: function (root, p, onchg) {
+    var self = this, c = this.ctx(p);
+    var units = function () { PKM.PKG.forEach(function (q) { var e = $('#pk_' + q.id + 'U', root); if (!e) return; if (q.id === 'enab') { var pr = PKM.total(p.bud) - (p.bud.enab || 0); e.textContent = pct((p.bud.enab || 0) / Math.max(1, pr)) + L(' dari anggaran program (saran 15%)', ' of programme budget (15% suggested)'); } else e.textContent = '≈ ' + fmt((p.bud[q.id] || 0) * c.P.absorb / PKM.costP(q, c.b)) + ' ' + q.u; }); };
+    PKM.PKG.forEach(function (q) { var e = $('#pk_' + q.id, root); if (!e) return; e.oninput = function () { p.bud[q.id] = +e.value * 1e6; $('#pk_' + q.id + 'V', root).textContent = rupiah(p.bud[q.id]); if (p.pre !== 'custom') { p.pre = 'custom'; p.msg = ''; $$('[data-pkp]', root).forEach(function (x) { x.classList.remove('on'); }); } units(); save(); onchg(); }; });
+    $$('[data-pkp]', root).forEach(function (x) { x.onclick = function () { x.textContent = L('Menghitung…', 'Calculating…'); setTimeout(function () { self.preset(p, x.dataset.pkp); save(); render(); }, 20); }; });
+    $$('[id^="pka_"]', root).forEach(function (e) { if (/V$/.test(e.id)) return; var k = e.id.slice(4); e.oninput = function () { p.as[k] = +e.value / 100; $('#pka_' + k + 'V', root).textContent = e.value; save(); clearTimeout(self._t); self._t = setTimeout(function () { var pr = p.pre; self.preset(p, pr === 'custom' || pr === 'ran' ? 'sq' : pr); save(); render(); }, 450); }; });
+    var r = $('#pkAsR', root); if (r) r.onclick = function () { p.as = {}; self.preset(p, 'sq'); save(); render(); };
+    var k = $('#pkToK', root); if (k) k.onclick = function () { S.simTab = 'kaskade'; save(); render(); };
+    units();
+  },
+  calc: function (p) {
+    var c = this.ctx(p), b = c.b, P = c.P, rows = PKM.run(b, p.bud, P), sq = PKM.run(b, c.bb, P);
+    var yi = Math.max(1, Math.min(4, S.year - 2025)), a = rows[yi], q = sq[yi], R = a.ran, aE = rows[5], qE = sq[5], a0 = rows[0];
+    var prog = PKM.total(p.bud), prog0 = PKM.total(c.bb), kom = PKM.komNeed(p.bud, b, P), need = needCalc(S.area, S.year), artBase = a.A * C.dana.uc.pdp;
+    var col = function (x, t) { return x >= t ? 'green' : x >= .8 * t ? 'amber' : 'red'; };
+    var k3 = [[L('Tahu status', 'Know status'), 'p1'], [L('On ART', 'On ART'), 'p2'], [L('VL tersupresi', 'VL suppressed'), 'p3']];
+    var html = '<div class="grid g3">' + k3.map(function (x) { return kpiS(pct(a[x[1]], 1), x[0] + ' ' + a.lbl + ' · ' + L('target RAN ', 'RAN target ') + pct(R[x[1]], 1) + ' · ' + L('status quo ', 'status quo ') + pct(q[x[1]], 1), col(a[x[1]], R[x[1]])); }).join('') + '</div>' +
+      '<p class="note">' + L('Angka ke-3 = ODHIV on ART dengan hasil VL tersupresi ÷ ODHIV on ART (definisi SIHA/RAN). Pilih tahun lewat pita wilayah di atas. Awal: ', 'Third figure = PLHIV on ART with a suppressed VL result ÷ PLHIV on ART (SIHA/RAN definition). Choose the year in the area bar above. Start: ') + pct(a0.p1) + ' · ' + pct(a0.p2) + ' · ' + pct(a0.p3) + (b.tier.t === 'A' ? L(' (SIHA Juni 2026).', ' (SIHA June 2026).') : L(' (estimasi tipologi).', ' (typology estimate).')) + '</p>' +
+      '<h3 style="margin-top:14px">' + L('Kaskade ', 'Cascade ') + esc(areaShort()) + ' ' + a.lbl + L(': skenario vs target RAN', ': scenario vs RAN target') + '</h3><div class="fig" id="sxFig" style="height:280px"></div>';
+    var legC = [{name: L('Target RAN', 'RAN target'), color: '#0b5c63'}, {name: L('Status quo', 'Status quo'), color: '#9DB3B2'}, {name: L('Skenario', 'Scenario'), color: '#d99a1e'}];
+    // tabel target RAN
+    var ind = [[L('ODHIV hidup tahu status', 'PLHIV alive who know status'), 'D'], [L('ODHIV on ART', 'PLHIV on ART'), 'A'], [L('On ART dites VL', 'On ART tested for VL'), 'vlT'], [L('On ART VL tersupresi', 'On ART VL suppressed'), 'VLs'], [L('Mulai ART per tahun', 'ART starts per year'), 'init'], [L('ODHIV ditemukan per tahun', 'PLHIV found per year'), 'newDx'], [L('Tes HIV per tahun', 'HIV tests per year'), 'tests']];
+    var cl = function (x, t) { var r = x / Math.max(1, t); return '<td class="n" style="' + (r >= 1 ? 'color:var(--green);font-weight:700' : r < .8 ? 'color:var(--red)' : '') + '">' + fmt(x) + '<br><small>' + pct(r) + '</small></td>'; };
+    var yrs = [1, 2, 3, 4];
+    html += '<h3 style="margin-top:18px">' + L('Capaian terhadap target RAN 2026–2029', 'Achievement against 2026–2029 RAN targets') + '</h3>' +
+      '<div class="scroll"><table><thead><tr><th>' + L('Indikator', 'Indicator') + '</th>' + yrs.map(function (i) { return '<th class="n">' + (2025 + i) + ' target</th><th class="n">' + L('skenario', 'scenario') + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      ind.map(function (x) { return '<tr><td style="min-width:150px">' + x[0] + '</td>' + yrs.map(function (i) { var t = rows[i].ran[x[1]]; return '<td class="n"><b>' + fmt(t) + '</b></td>' + cl(rows[i][x[1]], t); }).join('') + '</tr>'; }).join('') + '</tbody></table></div>' +
+      '<p class="note">' + L('Target 2026 dibandingkan dengan proyeksi Desember 2026 (semester kedua 2026 berjalan dengan anggaran status quo). Hijau = target tercapai, merah = di bawah 80% target.', 'The 2026 target is compared with the December 2026 projection (the second half of 2026 runs on the status quo budget). Green = target met, red = below 80% of target.') + '</p>';
+    // lintasan
+    html += '<h3 style="margin-top:18px">' + L('Lintasan tiga angka 95', 'Path of the three 95s') + '</h3><div class="fig" id="pkFig2" style="height:250px"></div>';
+    // biaya
+    html += '<h3 style="margin-top:18px">' + L('Biaya dan kebutuhan', 'Costs and needs') + '</h3>' + tbl([L('Komponen', 'Component'), L('Per tahun', 'Per year')], [
+      [L('Anggaran program skenario (paket P1–P11)', 'Scenario programme budget (packages P1–P11)'), '<b>' + rupiah(prog) + '</b>'],
+      [L('Selisih terhadap status quo', 'Difference from status quo'), (prog >= prog0 ? '+' : '−') + rupiah(Math.abs(prog - prog0))],
+      [L('Komoditas pendamping (APBN)', 'Commodity co-requirement (APBN)'), rupiah(kom)],
+      [L('Layanan ART dasar ', 'Basic ART services ') + a.lbl + L(' (on ART × unit cost PDP RAN Rp6.977.768)', ' (on ART × RAN treatment unit cost IDR 6,977,768)'), rupiah(artBase)],
+      [L('Pembanding: kebutuhan RAN ', 'Reference: RAN need ') + S.year + L(' (unit cost NHA/ICA, 3 domain)', ' (NHA/ICA unit costs, 3 domains)'), rupiah(need.total.need)],
+      [L('Pembanding: ketersediaan domestik RAN ', 'Reference: RAN domestic availability ') + S.year, rupiah(need.total.avail)]], 1) +
+      '<p class="note">' + L('Biaya paket tidak sama dengan domain RAN: paket berisi komponen program yang dapat didanai donor/APBD; kebutuhan RAN mencakup seluruh layanan termasuk ARV dan JKN.', 'Package costs are not RAN domains: packages are programme components fundable by donors/APBD; the RAN need covers all services including ARVs and JKN.') + '</p>';
+    // VfM
+    var inc = Math.max(50e6, Math.round(prog0 * .1 / 50e6) * 50e6), vf = PKM.vfm(b, P, p.bud, inc), mxS = Math.max.apply(null, vf.map(function (x) { return Math.max(0, x.dS); }).concat([1]));
+    html += '<h3 style="margin-top:18px">' + L('Mana yang paling value for money?', 'Which gives the best value for money?') + '</h3><p style="font-size:14px">' + L('Efek tambahan ', 'Effect of adding ') + rupiah(inc) + L(' per tahun (biaya penuh: program + komoditas + penguatan sistem) pada tiap paket, hasil 2030, diurutkan menurut biaya per tambahan ODHIV tersupresi (estimasi riil).', ' per year (full cost: programme + commodities + systems) to each package, 2030 result, sorted by cost per additional suppressed PLHIV (true estimate).') + '</p>' +
+      '<div class="scroll"><table><thead><tr><th>' + L('Paket', 'Package') + '</th><th class="n">+ ' + L('tahu status', 'know status') + '</th><th class="n">+ on ART</th><th class="n">+ ' + L('tersupresi', 'suppressed') + '</th><th style="min-width:80px"></th><th class="n">' + L('Δ 95 ke-3 terukur', 'Δ measured 3rd 95') + '</th><th class="n">+ ' + L('sifilis diobati', 'syphilis treated') + '</th><th class="n">' + L('Biaya / +1 tersupresi', 'Cost / +1 suppressed') + '</th></tr></thead><tbody>' +
+      vf.map(function (x, i) { var sg = function (v) { return (v >= 0 ? '+' : '−') + fmt(Math.abs(v)); }; return '<tr' + (i < 3 && x.cps ? ' class="hl"' : '') + '><td><span class="tag">' + x.p.no + '</span> ' + esc(x.p.n) + '</td><td class="n">' + sg(x.dD) + '</td><td class="n">' + sg(x.dA) + '</td><td class="n"><b>' + sg(x.dS) + '</b></td><td><div style="height:9px;border-radius:3px;background:var(--teal2);width:' + Math.max(0, x.dS) / mxS * 100 + '%"></div></td><td class="n">' + (x.d3 >= 0 ? '+' : '−') + num1(Math.abs(x.d3 * 100), 1) + L(' poin', ' pts') + '</td><td class="n">' + sg(x.dSif) + '</td><td class="n">' + (x.cps ? rupiah(x.cps) : L('tidak langsung', 'indirect')) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      (b.tier.t === 'A' ? '' : '<div class="alert ' + (b.tier.t === 'B' ? 'amber' : 'gray') + '" style="font-size:14px">' + L('Peringkat ini memakai positivitas target RAN per populasi wilayah ini dan parameter tipologi. Di luar Papua, tes populasi kunci (P1) biasanya jauh lebih efisien daripada di Papua karena epidemi terkonsentrasi. Kalibrasi dengan data SIHA sebelum dipakai untuk keputusan.', 'This ranking uses this area\'s RAN target positivity by population and typology parameters. Outside Papua, key-population testing (P1) is usually far more efficient than in Papua because the epidemic is concentrated. Calibrate with SIHA data before using it for decisions.') + '</div>');
+    // sifilis & lainnya
+    html += '<h3 style="margin-top:18px">' + L('Sifilis, TB-HIV dan pencegahan, ', 'Syphilis, TB-HIV and prevention, ') + a.lbl + '</h3>' + tbl([L('Indikator', 'Indicator'), L('Awal', 'Start'), 'Status quo', L('Skenario', 'Scenario')], [
+      [L('Ibu hamil dites (cakupan, estimasi bumil KMK)', 'Pregnant women tested (coverage, KMK estimate)'), pct(a0.ancCov), pct(q.ancCov), '<b>' + pct(a.ancCov) + '</b>'],
+      [L('Kasus sifilis diobati', 'Syphilis cases treated'), pct(a0.sifPct), pct(q.sifPct), '<b>' + pct(a.sifPct) + '</b>'],
+      [L('Ibu hamil sifilis diobati', 'Pregnant women with syphilis treated'), pct(a0.ancSifPct), pct(q.ancSifPct), '<b>' + pct(a.ancSifPct) + '</b>'],
+      [L('ODHIV on ART pernah TPT', 'PLHIV on ART ever given TPT'), pct(a0.tptCov), pct(q.tptCov), '<b>' + pct(a.tptCov) + '</b>'],
+      [L('Infeksi baru HIV 2027–2030', 'New HIV infections 2027–2030'), '–', fmt(sq.slice(2).reduce(function (s, x) { return s + x.newInf; }, 0)), '<b>' + fmt(rows.slice(2).reduce(function (s, x) { return s + x.newInf; }, 0)) + '</b>']], 1);
+    var self = this;
+    return {html: html,
+      draw: function (box) { barChart(box, {cats: [L('Tahu status', 'Know status'), 'On ART', L('VL tersupresi', 'VL suppressed')], series: [{name: legC[0].name, vals: [R.D, R.A, R.VLs], color: legC[0].color}, {name: legC[1].name, vals: [q.D, q.A, q.VLs], color: legC[1].color}, {name: legC[2].name, vals: [a.D, a.A, a.VLs], color: legC[2].color}], labels: true, lfmt: function (x) { return shortN(x); }, label: L('Kaskade skenario vs target RAN', 'Scenario cascade vs RAN target')}); },
+      leg: legC,
+      bind: function (out) {
+        var f2 = $('#pkFig2', out); if (!f2) return;
+        var cats = rows.map(function (r, i) { return i === 0 ? L('Awal', 'Start') : i === 1 ? '2026' : String(r.yr); });
+        lineChart(f2, {cats: cats, zero: true, series: [{name: L('1 Tahu status', '1 Know status'), vals: rows.map(function (r) { return Math.round(r.p1 * 100); }), color: '#0f7d84'}, {name: L('2 On ART', '2 On ART'), vals: rows.map(function (r) { return Math.round(r.p2 * 100); }), color: '#3f8f2a'}, {name: L('3 VL tersupresi', '3 VL suppressed'), vals: rows.map(function (r) { return Math.round(r.p3 * 100); }), color: '#d99a1e'}, {name: L('Target RAN on ART', 'RAN on-ART target'), vals: rows.map(function (r) { return r.ran ? Math.round(r.ran.p2 * 100) : null; }), color: '#3f8f2a', dash: true}],
+          lfmt: function (v) { return v + '%'; }, label: L('Lintasan 95-95-95', '95-95-95 path')});
+        f2.insertAdjacentHTML('afterend', legend([{name: L('1 Tahu status', '1 Know status'), color: '#0f7d84'}, {name: L('2 On ART', '2 On ART'), color: '#3f8f2a'}, {name: L('3 VL tersupresi', '3 VL suppressed'), color: '#d99a1e'}, {name: L('Garis putus: target RAN on ART', 'Dashed: RAN on-ART target'), color: '#9DB3B2'}]));
+      },
+      sum: L('Paket intervensi ', 'Intervention packages ') + areaShort() + ' [' + L('data ', 'data ') + b.tier.t + ']: ' + L('anggaran program ', 'programme budget ') + rupiah(prog) + L('/tahun (status quo ', '/year (status quo ') + rupiah(prog0) + '). ' + a.lbl + ': ' + pct(a.p1) + '-' + pct(a.p2) + '-' + pct(a.p3) + L(' vs target RAN ', ' vs RAN target ') + pct(R.p1) + '-' + pct(R.p2) + '-' + pct(R.p3) + '. 2030: ' + pct(aE.p1) + '-' + pct(aE.p2) + '-' + pct(aE.p3) + L(' (status quo ', ' (status quo ') + pct(qE.p1) + '-' + pct(qE.p2) + '-' + pct(qE.p3) + '). ' + L('Paket paling efisien: ', 'Most efficient packages: ') + vf.filter(function (x) { return x.cps; }).slice(0, 3).map(function (x) { return x.p.no; }).join(', ') + '.'};
+  },
+  note: function () { return L('<p><b>Model.</b> Kohort kaskade per wilayah: tes per modalitas × positivitas (turun saat ODHIV belum terdiagnosis berkurang) → ODHIV ditemukan → mulai ART sesuai linkage → putus ART masuk pool "tahu status, tidak ART" → kembali lewat pelacakan. Supresi naik bila ODHIV dengan VL tinggi teridentifikasi lewat tes VL dan ditangani EAC. Langkah pertama Juli–Desember 2026 memakai anggaran status quo; skenario berlaku 2027–2030. Penyebut tiap tahun = estimasi ODHIV RAN. Alokasi optimal membagi tambahan dana bertahap ke paket dengan kenaikan skor terbesar (80% rata-rata tiga angka 95, 20% cakupan tes ibu hamil); pengobatan sifilis mengikuti kasus yang ditemukan; setiap tambahan disertai 15% penguatan sistem.</p><p><b>Tiga tingkat data.</b> A = 9 KK dampingan GF di Tanah Papua (SIHA Juni 2026, realisasi GF GC7). B = KK/provinsi lain di Tanah Papua (target RAN + tipologi Papua: RAN Gambar I-5 dan kalibrasi 9 KK). C = luar Papua (target RAN + capaian nasional 2025: 67% tahu status, 72% on ART, VL 56%, supresi 95% di antara yang dites, linkage 79,5%, TPT 21%). Volume tes status quo = target tes RAN 2026 × 60% di luar Papua (realisasi nasional 2024: 6,99 juta tes, RAN Tabel IV-3, ÷ target 2026 11,4 juta) dan × 80% untuk KK Papua tanpa data SIHA. Laju putus ART luar Papua 7% per tahun dipilih agar porsi on ART di antara yang tahu status tetap sekitar 72% pada status quo, sesuai tren nasional. Positivitas per populasi diambil dari target temuan ÷ target tes RAN wilayah ini. Isian SIHA di simulasi Kaskade otomatis menggantikan kaskade awal B/C.</p><p><b>Biaya.</b> Biaya program per unit dari pos belanja GF GC7 Papua (operasional VL Rp200 ribu/sampel, kurir Rp72 ribu, transport lokal Rp170 ribu, uang harian Rp95 ribu) ditambah asumsi tenaga; luar Papua memakai indeks 75%. Pembanding: unit cost RAN Bab IV, yaitu historis NHA 2021–2024 (pencegahan Rp280.284, tes Rp62.854, PDP Rp7.979.998) dan kebutuhan NHA–ICA 2024 (Rp826.583, Rp114.209, Rp6.977.768).</p><p><b>Efek intervensi.</b> Pelacakan LTFU mengembalikan sekitar 39% pasien (Mirzazadeh dkk., PLoS Med 2022); dukungan sebaya menaikkan retensi 12 bulan (RR 1,07–1,14; Berg dkk., PLoS ONE 2021); sekitar 46–50% ODHIV dengan VL tinggi kembali tersupresi setelah EAC (Ford dkk., JIAS 2019); index testing memberi positivitas jauh di atas modalitas lain (CDC MMWR 2019).</p><p><b>Keterbatasan.</b> Hasil B dan C adalah perkiraan berbasis tipologi, bukan kalibrasi lokal. Kohort SIHA dapat memuat ODHIV yang sudah meninggal/pindah sehingga angka 95 kedua tampak lebih rendah. Proyeksi untuk membandingkan pilihan alokasi, bukan prediksi pasti.</p>',
+    '<p><b>Model.</b> Area-level cascade cohort: tests by modality × positivity (falling as undiagnosed PLHIV decline) → PLHIV found → ART start by linkage → drop-outs enter the "know status, not on ART" pool → return through tracing. Suppression rises when PLHIV with high VL are identified by VL testing and managed with EAC. The first step (July–December 2026) uses the status quo budget; scenarios apply 2027–2030. The denominator each year = RAN PLHIV estimate. Optimal allocation adds money step by step to the package with the largest score gain (80% mean of the three 95s, 20% pregnant-women testing coverage); syphilis treatment follows cases found; every addition carries 15% systems strengthening.</p><p><b>Three data tiers.</b> A = the 9 GF-supported districts in Tanah Papua (SIHA June 2026, GF GC7 expenditure). B = other districts/provinces in Tanah Papua (RAN targets + Papua typology: RAN Figure I-5 and calibration on the 9 districts). C = outside Papua (RAN targets + 2025 national cascade: 67% know status, 72% on ART, 56% VL, 95% suppressed among tested, 79.5% linkage, 21% TPT). Status quo testing volume = RAN 2026 testing target × 60% outside Papua (2024 national actual: 6.99 million tests, RAN Table IV-3, ÷ 2026 target of 11.4 million) and × 80% for Papua districts without SIHA data. The 7% annual ART drop-out outside Papua was chosen so the on-ART share among those who know their status stays around 72% under the status quo, in line with the national trend. Positivity by population = RAN case-finding target ÷ RAN testing target for this area. SIHA entries in the Cascade simulation automatically replace the B/C starting cascade.</p><p><b>Costs.</b> Programme unit costs from Papua GF GC7 budget lines (VL operations IDR 200k/sample, courier IDR 72k, local transport IDR 170k, per diem IDR 95k) plus staffing assumptions; outside Papua uses a 75% index. Reference: RAN Chapter IV unit costs, historical NHA 2021–2024 (prevention IDR 280,284, testing IDR 62,854, treatment IDR 7,979,998) and NHA–ICA 2024 need (IDR 826,583, 114,209, 6,977,768).</p><p><b>Intervention effects.</b> LTFU tracing returns about 39% of patients (Mirzazadeh et al., PLoS Med 2022); peer support raises 12-month retention (RR 1.07–1.14; Berg et al., PLoS ONE 2021); about 46–50% of PLHIV with high VL re-suppress after EAC (Ford et al., JIAS 2019); index testing yields far higher positivity than other modalities (CDC MMWR 2019).</p><p><b>Limitations.</b> Tier B and C results are typology-based estimates, not local calibration. The SIHA cohort may include PLHIV who have died or moved, making the second 95 look lower. Projections compare allocation options; they are not firm predictions.</p>'); }
+};
+
 /* ---------- tampilan & pengikat ---------- */
 function vSimulasi() {
   var tab = S.simTab || 'kaskade', cur = SXL.filter(function (x) { return x.k === tab; })[0] || SXL[0];
   var cards = '<div class="simcards" id="simCards">' + SXL.map(function (x, i) { return '<button type="button" class="simcard' + (x.k === tab ? ' on' : '') + '" data-sx="' + x.k + '" aria-pressed="' + (x.k === tab) + '"><span class="simno">' + (i + 1) + '</span>' + FI(x.ic, x.tone, 46) + '<b>' + x.t + '</b><span class="sd">' + x.d + '</span><span class="sg">' + x.g + '</span><span class="sw">' + L('Untuk: ', 'For: ') + x.w + '</span></button>'; }).join('') + '</div>';
-  var head = '<section class="band" style="padding-bottom:6px"><div class="wrap"><div class="titleic">' + FI('sliders', 'amber', 52) + '<div><h1 style="margin:0">' + L('Simulasi perencanaan', 'Planning simulations') + '</h1><p class="mute" style="margin:4px 0 0">' + L('Sembilan simulasi untuk menguji strategi, anggaran, dan target ', 'Nine simulations to test strategies, budgets and targets for ') + esc(areaShort()) + ' ' + S.year + L('. Pilih satu kartu; semua isian tersimpan otomatis di perangkat ini.', '. Choose a card; all entries are saved automatically on this device.') + '</p></div></div>' + cards + '</div></section>';
+  var head = '<section class="band" style="padding-bottom:6px"><div class="wrap"><div class="titleic">' + FI('sliders', 'amber', 52) + '<div><h1 style="margin:0">' + L('Simulasi perencanaan', 'Planning simulations') + '</h1><p class="mute" style="margin:4px 0 0">' + L('Sepuluh simulasi untuk menguji strategi, anggaran, dan target ', 'Ten simulations to test strategies, budgets and targets for ') + esc(areaShort()) + ' ' + S.year + L('. Pilih satu kartu; semua isian tersimpan otomatis di perangkat ini.', '. Choose a card; all entries are saved automatically on this device.') + '</p></div></div>' + cards + '</div></section>';
   if (tab === 'kaskade') return head + '<div id="simBody">' + vSimKaskade().replace('<h1 style="margin:0">', '<h2 style="margin:0">').replace('</h1>', '</h2>') + '</div>';
   var sm = SIM[tab], form, p;
   if (sm.custom) { p = sm.get(); form = sm.form(p); } else { var spec = sm.spec(); p = sxP(tab, spec, sm.y); form = spec.map(function (f) { return sxField(f, p, tab); }).join(''); }
