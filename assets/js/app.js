@@ -94,7 +94,12 @@
   const banner = k => { const p = photo(k); return p ? '<figure class="page-photo"><div class="wrap"><div class="pp-frame"><img onerror="this.closest(\'figure\').remove()" src="' + esc(API.img(p.src, 2000)) + '" alt="' + esc(p.alt || "") + '" decoding="async"></div>' + credit(p) + "</div></figure>" : ""; };
   const pageTop = (title, lead) => '<header class="page-top"><div class="wrap"><h1>' + esc(title) + "</h1>" + (lead ? "<p>" + esc(lead) + "</p>" : "") + "</div></header>";
   const secHead = (title, link) => '<div class="sec-head"><h2>' + esc(title) + "</h2>" + (link ? '<a class="see-all" href="' + link + '">' + esc(t("all")) + "</a>" : "") + "</div>";
-  const msg = k => '<p class="state">' + esc(t(k)) + "</p>";
+  const msg = k => k === "loading" ? '<p class="state ld-line"><span class="ld-spin" aria-hidden="true"></span>' + esc(t(k)) + "</p>" : '<p class="state">' + esc(t(k)) + "</p>";
+  /* shimmering placeholders while lists and articles load */
+  const skelCards = n => '<p class="sr-only" role="status">' + esc(t("loading")) + '</p><ul class="skel-grid" aria-hidden="true">' +
+    Array.from({ length: n }, () => '<li class="skel-card"><div class="skel"></div><div class="skel ln s"></div><div class="skel ln t"></div><div class="skel ln"></div><div class="skel ln s"></div></li>').join("") + "</ul>";
+  const skelArticle = () => '<p class="sr-only" role="status">' + esc(t("loading")) + '</p><div class="skel-card" aria-hidden="true" style="gap:16px"><div class="skel ln s" style="width:30%"></div><div class="skel ln t" style="height:38px;width:90%"></div>' +
+    '<div class="skel ln t" style="height:38px;width:60%"></div><div class="skel" style="aspect-ratio:16/9;margin:10px 0"></div><div class="skel-rows"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></div>';
   const errMsg = () => '<p class="state err">' + esc(t("error.load")) + "</p>";
   async function safeList(type) { try { return await API.list(type); } catch (e) { console.error(e); return null; } }
 
@@ -155,7 +160,7 @@
   /* ---------- latest feed with tabs ---------- */
   async function buildLatest(hostId, limit) {
     const host = document.getElementById(hostId);
-    host.innerHTML = msg("loading");
+    host.innerHTML = skelCards(Math.min(limit || 3, innerWidth < 700 ? 1 : 3));
     const [news, pubs, proj] = await Promise.all([safeList("news"), safeList("publications"), safeList("projects")]);
     if (!news && !pubs && !proj) { host.innerHTML = errMsg(); return; }
     const all = [].concat((news || []).map(r => toItem("news", r)), (pubs || []).map(r => toItem("publications", r)), (proj || []).map(r => toItem("projects", r))).sort(byDate);
@@ -801,7 +806,7 @@
     },
 
     async article(id) {
-      app.innerHTML = '<section class="sec"><div class="wrap narrow">' + msg("loading") + "</div></section>";
+      app.innerHTML = '<section class="sec"><div class="wrap narrow">' + skelArticle() + "</div></section>";
       const rows = await safeList("news");
       if (!rows) { app.innerHTML = '<section class="sec"><div class="wrap narrow">' + errMsg() + "</div></section>"; return; }
       const n = rows.find(r => String(r.id) === id);

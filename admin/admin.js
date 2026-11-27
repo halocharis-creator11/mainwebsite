@@ -201,7 +201,7 @@
     $("viewTitle").textContent = d.title; $("viewHint").textContent = d.hint; $("topTitle").textContent = d.title; if (typeof paintTabs === "function") paintTabs();
     $("addBtn").hidden = !!d.readonlyAdd; $("q").value = "";
     $("table").querySelector("thead").innerHTML = "<tr>" + d.cols.map(c => "<th scope=\"col\">" + esc(c[1]) + "</th>").join("") + '<th scope="col"><span class="sr-only">Aksi</span></th></tr>';
-    $("table").querySelector("tbody").innerHTML = ""; $("tableState").textContent = "Memuat";
+    $("table").querySelector("tbody").innerHTML = ""; $("tableState").innerHTML = '<span class="ld-line"><span class="ld-spin" aria-hidden="true"></span>Memuat data</span>';
     try {
       const r = await api({ action: "adminList", type: t });
       if (!r.ok) throw new Error(r.error);

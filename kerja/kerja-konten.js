@@ -41,7 +41,7 @@
     if (ED && ED.id === id && $("nkForm")) return;          /* already open: background refreshes leave it alone */
     K.closeDrawer(true);
     K.setTop("Naskah website", "#/konten");
-    v.innerHTML = '<p class="muted">Memuat naskah</p>';
+    v.innerHTML = '<p class="muted ld-line"><span class="ld-spin" aria-hidden="true"></span>Memuat naskah</p>';
     let j;
     try { j = await K.api("kontenGet", { id }); } catch (e) { v.innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; return; }
     if (!j.web_type) { v.innerHTML = '<div class="panel empty"><strong>Produk repositori diterbitkan lewat GitHub</strong>Naskah website hanya untuk berita, pengumuman, dan portofolio.</div>'; return; }
@@ -280,7 +280,7 @@
      ============================================================ */
   let webTab = "news";
   K.renderWebView = async body => {
-    body.innerHTML = '<p class="muted">Memuat isi website</p>';
+    body.innerHTML = '<p class="muted ld-line"><span class="ld-spin" aria-hidden="true"></span>Memuat isi website</p>';
     let j; try { j = await K.api("webList"); } catch (e) { body.innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; return; }
     const draw = () => {
       const rows = (webTab === "news" ? j.news : j.projects).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));

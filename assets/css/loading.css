@@ -1,0 +1,36 @@
+/* Loading indicator shared by the website, the admin panel and Ruang Kerja (see assets/js/loading.js) */
+.ld-bar { position: fixed; left: 0; right: 0; top: 0; height: 3px; z-index: 2147483000; pointer-events: none; opacity: 0; transition: opacity .25s; overflow: hidden; }
+.ld-bar.on { opacity: 1; }
+.ld-bar i { position: absolute; top: 0; bottom: 0; left: -40%; width: 40%; border-radius: 0 3px 3px 0;
+  background: linear-gradient(90deg, rgba(232,131,58,0), #E8833A 30%, #F6B47F 60%, #0E8A7E); box-shadow: 0 0 10px rgba(232,131,58,.6); animation: ldRun 1.15s cubic-bezier(.45,.05,.55,.95) infinite; }
+.ld-bar.done i { animation: none; left: 0; width: 100%; transition: width .3s; }
+.ld-bar.done { opacity: 0; transition: opacity .35s .15s; }
+@keyframes ldRun { 0% { left: -40%; width: 40%; } 60% { width: 55%; } 100% { left: 100%; width: 30%; } }
+.ld-pill { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 2147483000; display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px 10px 14px; border-radius: 999px; background: rgba(11,30,28,.92); color: #fff; font: 600 14px/1.2 "Plus Jakarta Sans", system-ui, sans-serif;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25); transform: translate(-50%, 16px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
+.ld-pill.on { opacity: 1; transform: translate(-50%, 0); }
+.ld-pill::before { content: ""; width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.28); border-top-color: #F6B47F; animation: ldSpin .8s linear infinite; }
+.ld-pill::after { content: ""; width: 1.2em; text-align: left; animation: ldDots 1.2s steps(4) infinite; }
+@keyframes ldDots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+/* small spinner for inline "loading" lines */
+.ld-spin { display: inline-block; flex: none; width: 15px; height: 15px; margin-right: 9px; vertical-align: -2px; border-radius: 50%; border: 2.2px solid rgba(14,90,85,.2); border-top-color: #E8833A; animation: ldSpin .8s linear infinite; }
+.ld-line { display: flex; align-items: center; }
+@keyframes ldSpin { to { transform: rotate(360deg); } }
+/* shimmering placeholders */
+.skel { position: relative; overflow: hidden; background: #E9EFED; border-radius: 10px; }
+.skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent); animation: ldShim 1.3s ease-in-out infinite; }
+@keyframes ldShim { to { transform: translateX(100%); } }
+.skel-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; }
+.skel-card { display: grid; gap: 12px; }
+.skel-card .skel:first-child { aspect-ratio: 16 / 10; border-radius: 14px; }
+.skel-card .skel.ln { height: 14px; border-radius: 7px; } .skel-card .skel.ln.s { width: 55%; } .skel-card .skel.ln.t { height: 20px; width: 85%; }
+.skel-rows { display: grid; gap: 10px; } .skel-rows .skel { height: 18px; border-radius: 9px; } .skel-rows .skel:nth-child(3n) { width: 70%; }
+@media (prefers-reduced-motion: reduce) {
+  .ld-bar i { animation-duration: 2.4s; } .skel::after { animation: none; } .ld-spin, .ld-pill::before { animation-duration: 1.6s; }
+}
+.ld-pill::after { margin-left: -6px; }
+/* the button that started a request */
+.ld-btn { cursor: progress !important; }
+.ld-btn::after { content: ""; display: inline-block; flex: none; width: 13px; height: 13px; margin-left: 8px; vertical-align: -2px; border-radius: 50%;
+  border: 2px solid currentColor; border-right-color: transparent; opacity: .85; animation: ldSpin .7s linear infinite; position: static; inset: auto; background: none; transform: none; }

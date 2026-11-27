@@ -202,7 +202,7 @@
   let D = null, posList = null;
   async function detail(v, id) {
     K.setTop("Peluang", "#/peluang");
-    if (!D || D.id !== id) v.innerHTML = '<p class="muted">Memuat peluang</p>';
+    if (!D || D.id !== id) v.innerHTML = '<p class="muted ld-line"><span class="ld-spin" aria-hidden="true"></span>Memuat peluang</p>';
     K.hold = () => location.hash.indexOf("#/peluang/" + id) === 0;
     let j; try { j = await K.api("oppGet", { id }); } catch (e) { v.innerHTML = '<div class="panel empty">' + esc(e.message) + "</div>"; return; }
     const keepTab = D && D.id === id ? D.tab : null;

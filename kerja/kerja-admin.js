@@ -160,7 +160,7 @@
     if (!tabs.find(t => t[0] === tab)) tab = tabs[0][0];
     K.setTop("Administrasi");
     v.innerHTML = '<nav class="tabs" aria-label="Administrasi">' + tabs.map(([k, l]) => '<a href="#/administrasi/' + k + '"' + (k === tab ? ' aria-current="page"' : "") + ">" + l +
-      (k === "cuti" && approver() && S.summary.leave_pending ? '<span class="cnt">' + S.summary.leave_pending + "</span>" : "") + "</a>").join("") + '</nav><div id="aBody"><p class="muted">Memuat data</p></div>';
+      (k === "cuti" && approver() && S.summary.leave_pending ? '<span class="cnt">' + S.summary.leave_pending + "</span>" : "") + "</a>").join("") + '</nav><div id="aBody"><p class="muted ld-line"><span class="ld-spin" aria-hidden="true"></span>Memuat data</p></div>';
     /* show the copy we already have, ask the server only when something changed */
     const c = cache[tab], hash = location.hash;
     if (c && c.me === S.me.id) { RENDER[tab]($("aBody"), c.rows, q); if (c.rev === S.rev) return; q = new URLSearchParams(q); q.delete("id"); }

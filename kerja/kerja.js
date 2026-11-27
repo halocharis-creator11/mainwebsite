@@ -716,7 +716,7 @@
   }
   const mentionHtml = body => { let h = esc(body); S.users.slice().sort((a, b) => b.name.length - a.name.length).forEach(u => { h = h.split("@" + esc(u.name)).join('<span class="mention">@' + esc(u.name) + "</span>"); }); return h; };
   let CM = null;   /* comment box state: { id, mentions } */
-  const COMMENTS_HTML = '<div><div class="dlabel"><span>Komentar</span></div><div class="comments" id="dCm"><p class="muted small">Memuat komentar</p></div>' +
+  const COMMENTS_HTML = '<div><div class="dlabel"><span>Komentar</span></div><div class="comments" id="dCm"><p class="muted small ld-line"><span class="ld-spin" aria-hidden="true"></span>Memuat komentar</p></div>' +
     '<div class="cm-in" style="margin-top:12px"><textarea class="in" id="dCmIn" rows="2" placeholder="Tulis komentar. Ketik @ untuk menyebut anggota tim."></textarea><div class="mpick" id="dPick" role="listbox" hidden></div><div style="display:flex;justify-content:flex-end"><button class="btn small" id="dCmSend" type="button">Kirim komentar</button></div></div>' +
     '<div class="actlog" id="dLog" style="margin-top:14px"></div></div>';
   function mountComments(id, team) { CM = { id, mentions: [] }; loadComments(id); bindMentions(team); }
